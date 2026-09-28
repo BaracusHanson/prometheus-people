@@ -1,6 +1,6 @@
 # ADR-0008 — Workflow git, GitHub et agents
 
-- **Statut** : Accepté
+- **Statut** : Accepté — partie « GitHub Pro / dépôt privé » remplacée par [ADR-0012](0012-depot-public-sans-github-pro.md)
 - **Date** : 2026-09-28
 
 ## Contexte

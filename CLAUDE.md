@@ -34,6 +34,7 @@ Les commandes `pnpm test:e2e` (Playwright) et `pnpm db:generate` / `pnpm db:migr
 7. **Pas de modification transverse** (beaucoup de fichiers à la fois, remplacement automatique) sans plan écrit dans le ticket et tests en place avant.
 8. **Les candidats n'ont pas de compte.** Leur accès repose sur un token haché, expirant, à usage unique, vérifié côté serveur.
 9. **Hors périmètre v1** (ADR-0010) : rapports générés par IA, intégration Stripe, mode équipe, API publique. Ne pas les ajouter sans nouvel ADR.
+10. **Le dépôt est public** ([ADR-0012](docs/adr/0012-depot-public-sans-github-pro.md)) : aucune donnée réelle (candidat, agence, prospect, email) dans le code, les tests, les tickets ou les PR ; le contenu du questionnaire BFI-2-Fr (questions, normes, barèmes) n'est jamais versionné ici. Un secret poussé par erreur est révoqué, pas seulement supprimé.
 
 ## Workflow
 
