@@ -9,7 +9,11 @@ import { getAuth } from "./index";
 // Les droits sur les données (agence, rôle) sont vérifiés par src/server/authz (PR 5b).
 
 export async function lireSession() {
-  return getAuth().api.getSession({ headers: await headers() });
+  // Lire les en-têtes AVANT de créer l'instance Better Auth : c'est ce qui indique à
+  // Next.js que la page dépend de la requête. Sinon, `next build` tente de pré-générer
+  // la page sans aucune variable d'environnement et échoue.
+  const entetes = await headers();
+  return getAuth().api.getSession({ headers: entetes });
 }
 
 export async function exigerSession() {

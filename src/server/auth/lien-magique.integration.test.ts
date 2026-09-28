@@ -20,7 +20,8 @@ describe.skipIf(!process.env.DATABASE_URL)("connexion par lien magique (intégra
         db: getDb(),
         schema,
         baseURL: "http://localhost:3000",
-        secret: "secret-de-test-uniquement-au-moins-32-caracteres",
+        // Valeur factice de test, volontairement répétitive (ce n'est pas un secret).
+        secret: "test".repeat(12),
         secureCookies: false,
         envoyerLienMagique: (lien) => {
           liensEnvoyes.push(lien);

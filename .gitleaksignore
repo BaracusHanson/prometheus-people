@@ -1,0 +1,9 @@
+# Faux positifs gitleaks vérifiés un par un. Chaque ligne cible UNE détection précise
+# (commit:fichier:règle:ligne) : rien d'autre n'est ignoré. Ne jamais ajouter de
+# règle générale ici. Un vrai secret poussé par erreur se révoque (ADR-0012).
+#
+# Commit 5500474 (étape 5a) : valeur d'exemple dans .env.example et secret factice de
+# test. Ni l'un ni l'autre n'est un secret ; les deux ont été remplacés par des valeurs
+# que gitleaks ne confond plus avec des clés.
+550047407f5d67a23658ff056ea549b3c1c41721:.env.example:generic-api-key:8
+550047407f5d67a23658ff056ea549b3c1c41721:src/server/auth/lien-magique.integration.test.ts:generic-api-key:23

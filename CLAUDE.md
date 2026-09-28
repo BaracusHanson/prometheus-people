@@ -28,6 +28,10 @@ Next.js (App Router, `standalone`) · TypeScript strict · Drizzle + Postgres (N
 
 **Connexion** (ADR-0016) : Better Auth, lien magique uniquement. En local sans `RESEND_API_KEY`, le lien s'affiche dans le terminal. La configuration Better Auth est dans `src/server/auth/options.ts` (source unique) ; `src/server/db/auth-schema.ts` est généré, ne jamais le modifier à la main.
 
+**Build sans variables** : la CI construit l'application **sans aucune variable d'environnement**, alors qu'un build local charge `.env.local` et masque les erreurs. Un module ne lit donc jamais l'environnement à l'import (`getEnv()`, `getDb()`, `getAuth()` sont paresseux), et une page qui dépend de la requête lit `headers()` **avant** tout accès à l'environnement. Pour reproduire la CI : cloner le dépôt dans un dossier temporaire (sans `.env.local`) et lancer le build.
+
+**gitleaks** : aucune valeur d'exemple ou de test ne doit ressembler à un secret (laisser vide, ou `"test".repeat(12)`). `.gitleaksignore` ne contient que des détections précises vérifiées, jamais de règle générale.
+
 **Poste Windows avec Smart App Control** : ce réglage peut bloquer le binaire natif d'une version récente de Next.js (erreur « An Application Control policy has blocked this file »). Dans ce cas, utiliser `pnpm dev:webpack` (moteur Webpack + SWC en WebAssembly) et `pnpm exec next build --webpack` en local. Ne jamais rétrograder Next.js ni désactiver ce réglage pour contourner le problème. La CI et la production utilisent Turbopack normalement.
 
 La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. Ne pas l'inventer avant.
