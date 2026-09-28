@@ -1,0 +1,49 @@
+name: Vérification des sauvegardes
+
+# Chaque matin : la sauvegarde de la nuit existe, se déchiffre et se restaure (ADR-0015).
+# En cas d'échec, GitHub envoie un email : c'est l'alerte « les sauvegardes ne marchent plus ».
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # 6 h UTC, soit 7 h ou 8 h à Paris, après la sauvegarde de 3 h
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  restauration:
+    name: Restauration de la dernière sauvegarde
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: restauration
+          POSTGRES_PASSWORD: restauration
+          POSTGRES_DB: restauration
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U restauration -d restauration"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+
+      # Mêmes outils que l'image de sauvegarde (pg_restore 18, age, curl, jq).
+      - name: Construire l'outil de vérification
+        run: docker build -q -t verification-sauvegarde deploy/backup
+
+      - name: Vérifier la dernière sauvegarde
+        env:
+          B2_KEY_ID: ${{ secrets.B2_READ_KEY_ID }}
+          B2_APPLICATION_KEY: ${{ secrets.B2_READ_APPLICATION_KEY }}
+          AGE_SECRET_KEY: ${{ secrets.AGE_SECRET_KEY }}
+        run: |
+          docker run --rm --network host \
+            -e B2_KEY_ID -e B2_APPLICATION_KEY -e AGE_SECRET_KEY \
+            -e RESTAURATION_URL=postgresql://restauration:restauration@localhost:5432/restauration \
+            -v "$PWD/deploy/backup/verifier.sh:/usr/local/bin/verifier.sh:ro" \
+            --entrypoint sh verification-sauvegarde /usr/local/bin/verifier.sh

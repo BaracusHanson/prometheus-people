@@ -76,13 +76,21 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      # Construit l'image sans la publier : détecte une erreur de Dockerfile avant la fusion.
+      # Construit les images sans les publier : détecte une erreur de Dockerfile avant la fusion.
       - uses: docker/build-push-action@v6
         with:
           context: .
           push: false
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Image de sauvegarde
+        uses: docker/build-push-action@v6
+        with:
+          context: deploy/backup
+          push: false
+          cache-from: type=gha,scope=sauvegarde
+          cache-to: type=gha,mode=max,scope=sauvegarde
 
   gitleaks:
     name: gitleaks

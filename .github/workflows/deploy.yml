@@ -13,15 +13,15 @@ on:
     branches: [main]
   workflow_dispatch:
 
-concurrency:
-  group: deploiement
-  cancel-in-progress: false
+# Pas de verrou global : il faisait attendre un nouveau déploiement derrière une
+# approbation de production restée en attente. Les verrous sont posés par job.
 
 permissions:
   contents: read
 
 env:
   IMAGE: ghcr.io/baracushanson/prometheus-people:sha-${{ github.sha }}
+  IMAGE_SAUVEGARDE: ghcr.io/baracushanson/prometheus-backup:sha-${{ github.sha }}
 
 jobs:
   image:
@@ -51,10 +51,24 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Image de sauvegarde
+        uses: docker/build-push-action@v6
+        with:
+          context: deploy/backup
+          push: true
+          tags: ${{ env.IMAGE_SAUVEGARDE }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          cache-from: type=gha,scope=sauvegarde
+          cache-to: type=gha,mode=max,scope=sauvegarde
+
   staging:
     name: Test (staging)
     needs: image
     runs-on: ubuntu-latest
+    # Deux déploiements en test ne se chevauchent jamais ; ils passent l'un après l'autre.
+    concurrency:
+      group: deploiement-staging
+      cancel-in-progress: false
     environment:
       name: staging
       url: https://staging.prometheus-people.com
@@ -75,6 +89,11 @@ jobs:
     name: Production
     needs: staging
     runs-on: ubuntu-latest
+    # Une version plus récente remplace une approbation de production encore en attente :
+    # on n'approuve jamais par erreur une version dépassée.
+    concurrency:
+      group: deploiement-production
+      cancel-in-progress: true
     # L'environnement « production » exige une approbation manuelle dans GitHub.
     environment:
       name: production

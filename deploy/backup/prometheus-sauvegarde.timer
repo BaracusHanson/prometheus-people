@@ -1,0 +1,13 @@
+# Déclenche la sauvegarde chaque nuit vers 3 h (heure de Paris) (ADR-0015).
+# Persistent : si le serveur était éteint à 3 h, la sauvegarde part au redémarrage.
+
+[Unit]
+Description=Sauvegarde nocturne de la base de production
+
+[Timer]
+OnCalendar=*-*-* 03:00:00 Europe/Paris
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

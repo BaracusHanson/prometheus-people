@@ -13,8 +13,8 @@ ENVIRONNEMENT="${1:-}"
 NOM="${2:-}"
 
 case "$ENVIRONNEMENT" in
-  production|staging) ;;
-  *) echo "Usage : sudo set-env production|staging NOM_DE_VARIABLE" >&2; exit 1 ;;
+  production|staging|backup) ;;
+  *) echo "Usage : sudo set-env production|staging|backup NOM_DE_VARIABLE" >&2; exit 1 ;;
 esac
 
 case "$NOM" in

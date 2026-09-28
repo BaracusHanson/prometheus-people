@@ -24,20 +24,32 @@ esac
 
 cd /srv/prometheus
 
-for fichier in .env .env.production .env.staging; do
+for fichier in .env .env.production .env.staging .env.backup; do
   [ -f "$fichier" ] || { echo "Fichier manquant sur le serveur : $fichier" >&2; exit 1; }
 done
+
+# definir_variable NOM VALEUR : met à jour (ou ajoute) une ligne de .env.
+definir_variable() {
+  if grep -q "^$1=" .env; then
+    sed -i "s|^$1=.*|$1=$2|" .env
+  else
+    echo "$1=$2" >> .env
+  fi
+}
 
 PRECEDENTE=$(grep "^$VARIABLE=" .env | cut -d= -f2- || true)
 echo "Image précédente ($ENVIRONNEMENT) : ${PRECEDENTE:-aucune}"
 echo "Nouvelle image  ($ENVIRONNEMENT) : $IMAGE"
 
 docker pull "$IMAGE"
+definir_variable "$VARIABLE" "$IMAGE"
 
-if grep -q "^$VARIABLE=" .env; then
-  sed -i "s|^$VARIABLE=.*|$VARIABLE=$IMAGE|" .env
-else
-  echo "$VARIABLE=$IMAGE" >> .env
+# En production, l'image de sauvegarde (ADR-0015) suit la même version que l'application.
+if [ "$ENVIRONNEMENT" = production ]; then
+  SAUVEGARDE=$(echo "$IMAGE" | sed 's#/prometheus-people:#/prometheus-backup:#')
+  docker pull "$SAUVEGARDE"
+  definir_variable BACKUP_IMAGE "$SAUVEGARDE"
+  echo "Image de sauvegarde : $SAUVEGARDE"
 fi
 
 # Ne démarre que Caddy et le service visé : l'autre environnement n'est jamais touché.
