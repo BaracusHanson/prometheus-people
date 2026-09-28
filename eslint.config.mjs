@@ -6,10 +6,12 @@ import tseslint from "typescript-eslint";
 
 // Seuls ces fichiers peuvent importer le client de base (ADR-0007, CLAUDE.md règle 4).
 // src/server/auth/index.ts : l'adaptateur Better Auth a besoin de la base (ADR-0016).
+// src/server/authz/membres.ts : l'autorisation relit l'appartenance en base (ADR-0017).
 const DB_CLIENT_ALLOWED = [
   "src/server/db/**",
   "src/modules/**/queries.ts",
   "src/server/auth/index.ts",
+  "src/server/authz/membres.ts",
 ];
 
 export default defineConfig([

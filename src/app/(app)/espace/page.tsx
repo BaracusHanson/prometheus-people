@@ -1,18 +1,32 @@
 import type { Metadata } from "next";
 
+import { listerMembres, obtenirAgence } from "@/modules/agences/queries";
 import { seDeconnecter } from "@/modules/connexion/actions";
-import { exigerSession } from "@/server/auth/session";
+import { exigerContexte } from "@/server/authz";
 
 export const metadata: Metadata = { title: "Mon espace — Prometheus People" };
 
-// Espace connecté, volontairement minimal : l'agence et les données arrivent en PR 5b.
+const LIBELLES_ROLE = { admin: "Administrateur", recruteur: "Recruteur" } as const;
+
+// Espace de l'agence : accessible uniquement aux membres d'une agence (ADR-0017).
 export default async function PageEspace() {
-  const session = await exigerSession();
+  const ctx = await exigerContexte();
+  const [agence, membres] = await Promise.all([obtenirAgence(ctx), listerMembres(ctx)]);
 
   return (
     <main>
-      <h1>Mon espace</h1>
-      <p>Connecté en tant que {session.user.email}.</p>
+      <h1>{agence?.nom ?? "Mon agence"}</h1>
+      <p>Votre rôle : {LIBELLES_ROLE[ctx.role]}.</p>
+
+      <h2>Membres de l&apos;agence</h2>
+      <ul>
+        {membres.map((membre) => (
+          <li key={membre.email}>
+            {membre.email} — {membre.role ? LIBELLES_ROLE[membre.role] : "Rôle inconnu"}
+          </li>
+        ))}
+      </ul>
+
       <form action={seDeconnecter}>
         <button type="submit">Me déconnecter</button>
       </form>

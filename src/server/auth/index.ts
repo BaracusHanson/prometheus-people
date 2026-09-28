@@ -6,6 +6,7 @@ import { getDb } from "@/server/db/client";
 import * as schema from "@/server/db/schema";
 import { envoyerEmail } from "@/server/email/envoyer";
 import { emailLienMagique } from "@/server/email/modeles";
+import { estMembreDUneAgence } from "@/server/authz/membres";
 import { getEnv } from "@/server/env";
 
 import { creerOptionsAuth, DUREE_LIEN_MAGIQUE_SECONDES } from "./options";
@@ -24,6 +25,7 @@ function creerAuth() {
       secureCookies: env.NODE_ENV === "production",
       envoyerLienMagique: ({ email, url }) =>
         envoyerEmail(emailLienMagique(email, url, DUREE_LIEN_MAGIQUE_SECONDES / 60)),
+      estMembreDUneAgence,
     }),
   );
 }
