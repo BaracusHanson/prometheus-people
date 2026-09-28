@@ -1,0 +1,41 @@
+# Ce qui tourne sur le serveur (ADR-0009). Copié dans /srv/prometheus à chaque déploiement.
+#
+# Fichiers présents UNIQUEMENT sur le serveur, jamais dans le dépôt :
+#   .env              ACME_EMAIL, APP_PROD_IMAGE, APP_STAGING_IMAGE (tenu à jour par deploy.sh)
+#   .env.production   variables de l'application en production
+#   .env.staging      variables de l'application de test
+#
+# Seul Caddy publie des ports. Les applications ne sont joignables que par Caddy.
+
+name: prometheus
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL manquant dans .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  # Valeur par défaut « non-deploye » : permet de déployer la version de test avant
+  # que la production existe. deploy.sh ne démarre que le service visé.
+  app-prod:
+    image: ${APP_PROD_IMAGE:-ghcr.io/baracushanson/prometheus-people:non-deploye}
+    restart: unless-stopped
+    env_file: .env.production
+
+  app-staging:
+    image: ${APP_STAGING_IMAGE:-ghcr.io/baracushanson/prometheus-people:non-deploye}
+    restart: unless-stopped
+    env_file: .env.staging
+
+volumes:
+  caddy_data:
+  caddy_config:

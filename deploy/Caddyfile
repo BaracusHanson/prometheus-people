@@ -1,0 +1,32 @@
+# Porte d'entrée HTTPS du serveur (ADR-0009). Certificats Let's Encrypt automatiques.
+
+{
+	email {$ACME_EMAIL}
+}
+
+(securite) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+prometheus-people.com {
+	import securite
+	reverse_proxy app-prod:3000
+}
+
+www.prometheus-people.com {
+	redir https://prometheus-people.com{uri} permanent
+}
+
+staging.prometheus-people.com {
+	import securite
+	# La version de test ne doit pas apparaître dans les moteurs de recherche.
+	header X-Robots-Tag "noindex, nofollow"
+	reverse_proxy app-staging:3000
+}
