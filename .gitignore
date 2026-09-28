@@ -1,0 +1,33 @@
+# Dépendances
+node_modules/
+.pnpm-store/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Tests
+coverage/
+playwright-report/
+test-results/
+
+# Variables d'environnement : seul l'exemple est versionné
+.env
+.env.*
+!.env.example
+
+# Sauvegardes et exports de base : jamais dans le dépôt
+*.dump
+*.sql.gz
+*.age
+
+# Claude Code : configuration locale personnelle
+.claude/settings.local.json
+
+# Divers
+.DS_Store
+*.pem
+*.log
+.vercel
