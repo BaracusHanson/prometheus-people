@@ -17,6 +17,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0011](0011-vente-et-facturation-v1.md)        | Vente et facturation en v1                                | Accepté                       |
 | [0012](0012-depot-public-sans-github-pro.md)   | Dépôt public, sans GitHub Pro                             | Accepté                       |
 | [0013](0013-deploiement-details.md)            | Détails du déploiement sur le VPS                         | Accepté                       |
+| [0014](0014-base-de-donnees-mise-en-oeuvre.md) | Base de données : mise en œuvre                           | Accepté                       |
 
 ## Modèle
 

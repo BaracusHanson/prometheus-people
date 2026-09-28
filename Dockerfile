@@ -27,10 +27,13 @@ ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
     HOSTNAME=0.0.0.0 \
-    APP_VERSION=${APP_VERSION}
+    APP_VERSION=${APP_VERSION} \
+    MIGRATIONS_DIR=/app/migrations
 
 COPY --from=build --chown=node:node /app/.next/standalone ./
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
+# Migrations SQL appliquées au démarrage (ADR-0014).
+COPY --from=build --chown=node:node /app/src/server/db/migrations ./migrations
 
 USER node
 EXPOSE 3000
