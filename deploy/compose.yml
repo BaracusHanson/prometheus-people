@@ -1,9 +1,10 @@
 # Ce qui tourne sur le serveur (ADR-0009). Copié dans /srv/prometheus à chaque déploiement.
 #
 # Fichiers présents UNIQUEMENT sur le serveur, jamais dans le dépôt :
-#   .env              ACME_EMAIL, APP_PROD_IMAGE, APP_STAGING_IMAGE (tenu à jour par deploy.sh)
+#   .env              ACME_EMAIL, APP_PROD_IMAGE, APP_STAGING_IMAGE, BACKUP_IMAGE (tenu à jour par deploy.sh)
 #   .env.production   variables de l'application en production
 #   .env.staging      variables de l'application de test
+#   .env.backup       clé Backblaze (dépôt seul), bucket, clé publique de chiffrement
 #
 # Seul Caddy publie des ports. Les applications ne sont joignables que par Caddy.
 
@@ -35,6 +36,14 @@ services:
     image: ${APP_STAGING_IMAGE:-ghcr.io/baracushanson/prometheus-people:non-deploye}
     restart: unless-stopped
     env_file: .env.staging
+
+  # Sauvegarde nocturne (ADR-0015), lancée par le minuteur systemd, jamais par `up`.
+  backup:
+    image: ${BACKUP_IMAGE:-ghcr.io/baracushanson/prometheus-backup:non-deploye}
+    profiles: ["outils"]
+    env_file:
+      - .env.production
+      - .env.backup
 
 volumes:
   caddy_data:

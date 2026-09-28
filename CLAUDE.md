@@ -23,6 +23,8 @@ Next.js (App Router, `standalone`) · TypeScript strict · Drizzle + Postgres (N
 
 **Base de données** : la base locale est la branche Neon `dev` (`.env.local`, jamais versionné, jamais lu par un agent). Les migrations sont appliquées automatiquement au démarrage du serveur (ADR-0014). Les tests d'intégration (`*.integration.test.ts`) tournent en CI contre un Postgres jetable et sont ignorés en local sans `DATABASE_URL`.
 
+**Sauvegardes** (ADR-0015) : chaque nuit, chiffrées (age) vers Backblaze B2, verrouillées 30 jours ; vérifiées chaque matin par le workflow « Vérification des sauvegardes ». **Les journaux GitHub Actions sont publics** : aucun script ne doit y afficher une donnée ou un secret, seulement des comptages.
+
 **Poste Windows avec Smart App Control** : ce réglage peut bloquer le binaire natif d'une version récente de Next.js (erreur « An Application Control policy has blocked this file »). Dans ce cas, utiliser `pnpm dev:webpack` (moteur Webpack + SWC en WebAssembly) et `pnpm exec next build --webpack` en local. Ne jamais rétrograder Next.js ni désactiver ce réglage pour contourner le problème. La CI et la production utilisent Turbopack normalement.
 
 La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. Ne pas l'inventer avant.
