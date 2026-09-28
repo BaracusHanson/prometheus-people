@@ -1,0 +1,57 @@
+name: Déployer sur le VPS
+description: Copie la configuration du serveur (deploy/) puis lance deploy.sh pour un environnement.
+
+inputs:
+  environnement:
+    description: staging ou production
+    required: true
+  image:
+    description: Image à déployer (ghcr.io/...:sha-<commit>)
+    required: true
+  host:
+    description: Adresse du serveur
+    required: true
+  known-hosts:
+    description: Empreinte SSH du serveur (ligne known_hosts)
+    required: true
+  ssh-key:
+    description: Clé privée du compte deploy
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Préparer SSH
+      shell: bash
+      env:
+        KNOWN_HOSTS: ${{ inputs.known-hosts }}
+        SSH_KEY: ${{ inputs.ssh-key }}
+      run: |
+        install -d -m 700 ~/.ssh
+        printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+        printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/known_hosts ~/.ssh/deploy_key
+
+    - name: Copier la configuration du serveur
+      shell: bash
+      env:
+        HOST: ${{ inputs.host }}
+      run: |
+        scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+          deploy/compose.yml deploy/Caddyfile deploy/deploy.sh \
+          "deploy@${HOST}:/srv/prometheus/"
+
+    - name: Lancer le déploiement
+      shell: bash
+      env:
+        HOST: ${{ inputs.host }}
+        ENVIRONNEMENT: ${{ inputs.environnement }}
+        IMAGE: ${{ inputs.image }}
+      run: |
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "deploy@${HOST}" \
+          "sh /srv/prometheus/deploy.sh '${ENVIRONNEMENT}' '${IMAGE}'"
+
+    - name: Effacer la clé
+      if: always()
+      shell: bash
+      run: rm -f ~/.ssh/deploy_key
