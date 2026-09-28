@@ -41,13 +41,20 @@ PRECEDENTE=$(grep "^$VARIABLE=" .env | cut -d= -f2- || true)
 echo "Image précédente ($ENVIRONNEMENT) : ${PRECEDENTE:-aucune}"
 echo "Nouvelle image  ($ENVIRONNEMENT) : $IMAGE"
 
+# 1. Télécharger TOUTES les images d'abord. Si l'une échoue, on s'arrête ici :
+#    .env n'a pas encore été modifié et reflète toujours ce qui tourne réellement.
 docker pull "$IMAGE"
-definir_variable "$VARIABLE" "$IMAGE"
 
-# En production, l'image de sauvegarde (ADR-0015) suit la même version que l'application.
+SAUVEGARDE=""
 if [ "$ENVIRONNEMENT" = production ]; then
+  # En production, l'image de sauvegarde (ADR-0015) suit la même version que l'application.
   SAUVEGARDE=$(echo "$IMAGE" | sed 's#/prometheus-people:#/prometheus-backup:#')
   docker pull "$SAUVEGARDE"
+fi
+
+# 2. Seulement ensuite, noter les nouvelles versions.
+definir_variable "$VARIABLE" "$IMAGE"
+if [ -n "$SAUVEGARDE" ]; then
   definir_variable BACKUP_IMAGE "$SAUVEGARDE"
   echo "Image de sauvegarde : $SAUVEGARDE"
 fi
