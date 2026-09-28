@@ -1,0 +1,20 @@
+# Hooks git locaux (ADR-0006). La CI refait tous ces contrôles : ces hooks ne font
+# que donner le retour plus tôt. Objectif : moins de 5 secondes.
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: prettier
+      glob: "*.{ts,tsx,mjs,js,json,md,yml,yaml,css}"
+      run: pnpm exec prettier --check {staged_files}
+
+    - name: eslint
+      glob: "*.{ts,tsx,mjs,js}"
+      run: pnpm exec eslint --max-warnings=0 {staged_files}
+
+    # gitleaks n'est pas un paquet npm : s'il n'est pas installé localement,
+    # on avertit sans bloquer. La CI, elle, bloque (job gitleaks).
+    # Logique dans un script : sous Windows, lefthook découpe la commande sans
+    # respecter les guillemets.
+    - name: gitleaks
+      run: sh scripts/gitleaks-staged.sh

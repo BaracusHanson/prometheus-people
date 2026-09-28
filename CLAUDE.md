@@ -10,16 +10,18 @@ Next.js (App Router, `standalone`) · TypeScript strict · Drizzle + Postgres (N
 
 ## Commandes
 
-> Disponibles à partir de l'étape 2 (squelette + outillage).
+| Commande           | Rôle                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------- |
+| `pnpm dev`         | Serveur de développement                                                              |
+| `pnpm dev:webpack` | Serveur de développement avec Webpack (voir la note Windows ci-dessous)               |
+| `pnpm check`       | Format + lint + typage + tests. **Doit passer avant de déclarer une tâche terminée.** |
+| `pnpm build`       | Build de production (exécuté aussi en CI)                                             |
+| `pnpm test`        | Tests Vitest                                                                          |
+| `pnpm format`      | Formater tout le dépôt avec Prettier                                                  |
 
-| Commande | Rôle |
-|---|---|
-| `pnpm dev` | Serveur de développement |
-| `pnpm check` | Lint + typage + tests. **Doit passer avant de déclarer une tâche terminée.** |
-| `pnpm test` | Tests Vitest |
-| `pnpm test:e2e` | Tests Playwright |
-| `pnpm db:generate` | Générer une migration Drizzle à partir du schéma |
-| `pnpm db:migrate` | Appliquer les migrations |
+**Poste Windows avec Smart App Control** : ce réglage peut bloquer le binaire natif d'une version récente de Next.js (erreur « An Application Control policy has blocked this file »). Dans ce cas, utiliser `pnpm dev:webpack` (moteur Webpack + SWC en WebAssembly) et `pnpm exec next build --webpack` en local. Ne jamais rétrograder Next.js ni désactiver ce réglage pour contourner le problème. La CI et la production utilisent Turbopack normalement.
+
+Les commandes `pnpm test:e2e` (Playwright) et `pnpm db:generate` / `pnpm db:migrate` (Drizzle) arrivent avec les étapes qui les introduisent. Ne pas les inventer avant.
 
 ## Règles non négociables
 
