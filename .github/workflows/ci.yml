@@ -16,6 +16,21 @@ jobs:
   check:
     name: check
     runs-on: ubuntu-latest
+    # Base jetable pour les tests d'intégration (ADR-0003) : même version majeure que Neon.
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: prometheus_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d prometheus_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +46,21 @@ jobs:
 
       - name: pnpm check (format, lint, typage, tests)
         run: pnpm check
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/prometheus_ci
+
+      # Un changement de schema.ts commité sans sa migration fait échouer la CI.
+      - name: Aucune migration oubliée
+        run: |
+          pnpm db:check
+          pnpm db:generate
+          if [ -n "$(git status --porcelain src/server/db/migrations)" ]; then
+            echo "::error::schema.ts a changé sans migration versionnée. Lancer « pnpm db:generate » et commiter le résultat."
+            git status --porcelain src/server/db/migrations
+            exit 1
+          fi
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/prometheus_ci
 
       - name: Build
         run: pnpm build

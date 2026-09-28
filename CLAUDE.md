@@ -18,10 +18,14 @@ Next.js (App Router, `standalone`) · TypeScript strict · Drizzle + Postgres (N
 | `pnpm build`       | Build de production (exécuté aussi en CI)                                             |
 | `pnpm test`        | Tests Vitest                                                                          |
 | `pnpm format`      | Formater tout le dépôt avec Prettier                                                  |
+| `pnpm db:generate` | Générer une migration après modification de `src/server/db/schema.ts`                 |
+| `pnpm db:migrate`  | Appliquer les migrations sur la base `dev` (lue dans `.env.local`)                    |
+
+**Base de données** : la base locale est la branche Neon `dev` (`.env.local`, jamais versionné, jamais lu par un agent). Les migrations sont appliquées automatiquement au démarrage du serveur (ADR-0014). Les tests d'intégration (`*.integration.test.ts`) tournent en CI contre un Postgres jetable et sont ignorés en local sans `DATABASE_URL`.
 
 **Poste Windows avec Smart App Control** : ce réglage peut bloquer le binaire natif d'une version récente de Next.js (erreur « An Application Control policy has blocked this file »). Dans ce cas, utiliser `pnpm dev:webpack` (moteur Webpack + SWC en WebAssembly) et `pnpm exec next build --webpack` en local. Ne jamais rétrograder Next.js ni désactiver ce réglage pour contourner le problème. La CI et la production utilisent Turbopack normalement.
 
-Les commandes `pnpm test:e2e` (Playwright) et `pnpm db:generate` / `pnpm db:migrate` (Drizzle) arrivent avec les étapes qui les introduisent. Ne pas les inventer avant.
+La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. Ne pas l'inventer avant.
 
 ## Règles non négociables
 
