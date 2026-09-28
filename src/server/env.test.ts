@@ -4,34 +4,69 @@ vi.mock("server-only", () => ({}));
 
 const { parseEnv } = await import("./env");
 
+const BASE = {
+  DATABASE_URL: "postgresql://utilisateur:secret@hote.exemple/neondb?sslmode=require",
+  BETTER_AUTH_SECRET: "x".repeat(32),
+  BETTER_AUTH_URL: "http://localhost:3000",
+};
+
+function messageErreur(source: Record<string, string | undefined>): string {
+  try {
+    parseEnv(source);
+  } catch (erreur) {
+    return (erreur as Error).message;
+  }
+  return "";
+}
+
 describe("parseEnv", () => {
-  it("accepte une configuration complète", () => {
+  it("accepte une configuration de développement sans clé Resend", () => {
+    const env = parseEnv(BASE);
+
+    expect(env.NODE_ENV).toBe("development");
+    expect(env.RESEND_API_KEY).toBeUndefined();
+    expect(env.EMAIL_EXPEDITEUR).toContain("noreply@prometheus-people.com");
+  });
+
+  it("accepte une configuration de production complète", () => {
     const env = parseEnv({
+      ...BASE,
       NODE_ENV: "production",
-      DATABASE_URL: "postgresql://utilisateur:secret@hote.exemple/neondb?sslmode=require",
+      BETTER_AUTH_URL: "https://prometheus-people.com",
+      RESEND_API_KEY: "re_exemple",
     });
 
-    expect(env.DATABASE_URL).toContain("postgresql://");
-    expect(env.APP_VERSION).toBe("dev");
+    expect(env.NODE_ENV).toBe("production");
   });
 
   it("refuse de démarrer sans DATABASE_URL", () => {
-    expect(() => parseEnv({ NODE_ENV: "production" })).toThrow(/DATABASE_URL/);
+    expect(messageErreur({ ...BASE, DATABASE_URL: undefined })).toMatch(/DATABASE_URL/);
   });
 
   it("refuse une adresse qui n'est pas postgres", () => {
-    expect(() => parseEnv({ DATABASE_URL: "https://exemple.com" })).toThrow(/postgresql/);
+    expect(messageErreur({ ...BASE, DATABASE_URL: "https://exemple.com" })).toMatch(/postgresql/);
   });
 
-  it("ne répète jamais la valeur fautive dans le message d'erreur", () => {
-    let message = "";
-    try {
-      parseEnv({ DATABASE_URL: "mysql://root:MotDePasseSecret@hote/base" });
-    } catch (erreur) {
-      message = (erreur as Error).message;
-    }
+  it("refuse un secret d'authentification trop court", () => {
+    expect(messageErreur({ ...BASE, BETTER_AUTH_SECRET: "court" })).toMatch(/32 caractères/);
+  });
+
+  it("exige Resend et https en production", () => {
+    const message = messageErreur({ ...BASE, NODE_ENV: "production" });
+
+    expect(message).toMatch(/RESEND_API_KEY est obligatoire en production/);
+    expect(message).toMatch(/https en production/);
+  });
+
+  it("ne répète jamais une valeur fautive dans le message d'erreur", () => {
+    const message = messageErreur({
+      ...BASE,
+      DATABASE_URL: "mysql://root:MotDePasseSecret@hote/base",
+      BETTER_AUTH_SECRET: "SecretTropCourt",
+    });
 
     expect(message).toContain("DATABASE_URL");
     expect(message).not.toContain("MotDePasseSecret");
+    expect(message).not.toContain("SecretTropCourt");
   });
 });

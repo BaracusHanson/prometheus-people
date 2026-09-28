@@ -48,6 +48,8 @@ jobs:
         run: pnpm check
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/prometheus_ci
+          BETTER_AUTH_SECRET: secret-de-ci-uniquement-jamais-utilise-ailleurs
+          BETTER_AUTH_URL: http://localhost:3000
 
       # Un changement de schema.ts commité sans sa migration fait échouer la CI.
       - name: Aucune migration oubliée

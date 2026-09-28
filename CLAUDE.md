@@ -20,10 +20,13 @@ Next.js (App Router, `standalone`) · TypeScript strict · Drizzle + Postgres (N
 | `pnpm format`      | Formater tout le dépôt avec Prettier                                                  |
 | `pnpm db:generate` | Générer une migration après modification de `src/server/db/schema.ts`                 |
 | `pnpm db:migrate`  | Appliquer les migrations sur la base `dev` (lue dans `.env.local`)                    |
+| `pnpm auth:schema` | Regénérer le schéma des tables Better Auth (puis `pnpm db:generate`)                  |
 
 **Base de données** : la base locale est la branche Neon `dev` (`.env.local`, jamais versionné, jamais lu par un agent). Les migrations sont appliquées automatiquement au démarrage du serveur (ADR-0014). Les tests d'intégration (`*.integration.test.ts`) tournent en CI contre un Postgres jetable et sont ignorés en local sans `DATABASE_URL`.
 
 **Sauvegardes** (ADR-0015) : chaque nuit, chiffrées (age) vers Backblaze B2, verrouillées 30 jours ; vérifiées chaque matin par le workflow « Vérification des sauvegardes ». **Les journaux GitHub Actions sont publics** : aucun script ne doit y afficher une donnée ou un secret, seulement des comptages.
+
+**Connexion** (ADR-0016) : Better Auth, lien magique uniquement. En local sans `RESEND_API_KEY`, le lien s'affiche dans le terminal. La configuration Better Auth est dans `src/server/auth/options.ts` (source unique) ; `src/server/db/auth-schema.ts` est généré, ne jamais le modifier à la main.
 
 **Poste Windows avec Smart App Control** : ce réglage peut bloquer le binaire natif d'une version récente de Next.js (erreur « An Application Control policy has blocked this file »). Dans ce cas, utiliser `pnpm dev:webpack` (moteur Webpack + SWC en WebAssembly) et `pnpm exec next build --webpack` en local. Ne jamais rétrograder Next.js ni désactiver ce réglage pour contourner le problème. La CI et la production utilisent Turbopack normalement.
 

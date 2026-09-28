@@ -19,6 +19,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0013](0013-deploiement-details.md)            | Détails du déploiement sur le VPS                         | Accepté                       |
 | [0014](0014-base-de-donnees-mise-en-oeuvre.md) | Base de données : mise en œuvre                           | Accepté                       |
 | [0015](0015-sauvegardes.md)                    | Sauvegardes de la base de production                      | Accepté                       |
+| [0016](0016-connexion-lien-magique.md)         | Connexion par lien magique (Better Auth + Resend)         | Accepté                       |
 
 ## Modèle
 

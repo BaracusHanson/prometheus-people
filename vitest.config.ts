@@ -7,6 +7,8 @@ export default defineConfig({
   },
   test: {
     environment: "node",
+    // Migrations appliquées une seule fois avant tous les tests (tests d'intégration).
+    globalSetup: ["./tests/setup/migrations.ts"],
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
   },
 });

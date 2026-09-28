@@ -5,7 +5,12 @@ import prettier from "eslint-config-prettier/flat";
 import tseslint from "typescript-eslint";
 
 // Seuls ces fichiers peuvent importer le client de base (ADR-0007, CLAUDE.md règle 4).
-const DB_CLIENT_ALLOWED = ["src/server/db/**", "src/modules/**/queries.ts"];
+// src/server/auth/index.ts : l'adaptateur Better Auth a besoin de la base (ADR-0016).
+const DB_CLIENT_ALLOWED = [
+  "src/server/db/**",
+  "src/modules/**/queries.ts",
+  "src/server/auth/index.ts",
+];
 
 export default defineConfig([
   ...nextVitals,
