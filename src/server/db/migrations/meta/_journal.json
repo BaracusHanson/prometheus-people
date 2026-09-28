@@ -8,6 +8,20 @@
       "when": 1790629008788,
       "tag": "0000_tables_better_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790632339006,
+      "tag": "0001_agences",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790632370353,
+      "tag": "0002_une_agence_par_personne",
+      "breakpoints": true
     }
   ]
 }

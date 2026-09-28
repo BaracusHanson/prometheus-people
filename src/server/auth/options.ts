@@ -1,7 +1,7 @@
 import type { BetterAuthOptions } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { magicLink } from "better-auth/plugins";
+import { magicLink, organization } from "better-auth/plugins";
 
 // Configuration Better Auth, source UNIQUE partagée par l'application (./index.ts)
 // et par la génération du schéma (scripts/auth-schema.config.ts) : les tables
@@ -20,6 +20,8 @@ export interface DependancesAuth {
   secret: string;
   secureCookies: boolean;
   envoyerLienMagique: EnvoiLienMagique;
+  // Vrai si l'utilisateur appartient déjà à une agence (une seule agence par personne en v1).
+  estMembreDUneAgence: (userId: string) => Promise<boolean>;
 }
 
 export const DUREE_LIEN_MAGIQUE_SECONDES = 10 * 60;
@@ -49,6 +51,13 @@ export function creerOptionsAuth(deps: DependancesAuth) {
         // d'utiliser un lien en cours de validité (ADR-0005).
         storeToken: "hashed",
         sendMagicLink: ({ email, url }) => deps.envoyerLienMagique({ email, url }),
+      }),
+      // Agences (ADR-0017). Le créateur devient « admin » ; les invités (PR 5c) « member »,
+      // affiché « recruteur ». Une personne n'appartient qu'à une seule agence en v1.
+      organization({
+        allowUserToCreateOrganization: async (user) => !(await deps.estMembreDUneAgence(user.id)),
+        creatorRole: "admin",
+        disableOrganizationDeletion: true,
       }),
       // Doit rester le dernier module : pose les cookies depuis les server actions.
       nextCookies(),
