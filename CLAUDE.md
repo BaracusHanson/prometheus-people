@@ -10,16 +10,15 @@ Next.js (App Router, `standalone`) · TypeScript strict · Drizzle + Postgres (N
 
 ## Commandes
 
-> Disponibles à partir de l'étape 2 (squelette + outillage).
+| Commande      | Rôle                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------- |
+| `pnpm dev`    | Serveur de développement                                                              |
+| `pnpm check`  | Format + lint + typage + tests. **Doit passer avant de déclarer une tâche terminée.** |
+| `pnpm build`  | Build de production (exécuté aussi en CI)                                             |
+| `pnpm test`   | Tests Vitest                                                                          |
+| `pnpm format` | Formater tout le dépôt avec Prettier                                                  |
 
-| Commande | Rôle |
-|---|---|
-| `pnpm dev` | Serveur de développement |
-| `pnpm check` | Lint + typage + tests. **Doit passer avant de déclarer une tâche terminée.** |
-| `pnpm test` | Tests Vitest |
-| `pnpm test:e2e` | Tests Playwright |
-| `pnpm db:generate` | Générer une migration Drizzle à partir du schéma |
-| `pnpm db:migrate` | Appliquer les migrations |
+Les commandes `pnpm test:e2e` (Playwright) et `pnpm db:generate` / `pnpm db:migrate` (Drizzle) arrivent avec les étapes qui les introduisent. Ne pas les inventer avant.
 
 ## Règles non négociables
 
