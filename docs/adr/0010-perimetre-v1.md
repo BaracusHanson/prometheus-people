@@ -16,9 +16,9 @@ Un seul parcours complet : une agence invite un candidat, le candidat passe le t
 | --- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1   | Inscription de l'agence  | Lien magique, création **explicite** de l'organisation, invitation de recruteurs. Rôles : `admin`, `recruteur`.                                                  |
 | 2   | Invitation d'un candidat | Nom, email, type de poste (liste fixe). Email avec lien à token (haché, expirant, usage unique). Relance manuelle.                                               |
-| 3   | Passation                | Information RGPD et consentement, 120 questions de l'IPIP-NEO-120 pensées pour mobile (ADR-0019), sauvegarde automatique et reprise, écran de fin.               |
+| 3   | Passation                | Information RGPD et consentement, 116 questions de l'IPIP-NEO-120 pensées pour mobile (ADR-0019), sauvegarde automatique et reprise, écran de fin.               |
 | 4   | Suivi recruteur          | Liste des candidats : invité, en cours, terminé, expiré.                                                                                                         |
-| 5   | Rapport recruteur        | 5 traits, 30 sous-dimensions (ADR-0019), score d'adéquation au type de poste, points de vigilance (qualité des réponses, contrôle d'attention). Page imprimable. |
+| 5   | Rapport recruteur        | 5 traits, 29 sous-dimensions (ADR-0019), score d'adéquation au type de poste, points de vigilance (qualité des réponses, contrôle d'attention). Page imprimable. |
 | 6   | Restitution candidat     | Page simple accessible depuis l'écran de fin, **sans** le score d'adéquation au poste.                                                                           |
 | 7   | Conservation             | Purge automatique après **24 mois** par défaut (réglable par agence), suppression manuelle par un admin.                                                         |
 | 8   | Journal d'audit          | Qui a consulté, supprimé ou exporté quel candidat.                                                                                                               |
