@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -34,7 +36,7 @@ describe.skipIf(!process.env.DATABASE_URL)("connexion par lien magique (intégra
   }
   let auth: ReturnType<typeof creerAuthDeTest>;
 
-  const email = `test-${Date.now()}@exemple.fr`;
+  const email = `test-${Date.now()}-${randomUUID().slice(0, 8)}@exemple.fr`;
 
   function jetonDuLien(url: string): string {
     const jeton = new URL(url).searchParams.get("token");

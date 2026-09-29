@@ -1,10 +1,10 @@
 import {
-  FACETTES,
+  FACETTES_MESUREES,
   REPONSE_MAX,
   REPONSE_MIN,
   TRAITS,
   traitDe,
-  type Facette,
+  type FacetteMesuree,
   type QuestionCle,
   type Trait,
 } from "./structure";
@@ -12,14 +12,15 @@ import {
 // Calcul des scores de l'IPIP-NEO-120 (ADR-0019 ; Kajonius et Johnson, 2019) :
 //   - question inversée : 6 − réponse ;
 //   - sous-dimension : somme de ses 4 questions (4 à 20) ;
-//   - trait : moyenne de ses 6 sous-dimensions (4 à 20).
+//   - trait : moyenne de ses sous-dimensions mesurées (4 à 20) ; 5 pour l'Ouverture,
+//     dont O6 est exclue (ADR-0019).
 // Fonctions pures, sans base ni réseau.
 
 // Réponses du candidat, par numéro de question (numérotation IPIP-NEO-300).
 export type Reponses = ReadonlyMap<number, number>;
 
 export interface Scores {
-  facettes: Record<Facette, number>;
+  facettes: Record<FacetteMesuree, number>;
   traits: Record<Trait, number>;
 }
 
@@ -47,14 +48,17 @@ export function calculerScores(cle: readonly QuestionCle[], reponses: Reponses):
     .map((question) => question.numero);
   if (manquantes.length > 0) return { complet: false, manquantes };
 
-  const facettes = Object.fromEntries(FACETTES.map((f) => [f, 0])) as Record<Facette, number>;
+  const facettes = Object.fromEntries(FACETTES_MESUREES.map((f) => [f, 0])) as Record<
+    FacetteMesuree,
+    number
+  >;
   for (const question of cle) {
     facettes[question.facette] += valeurCorrigee(reponses.get(question.numero)!, question.inversee);
   }
 
   const traits = Object.fromEntries(
     TRAITS.map((trait) => {
-      const siennes = FACETTES.filter((f) => traitDe(f) === trait);
+      const siennes = FACETTES_MESUREES.filter((f) => traitDe(f) === trait);
       return [trait, siennes.reduce((somme, f) => somme + facettes[f], 0) / siennes.length];
     }),
   ) as Record<Trait, number>;

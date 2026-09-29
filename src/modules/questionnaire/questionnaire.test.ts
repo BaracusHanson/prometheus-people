@@ -3,13 +3,21 @@ import { describe, expect, it } from "vitest";
 import { NORMES_FACETTES, NORMES_TRAITS, rang } from "./normes";
 import { analyserQualite, plusLongueSerie, SEUIL_SERIE_IDENTIQUE } from "./qualite";
 import { calculerScores, valeurCorrigee } from "./scores";
-import { FACETTES, NOMBRE_QUESTIONS, TRAITS, verifierCle, type QuestionCle } from "./structure";
+import {
+  FACETTES,
+  FACETTES_MESUREES,
+  NOMBRE_QUESTIONS,
+  TRAITS,
+  TRAITS_RANG_APPROXIMATIF,
+  verifierCle,
+  type QuestionCle,
+} from "./structure";
 
-// Clé FICTIVE : bonne forme (120 questions, 4 par sous-dimension), numéros et sens
+// Clé FICTIVE : bonne forme (116 questions, 4 par sous-dimension mesurée), numéros et sens
 // arbitraires. La vraie clé arrive avec les questions (PR 6b) et passera verifierCle.
 const cleFictive: QuestionCle[] = Array.from({ length: NOMBRE_QUESTIONS }, (_, i) => ({
   numero: i * 2 + 1,
-  facette: FACETTES[Math.floor(i / 4)]!,
+  facette: FACETTES_MESUREES[Math.floor(i / 4)]!,
   inversee: i % 2 === 1,
 }));
 
@@ -18,10 +26,20 @@ function reponsesUniformes(valeur: number): Map<number, number> {
 }
 
 describe("structure", () => {
-  it("compte 5 traits, 30 sous-dimensions et 120 questions", () => {
+  it("compte 5 traits, 30 sous-dimensions dont 29 mesurées, et 116 questions", () => {
     expect(TRAITS).toHaveLength(5);
     expect(FACETTES).toHaveLength(30);
-    expect(NOMBRE_QUESTIONS).toBe(120);
+    expect(FACETTES_MESUREES).toHaveLength(29);
+    expect(NOMBRE_QUESTIONS).toBe(116);
+  });
+
+  it("n'interroge jamais sur les opinions politiques (O6 exclue)", () => {
+    expect(FACETTES_MESUREES).not.toContain("O6");
+    expect(TRAITS_RANG_APPROXIMATIF).toEqual(["O"]);
+
+    const cle = cleFictive.map((q) => ({ ...q }));
+    (cle[0] as { facette: string }).facette = "O6";
+    expect(verifierCle(cle)).toContain("Sous-dimension inconnue : O6.");
   });
 
   it("accepte une clé bien formée", () => {
@@ -69,6 +87,8 @@ describe("calculerScores", () => {
     // Trait = moyenne des 6 sous-dimensions : (20 + 5 × 12) / 6.
     expect(resultat.scores.traits.N).toBeCloseTo(80 / 6);
     expect(resultat.scores.traits.E).toBe(12);
+    expect(resultat.scores.traits.O).toBe(12); // moyenne sur 5 sous-dimensions
+    expect(Object.keys(resultat.scores.facettes)).not.toContain("O6");
   });
 
   it("ne calcule rien si une réponse manque ou sort de l'échelle", () => {

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
@@ -15,7 +17,9 @@ describe.skipIf(!process.env.DATABASE_URL)("autorisation entre agences (intégra
   const { contextePourUtilisateur } = await import("./index");
   const { listerMembres, obtenirAgence } = await import("@/modules/agences/queries");
 
-  const suffixe = `${Date.now()}`;
+  // Suffixe unique : les fichiers de tests tournent en parallèle sur la même base, et le
+  // nettoyage supprime tout ce qui porte ce suffixe. L'heure seule ne suffit pas (même ms).
+  const suffixe = `${Date.now()}-${randomUUID().slice(0, 8)}`;
   const emails = {
     a: `authz-a-${suffixe}@example.com`,
     b: `authz-b-${suffixe}@example.com`,

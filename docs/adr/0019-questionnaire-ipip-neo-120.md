@@ -13,9 +13,11 @@ L'ADR-0010 prévoyait le BFI-2-Fr, sous réserve d'une autorisation écrite d'us
 **Questionnaire : IPIP-NEO-120** (Johnson, 2014), issu de l'International Personality Item Pool.
 
 - **Domaine public** : le site de l'IPIP autorise la copie, la modification, la traduction et tout usage sans permission ni paiement. Les questions peuvent donc être versionnées dans ce dépôt public.
-- **Structure** : 5 traits × 6 sous-dimensions = **30 sous-dimensions**, 4 questions chacune, 120 questions. Échelle de réponse en 5 points.
+- **Structure** : 5 traits × 6 sous-dimensions = 30 sous-dimensions de 4 questions, dont **29 mesurées** : **116 questions**. Échelle de réponse en 5 points.
+- **Sous-dimension exclue : O6 « Libéralisme »**. Ses questions portent sur le vote pour des candidats libéraux ou conservateurs et sur la sévérité envers les crimes : ce sont des opinions politiques, donnée sensible (RGPD art. 9), motif de discrimination (Code du travail L1132-1), sans lien avec le poste (L1221-6). Elles ne sont jamais posées. L'Ouverture est donc la moyenne de 5 sous-dimensions ; son rang global, calculé avec les normes publiées sur 6, est affiché comme **approximatif**.
 - **Français** : l'adaptation en français de France de l'IPIP-NEO-300 (Thiry et Piolti, 2023, à partir de la traduction québécoise de Gravel). Les 120 questions sont un sous-ensemble des 300. Le texte exact est ajouté par une PR distincte, avec sa source.
 - **Durée** : environ 15 à 20 minutes sur téléphone.
+- **Clé de correction** : liste officielle de Johnson (IPIP-NEO-120) et ordre de l'IPIP-NEO-300 (question n → sous-dimension `(n − 1) mod 30`). La colonne des sous-dimensions de la traduction québécoise publiée sur le site de l'IPIP est **erronée** pour de nombreuses questions, et deux de ses traductions contredisent l'anglais : elle ne sert jamais de clé.
 
 **Rien du BFI-2 n'est repris** : ni questions, ni reformulations, ni barèmes, ni le moteur et les données du brouillon (`lib/scoring.ts`, `data/bfi2_fr_data.json`).
 
@@ -23,7 +25,7 @@ L'ADR-0010 prévoyait le BFI-2-Fr, sous réserve d'une autorisation écrite d'us
 
 - une réponse va de 1 à 5 ; une question inversée vaut `6 − réponse` ;
 - une sous-dimension est la **somme** de ses 4 questions (de 4 à 20) ;
-- un trait est la **moyenne** de ses 6 sous-dimensions (de 4 à 20) ;
+- un trait est la **moyenne** de ses sous-dimensions mesurées (de 4 à 20) ;
 - le rang (percentile) est calculé par rapport aux moyennes et écarts-types publiés dans ce même article.
 
 **Ce que l'on dit et ce que l'on ne dit jamais**
@@ -49,7 +51,8 @@ L'ADR-0010 prévoyait le BFI-2-Fr, sous réserve d'une autorisation écrite d'us
 
 ## Conséquences
 
-- Le rapport passe de 15 à **30 sous-dimensions** (ADR-0010, parcours 5).
+- Le rapport passe de 15 à **29 sous-dimensions** (ADR-0010, parcours 5).
+- Les libellés du rapport restent neutres : jamais « Dépression » ni « Immodération » ; certaines questions touchent à l'intime (estime de soi, humeur, excès). Un avis juridique sur l'ensemble du questionnaire est recommandé avant le lancement commercial.
 - La restitution au candidat (ADR-0010, parcours 6) montre ses traits et sous-dimensions, sans score d'adéquation au poste.
 - Les questions, la clé de correction et les normes sont des données publiques versionnées ; CLAUDE.md règle 10 est mise à jour en ce sens.
 - Un email de courtoisie aux auteurs de l'adaptation française est recommandé avant la mise en production ; leurs conditions d'usage ne sont pas précisées.
