@@ -20,7 +20,8 @@
 **Le lien**
 
 - Jeton de 256 bits aléatoires (`randomBytes(32)`, base64url) envoyé par email dans `/passation/<jeton>`. Jamais stocké ni journalisé en clair.
-- **Usage unique** : au premier clic, le serveur le marque utilisé par une mise à jour atomique (`utilise_le IS NULL`), puis ouvre une **session candidat**. Un second clic sur le même lien est refusé.
+- **Ouvrir le lien ne le consomme pas** : la page affiche l'accueil et un bouton « Commencer ». Les messageries d'entreprise (liens « sûrs », antivirus) ouvrent les liens des emails pour les analyser ; si l'ouverture consommait le lien, le candidat le trouverait déjà utilisé.
+- **Usage unique** : au clic sur « Commencer » (formulaire POST), le serveur le marque utilisé par une mise à jour atomique (`utilise_le IS NULL`), puis ouvre une **session candidat**. Un second clic sur le même lien est refusé.
 - La session est un cookie `httpOnly`, `Secure`, `SameSite=Lax`, limité aux pages de passation, dont seule l'empreinte est en base. Elle expire en même temps que le lien et permet de **reprendre sur le même appareil**.
 - **Changer d'appareil** : le recruteur « relance ». Les jetons et sessions en cours sont révoqués, un nouveau jeton de 7 jours est envoyé ; les réponses déjà données sont conservées (étape 8). Une relance ne consomme pas le quota.
 - Un lien inconnu, expiré, révoqué ou déjà utilisé donne la même réponse (« ce lien n'est plus valable »), pour ne rien révéler.
@@ -43,7 +44,7 @@
 
 ## Conséquences
 
-- La page de passation (étape 8) lit uniquement le `ContexteCandidat` ; elle envoie `Referrer-Policy: no-referrer` et `noindex` (ADR-0020).
+- Les pages `/passation` lisent uniquement le `ContexteCandidat` et envoient `Referrer-Policy: no-referrer` et `X-Robots-Tag: noindex` (next.config.ts). Caddy ne pose plus `Referrer-Policy` qu'en valeur par défaut (`?Referrer-Policy`), pour ne pas écraser celle de l'application. Caddy n'écrit pas de journal d'accès : les jetons présents dans les adresses n'y sont pas conservés.
 - L'écran « Reprise » de la maquette doit préciser « sur le même appareil ».
 - La purge (étape 10) supprime aussi les jetons et sessions expirés.
 - Critère de réexamen : taux élevé de relances pour changement d'appareil, ou incident lié à un lien transféré.

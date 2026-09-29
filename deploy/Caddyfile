@@ -10,7 +10,8 @@
 		Strict-Transport-Security "max-age=31536000"
 		X-Content-Type-Options "nosniff"
 		X-Frame-Options "DENY"
-		Referrer-Policy "strict-origin-when-cross-origin"
+		# Valeur par défaut (« ? ») : les pages candidat imposent no-referrer (ADR-0021).
+		?Referrer-Policy "strict-origin-when-cross-origin"
 		-Server
 	}
 }

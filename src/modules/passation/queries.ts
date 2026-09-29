@@ -3,7 +3,8 @@ import "server-only";
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/server/db/client";
-import { candidat, jetonCandidat, sessionCandidat } from "@/server/db/schema";
+import type { ContexteCandidat } from "@/server/authz/candidat";
+import { candidat, jetonCandidat, organization, sessionCandidat } from "@/server/db/schema";
 import { empreinteJeton, estFormatJeton, genererJeton } from "@/server/jetons";
 
 // Accès du candidat (ADR-0021). Le candidat n'a pas de compte ni de Contexte d'agence :
@@ -75,6 +76,59 @@ export async function trouverSessionCandidat(secret: unknown): Promise<SessionVa
         eq(sessionCandidat.empreinte, empreinteJeton(secret)),
         isNull(sessionCandidat.revoqueLe),
         gt(sessionCandidat.expireLe, sql`now()`),
+      ),
+    )
+    .limit(1);
+  return ligne ?? null;
+}
+
+export interface Passation {
+  nom: string;
+  typePoste: string;
+  agence: string;
+  statut: string;
+}
+
+// Informations affichées au candidat. Ne prend que son propre ContexteCandidat.
+export async function lirePassation(ctx: ContexteCandidat): Promise<Passation | null> {
+  const [ligne] = await getDb()
+    .select({
+      nom: candidat.nom,
+      typePoste: candidat.typePoste,
+      agence: organization.name,
+      statut: candidat.statut,
+    })
+    .from(candidat)
+    .innerJoin(organization, eq(organization.id, candidat.organizationId))
+    .where(and(eq(candidat.id, ctx.candidatId), eq(candidat.organizationId, ctx.orgId)))
+    .limit(1);
+  return ligne ?? null;
+}
+
+export interface ApercuLien {
+  nom: string;
+  agence: string;
+  typePoste: string;
+}
+
+// Lecture SANS consommation : la page d'accueil du lien affiche le nom et l'agence
+// avant que le candidat ne clique « Commencer ». Les robots de messagerie qui ouvrent
+// les liens pour les analyser ne consomment donc pas le lien à usage unique.
+export async function apercuLien(jeton: unknown): Promise<ApercuLien | null> {
+  if (!estFormatJeton(jeton)) return null;
+
+  const [ligne] = await getDb()
+    .select({ nom: candidat.nom, agence: organization.name, typePoste: candidat.typePoste })
+    .from(jetonCandidat)
+    .innerJoin(candidat, eq(candidat.id, jetonCandidat.candidatId))
+    .innerJoin(organization, eq(organization.id, candidat.organizationId))
+    .where(
+      and(
+        eq(jetonCandidat.empreinte, empreinteJeton(jeton)),
+        isNull(jetonCandidat.utiliseLe),
+        isNull(jetonCandidat.revoqueLe),
+        gt(jetonCandidat.expireLe, sql`now()`),
+        sql`${candidat.statut} <> 'termine'`,
       ),
     )
     .limit(1);
