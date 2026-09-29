@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
 import { CadreApplication } from "@/components/cadres";
-import { Bouton } from "@/components/ui/bouton";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { listerMembres, obtenirAgence } from "@/modules/agences/queries";
 import { seDeconnecter } from "@/modules/connexion/actions";
 import { annulerInvitation } from "@/modules/invitations/actions";
@@ -14,10 +15,7 @@ import { FormulaireInvitation } from "./formulaire-invitation";
 export const metadata: Metadata = { title: "Mon espace — Prometheus People" };
 
 const LIBELLES_ROLE = { admin: "Administrateur", recruteur: "Recruteur" } as const;
-const BADGE_ROLE = {
-  admin: "bg-encre text-white",
-  recruteur: "bg-bleu-pale text-bleu-fonce",
-} as const;
+const BADGE_ROLE = { admin: "fort", recruteur: "info" } as const;
 
 const formatDate = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",
@@ -49,9 +47,9 @@ export default async function PageEspace() {
             <p className="text-gris">Votre rôle : {LIBELLES_ROLE[ctx.role]}.</p>
           </div>
           <form action={seDeconnecter}>
-            <Bouton type="submit" variante="secondaire">
+            <Button type="submit" variant="outline">
               Me déconnecter
-            </Bouton>
+            </Button>
           </form>
         </div>
 
@@ -65,13 +63,9 @@ export default async function PageEspace() {
                   className="flex items-center justify-between gap-3 border-t border-trait py-3"
                 >
                   <span className="font-bold break-all">{membre.email}</span>
-                  <span
-                    className={`rounded px-2 py-0.5 text-[13px] font-bold ${
-                      membre.role ? BADGE_ROLE[membre.role] : "bg-trait text-gris"
-                    }`}
-                  >
+                  <Badge variant={membre.role ? BADGE_ROLE[membre.role] : "neutre"}>
                     {membre.role ? LIBELLES_ROLE[membre.role] : "Rôle inconnu"}
-                  </span>
+                  </Badge>
                 </li>
               ))}
             </ul>
@@ -106,9 +100,9 @@ export default async function PageEspace() {
                     </span>
                     <form action={annulerInvitation}>
                       <input type="hidden" name="id" value={invitation.id} />
-                      <Bouton type="submit" variante="danger">
+                      <Button type="submit" variant="destructive">
                         Annuler
-                      </Bouton>
+                      </Button>
                     </form>
                   </li>
                 ))}

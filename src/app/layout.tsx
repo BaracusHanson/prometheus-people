@@ -3,7 +3,6 @@ import { Archivo } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "./globals.css";
-
 // Police auto-hébergée : next/font la télécharge au build et la sert depuis notre
 // domaine. Le navigateur ne contacte jamais Google (ADR-0020). L'axe « wdth » permet
 // les versions étroites (chiffres, titres) sans charger une seconde police.

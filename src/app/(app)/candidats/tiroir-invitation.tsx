@@ -1,21 +1,32 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { PlusIcon } from "lucide-react";
+import { useActionState, useEffect, useRef } from "react";
 
-import { Alerte } from "@/components/ui/alerte";
-import { Bouton } from "@/components/ui/bouton";
-import { Champ, ChampListe } from "@/components/ui/champ";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { inviterCandidat, type EtatInvitationCandidat } from "@/modules/candidats/actions";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
 
 const ETAT_INITIAL: EtatInvitationCandidat = {};
 
-// Tiroir « Inviter un candidat » (maquette, page Candidats). Élément <dialog> natif :
-// focus piégé, fermeture par Échap et retour du focus gérés par le navigateur.
+// Tiroir « Inviter un candidat » (maquette, page Candidats) : Sheet de shadcn/ui
+// (Radix Dialog) — focus piégé, Échap, retour du focus gérés par la bibliothèque.
 export function TiroirInvitation({ restantes, limite }: { restantes: number; limite: number }) {
-  const dialogue = useRef<HTMLDialogElement>(null);
   const formulaire = useRef<HTMLFormElement>(null);
-  const [cle, setCle] = useState(0);
   const [etat, action, enCours] = useActionState(inviterCandidat, ETAT_INITIAL);
 
   // Après un envoi réussi, le formulaire est vidé pour l'invitation suivante.
@@ -24,107 +35,76 @@ export function TiroirInvitation({ restantes, limite }: { restantes: number; lim
   }, [etat]);
 
   return (
-    <>
-      <Bouton onClick={() => dialogue.current?.showModal()} disabled={restantes === 0}>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 18 18"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          aria-hidden="true"
-        >
-          <path d="M9 3v12M3 9h12" />
-        </svg>
-        Inviter un candidat
-      </Bouton>
-      <dialog
-        ref={dialogue}
-        aria-labelledby="titre-invitation"
-        onClose={() => setCle((c) => c + 1)}
-        className="m-0 ml-auto h-dvh max-h-none w-full max-w-[460px] bg-white p-0 text-encre backdrop:bg-encre/45"
-      >
-        <div key={cle} className="flex h-full flex-col gap-4 p-6">
-          <div className="flex items-center justify-between">
-            <h2 id="titre-invitation" className="text-2xl font-extrabold font-stretch-[85%]">
-              Inviter un candidat
-            </h2>
-            <Bouton
-              variante="discret"
-              aria-label="Fermer"
-              onClick={() => dialogue.current?.close()}
-            >
-              <span aria-hidden="true" className="text-xl">
-                ×
-              </span>
-            </Bouton>
-          </div>
-          <p className="text-sm leading-relaxed text-gris">
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button disabled={restantes === 0}>
+          <PlusIcon aria-hidden="true" />
+          Inviter un candidat
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-full gap-0 sm:max-w-[460px]">
+        <SheetHeader>
+          <SheetTitle className="text-2xl font-extrabold font-stretch-[85%]">
+            Inviter un candidat
+          </SheetTitle>
+          <SheetDescription className="leading-relaxed">
             Le candidat reçoit un lien personnel, valable 7 jours et utilisable une seule fois. Il
             n&apos;a pas besoin de créer de compte.
-          </p>
-          <form ref={formulaire} action={action} className="flex flex-1 flex-col gap-4">
-            <Champ
-              id="nom"
-              name="nom"
-              libelle="Nom et prénom"
-              autoComplete="off"
-              required
-              minLength={2}
-              maxLength={100}
-            />
-            <Champ
-              id="email"
-              name="email"
-              type="email"
-              libelle="Adresse email"
-              autoComplete="off"
-              required
-            />
-            <ChampListe
+          </SheetDescription>
+        </SheetHeader>
+        <form ref={formulaire} action={action} className="flex flex-1 flex-col gap-4 px-4 pb-4">
+          <Field>
+            <FieldLabel htmlFor="nom">Nom et prénom</FieldLabel>
+            <Input id="nom" name="nom" autoComplete="off" required minLength={2} maxLength={100} />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="email">Adresse email</FieldLabel>
+            <Input id="email" name="email" type="email" autoComplete="off" required />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="typePoste">Type de poste</FieldLabel>
+            <NativeSelect
               id="typePoste"
               name="typePoste"
-              libelle="Type de poste"
-              aide="Sert à afficher les zones indicatives du rapport."
               defaultValue=""
               required
+              aria-describedby="typePoste-aide"
             >
-              <option value="" disabled>
+              <NativeSelectOption value="" disabled>
                 Choisir…
-              </option>
+              </NativeSelectOption>
               {Object.entries(TYPES_POSTE).map(([cle, libelle]) => (
-                <option key={cle} value={cle}>
+                <NativeSelectOption key={cle} value={cle}>
                   {libelle}
-                </option>
+                </NativeSelectOption>
               ))}
-            </ChampListe>
-            <Alerte ton="attention">
+            </NativeSelect>
+            <FieldDescription id="typePoste-aide">
+              Sert à afficher les zones indicatives du rapport.
+            </FieldDescription>
+          </Field>
+          <Alert variant="attention" role="note">
+            <span>
               Il vous reste <strong>{restantes}</strong> candidat{restantes > 1 ? "s" : ""} sur les{" "}
               {limite} de votre essai gratuit.
-            </Alerte>
-            {etat.erreur && (
-              <Alerte ton="erreur" role="alert">
-                {etat.erreur}
-              </Alerte>
-            )}
-            {etat.succes && (
-              <Alerte ton="succes" role="status">
-                {etat.succes}
-              </Alerte>
-            )}
-            <div className="mt-auto flex justify-end gap-2">
-              <Bouton variante="secondaire" onClick={() => dialogue.current?.close()}>
-                Fermer
-              </Bouton>
-              <Bouton type="submit" disabled={enCours}>
-                {enCours ? "Envoi…" : "Envoyer l'invitation"}
-              </Bouton>
-            </div>
-          </form>
-        </div>
-      </dialog>
-    </>
+            </span>
+          </Alert>
+          {etat.erreur && <Alert variant="erreur">{etat.erreur}</Alert>}
+          {etat.succes && (
+            <Alert variant="succes" role="status">
+              {etat.succes}
+            </Alert>
+          )}
+          <SheetFooter className="mt-auto flex-row justify-end gap-2 p-0">
+            <SheetClose asChild>
+              <Button variant="outline">Fermer</Button>
+            </SheetClose>
+            <Button type="submit" disabled={enCours}>
+              {enCours ? "Envoi…" : "Envoyer l'invitation"}
+            </Button>
+          </SheetFooter>
+        </form>
+      </SheetContent>
+    </Sheet>
   );
 }

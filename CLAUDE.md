@@ -49,6 +49,15 @@ La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. N
 9. **Hors périmètre v1** (ADR-0010) : rapports générés par IA, intégration Stripe, mode équipe, API publique. Ne pas les ajouter sans nouvel ADR.
 10. **Le dépôt est public** ([ADR-0012](docs/adr/0012-depot-public-sans-github-pro.md)) : aucune donnée réelle (candidat, agence, prospect, email) dans le code, les tests, les tickets ou les PR ; rien du BFI-2 (questions, reformulations, normes, barèmes) n'est jamais versionné ici : le questionnaire est l'IPIP-NEO-120, du domaine public ([ADR-0019](docs/adr/0019-questionnaire-ipip-neo-120.md)), et le mot « validé » ne le qualifie jamais. Un secret poussé par erreur est révoqué, pas seulement supprimé.
 
+## Interface (ADR-0020)
+
+1. **Réutiliser avant de créer.** Composants shadcn/ui dans `src/components/ui` (base Radix, `pnpm dlx shadcn@latest add <nom>`), cadres de page dans `src/components/cadres.tsx`. On ne réécrit pas un composant que shadcn fournit ; on adapte la copie du dépôt.
+2. **Uniquement nos jetons** (`src/app/globals.css`) : aucune couleur en dur, aucune police ajoutée, pas de mode sombre en v1. Une nouvelle couleur passe par l'ADR-0020.
+3. **Chaque page suit la maquette validée** (lien dans l'ADR-0020). Tableau de bord et analyses tiennent sans défilement à partir de 1536 × 740.
+4. **Accessibilité non négociable** : libellé visible, erreur reliée au champ (`aria-describedby`), focus visible, cibles de 44 px, jamais la couleur seule.
+5. **Graphiques** : chacun porte sa conclusion écrite ; aucune répartition par âge, sexe ou origine ; aucun classement automatique ; répartition des profils seulement à partir de 10 candidats.
+6. **Pages du candidat** (`/passation`) : légères (pas de bibliothèque de graphiques), `noindex`, `Referrer-Policy: no-referrer`.
+
 ## Workflow
 
 - Un ticket GitHub → une branche → une petite PR (repère : < 400 lignes modifiées) → CI verte → relecture → fusion en un seul commit.
@@ -60,7 +69,7 @@ La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. N
 
 ```
 src/app/            routes Next.js, sans logique métier
-src/components/     composants d'interface (ui/ : bouton, champ, alerte… ; ADR-0020)
+src/components/     ui/ : composants shadcn/ui adaptés ; cadres.tsx : cadres de page (ADR-0020)
 src/modules/<dom>/  queries.ts · actions.ts · schemas.ts · *.test.ts
 src/server/db/      schéma Drizzle, client (server-only), migrations
 src/server/auth/    configuration Better Auth

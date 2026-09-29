@@ -2,9 +2,11 @@
 
 import { useActionState } from "react";
 
-import { Alerte } from "@/components/ui/alerte";
-import { Bouton } from "@/components/ui/bouton";
-import { Champ, ChampListe } from "@/components/ui/champ";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { inviterMembre, type EtatInvitation } from "@/modules/invitations/actions";
 
 const ETAT_INITIAL: EtatInvitation = {};
@@ -14,30 +16,25 @@ export function FormulaireInvitation() {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <Champ
-        id="email-invite"
-        name="email"
-        type="email"
-        libelle="Adresse email"
-        autoComplete="off"
-        required
-      />
-      <ChampListe id="role-invite" name="role" libelle="Rôle" defaultValue="recruteur">
-        <option value="recruteur">Recruteur</option>
-        <option value="admin">Administrateur</option>
-      </ChampListe>
-      <Bouton type="submit" disabled={enCours}>
+      <Field>
+        <FieldLabel htmlFor="email-invite">Adresse email</FieldLabel>
+        <Input id="email-invite" name="email" type="email" autoComplete="off" required />
+      </Field>
+      <Field>
+        <FieldLabel htmlFor="role-invite">Rôle</FieldLabel>
+        <NativeSelect id="role-invite" name="role" defaultValue="recruteur">
+          <NativeSelectOption value="recruteur">Recruteur</NativeSelectOption>
+          <NativeSelectOption value="admin">Administrateur</NativeSelectOption>
+        </NativeSelect>
+      </Field>
+      <Button type="submit" disabled={enCours}>
         {enCours ? "Envoi…" : "Envoyer l'invitation"}
-      </Bouton>
-      {etat.erreur && (
-        <Alerte ton="erreur" role="alert">
-          {etat.erreur}
-        </Alerte>
-      )}
+      </Button>
+      {etat.erreur && <Alert variant="erreur">{etat.erreur}</Alert>}
       {etat.succes && (
-        <Alerte ton="succes" role="status">
+        <Alert variant="succes" role="status">
           {etat.succes}
-        </Alerte>
+        </Alert>
       )}
     </form>
   );

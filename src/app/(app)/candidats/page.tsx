@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CadreApplication } from "@/components/cadres";
+import { Badge } from "@/components/ui/badge";
 import {
   invitationsRestantes,
   LIMITE_ESSAI,
@@ -17,12 +18,12 @@ import { TiroirInvitation } from "./tiroir-invitation";
 
 export const metadata: Metadata = { title: "Candidats — Prometheus People" };
 
-const STATUTS: Record<StatutAffiche, { libelle: string; classes: string }> = {
-  invite: { libelle: "Invité", classes: "bg-ambre-pale text-[#78350F]" },
-  en_cours: { libelle: "En cours", classes: "bg-bleu-pale text-bleu-fonce" },
-  termine: { libelle: "Terminé", classes: "bg-vert-pale text-vert" },
-  expire: { libelle: "Expiré", classes: "bg-trait text-[#3B4354]" },
-};
+const STATUTS = {
+  invite: { libelle: "Invité", ton: "attention" },
+  en_cours: { libelle: "En cours", ton: "info" },
+  termine: { libelle: "Terminé", ton: "succes" },
+  expire: { libelle: "Expiré", ton: "neutre" },
+} as const satisfies Record<StatutAffiche, { libelle: string; ton: string }>;
 const FILTRES: (StatutAffiche | "tous")[] = ["tous", "invite", "en_cours", "termine", "expire"];
 
 const formatDate = new Intl.DateTimeFormat("fr-FR", {
@@ -94,11 +95,7 @@ export default async function PageCandidats({
                   </span>
                   <span className="text-sm">{TYPES_POSTE[c.typePoste]}</span>
                   <span>
-                    <span
-                      className={`rounded px-2 py-0.5 text-[13px] font-bold ${STATUTS[c.statut].classes}`}
-                    >
-                      {STATUTS[c.statut].libelle}
-                    </span>
+                    <Badge variant={STATUTS[c.statut].ton}>{STATUTS[c.statut].libelle}</Badge>
                   </span>
                   <span className="text-sm text-gris">
                     <span className="md:sr-only">Invité le </span>
