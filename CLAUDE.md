@@ -6,7 +6,7 @@ Les décisions d'architecture sont dans [`docs/adr/`](docs/adr/README.md). Ce fi
 
 ## Stack
 
-Next.js (App Router, `standalone`) · TypeScript strict · Drizzle + Postgres (Neon) · Better Auth (lien magique, organisations) · pnpm · Vitest · Playwright · déploiement Docker sur VPS avec Caddy.
+Next.js (App Router, `standalone`) · Tailwind CSS v4 · TypeScript strict · Drizzle + Postgres (Neon) · Better Auth (lien magique, organisations) · pnpm · Vitest · Playwright · déploiement Docker sur VPS avec Caddy.
 
 ## Commandes
 
@@ -60,6 +60,7 @@ La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. N
 
 ```
 src/app/            routes Next.js, sans logique métier
+src/components/     composants d'interface (ui/ : bouton, champ, alerte… ; ADR-0020)
 src/modules/<dom>/  queries.ts · actions.ts · schemas.ts · *.test.ts
 src/server/db/      schéma Drizzle, client (server-only), migrations
 src/server/auth/    configuration Better Auth

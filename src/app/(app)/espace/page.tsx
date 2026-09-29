@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 
+import { CadreApplication } from "@/components/cadres";
+import { Bouton } from "@/components/ui/bouton";
 import { listerMembres, obtenirAgence } from "@/modules/agences/queries";
 import { seDeconnecter } from "@/modules/connexion/actions";
 import { annulerInvitation } from "@/modules/invitations/actions";
 import { listerInvitationsEnAttente } from "@/modules/invitations/queries";
+import { lireSession } from "@/server/auth/session";
 import { exigerContexte } from "@/server/authz";
 
 import { FormulaireInvitation } from "./formulaire-invitation";
@@ -11,65 +14,109 @@ import { FormulaireInvitation } from "./formulaire-invitation";
 export const metadata: Metadata = { title: "Mon espace — Prometheus People" };
 
 const LIBELLES_ROLE = { admin: "Administrateur", recruteur: "Recruteur" } as const;
+const BADGE_ROLE = {
+  admin: "bg-encre text-white",
+  recruteur: "bg-bleu-pale text-bleu-fonce",
+} as const;
 
 const formatDate = new Intl.DateTimeFormat("fr-FR", {
   dateStyle: "long",
   timeZone: "Europe/Paris",
 });
 
+const CARTE = "rounded-bloc border border-bordure bg-white p-5";
+const TITRE_BLOC = "text-lg font-extrabold font-stretch-[85%]";
+
 // Espace de l'agence : accessible uniquement aux membres d'une agence (ADR-0017).
 export default async function PageEspace() {
   const ctx = await exigerContexte();
   const estAdmin = ctx.role === "admin";
-  const [agence, membres, invitations] = await Promise.all([
+  const [session, agence, membres, invitations] = await Promise.all([
+    lireSession(),
     obtenirAgence(ctx),
     listerMembres(ctx),
     estAdmin ? listerInvitationsEnAttente(ctx) : [],
   ]);
 
   return (
-    <main>
-      <h1>{agence?.nom ?? "Mon agence"}</h1>
-      <p>Votre rôle : {LIBELLES_ROLE[ctx.role]}.</p>
+    <CadreApplication actif="tableau" compte={session?.user.email ?? ""}>
+      <div className="flex flex-col gap-5">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-extrabold font-stretch-75%">
+              {agence?.nom ?? "Mon agence"}
+            </h1>
+            <p className="text-gris">Votre rôle : {LIBELLES_ROLE[ctx.role]}.</p>
+          </div>
+          <form action={seDeconnecter}>
+            <Bouton type="submit" variante="secondaire">
+              Me déconnecter
+            </Bouton>
+          </form>
+        </div>
 
-      <h2>Membres de l&apos;agence</h2>
-      <ul>
-        {membres.map((membre) => (
-          <li key={membre.email}>
-            {membre.email} — {membre.role ? LIBELLES_ROLE[membre.role] : "Rôle inconnu"}
-          </li>
-        ))}
-      </ul>
-
-      {estAdmin && (
-        <>
-          <h2>Inviter un membre</h2>
-          <FormulaireInvitation />
-
-          <h2>Invitations en attente</h2>
-          {invitations.length === 0 ? (
-            <p>Aucune invitation en attente.</p>
-          ) : (
-            <ul>
-              {invitations.map((invitation) => (
-                <li key={invitation.id}>
-                  {invitation.email} —{" "}
-                  {invitation.role ? LIBELLES_ROLE[invitation.role] : "Rôle inconnu"}, valable
-                  jusqu&apos;au {formatDate.format(invitation.expireLe)}
-                  <form action={annulerInvitation}>
-                    <input type="hidden" name="id" value={invitation.id} />
-                    <button type="submit">Annuler</button>
-                  </form>
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+          <section className={CARTE}>
+            <h2 className={TITRE_BLOC}>Membres de l&apos;agence</h2>
+            <ul className="mt-3 flex flex-col">
+              {membres.map((membre) => (
+                <li
+                  key={membre.email}
+                  className="flex items-center justify-between gap-3 border-t border-trait py-3"
+                >
+                  <span className="font-bold break-all">{membre.email}</span>
+                  <span
+                    className={`rounded px-2 py-0.5 text-[13px] font-bold ${
+                      membre.role ? BADGE_ROLE[membre.role] : "bg-trait text-gris"
+                    }`}
+                  >
+                    {membre.role ? LIBELLES_ROLE[membre.role] : "Rôle inconnu"}
+                  </span>
                 </li>
               ))}
             </ul>
-          )}
-        </>
-      )}
+          </section>
 
-      <form action={seDeconnecter}>
-        <button type="submit">Me déconnecter</button>
-      </form>
-    </main>
+          {estAdmin && (
+            <section className={`${CARTE} flex flex-col gap-4`}>
+              <h2 className={TITRE_BLOC}>Inviter un membre</h2>
+              <FormulaireInvitation />
+            </section>
+          )}
+        </div>
+
+        {estAdmin && (
+          <section className={CARTE}>
+            <h2 className={TITRE_BLOC}>Invitations en attente</h2>
+            {invitations.length === 0 ? (
+              <p className="mt-2 text-gris">Aucune invitation en attente.</p>
+            ) : (
+              <ul className="mt-3 flex flex-col">
+                {invitations.map((invitation) => (
+                  <li
+                    key={invitation.id}
+                    className="flex flex-wrap items-center justify-between gap-3 border-t border-trait py-3"
+                  >
+                    <span>
+                      <span className="font-bold break-all">{invitation.email}</span>{" "}
+                      <span className="text-gris">
+                        {invitation.role ? LIBELLES_ROLE[invitation.role] : "Rôle inconnu"}, valable
+                        jusqu&apos;au {formatDate.format(invitation.expireLe)}
+                      </span>
+                    </span>
+                    <form action={annulerInvitation}>
+                      <input type="hidden" name="id" value={invitation.id} />
+                      <Bouton type="submit" variante="danger">
+                        Annuler
+                      </Bouton>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+      </div>
+    </CadreApplication>
   );
 }

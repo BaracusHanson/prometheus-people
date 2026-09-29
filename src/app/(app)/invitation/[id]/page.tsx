@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 
+import { EcranCentre, TitreEcran } from "@/components/cadres";
+import { Alerte } from "@/components/ui/alerte";
+import { Bouton, LienBouton } from "@/components/ui/bouton";
 import { accepterInvitation } from "@/modules/invitations/actions";
 import { cheminInvitation, idInvitationSchema } from "@/modules/invitations/schemas";
 import { getAuth } from "@/server/auth";
@@ -32,20 +34,20 @@ export default async function PageInvitation({
 
   if (erreur === "deja-membre" || (await contexteCourant())) {
     return (
-      <main>
-        <h1>Invitation</h1>
-        <p>
+      <EcranCentre>
+        <TitreEcran>Invitation</TitreEcran>
+        <p className="leading-relaxed">
           Vous faites déjà partie d&apos;une agence avec l&apos;adresse {session.user.email}. Si
           vous venez d&apos;accepter cette invitation, tout est en ordre.
         </p>
-        <p>
+        <p className="leading-relaxed text-gris">
           Sinon, sachez qu&apos;une personne ne peut appartenir qu&apos;à une seule agence : cette
           invitation ne peut pas être acceptée avec cette adresse.
         </p>
-        <p>
-          <Link href="/espace">Retour à mon espace</Link>
-        </p>
-      </main>
+        <LienBouton href="/espace" variante="secondaire">
+          Retour à mon espace
+        </LienBouton>
+      </EcranCentre>
     );
   }
 
@@ -55,28 +57,32 @@ export default async function PageInvitation({
 
   if (!invitation || erreur === "impossible") {
     return (
-      <main>
-        <h1>Invitation</h1>
-        <p role="alert">
+      <EcranCentre>
+        <TitreEcran>Invitation</TitreEcran>
+        <Alerte ton="attention" role="alert">
           Cette invitation n&apos;est pas disponible : elle a expiré, a été annulée ou déjà
           utilisée, ou elle a été envoyée à une autre adresse que la vôtre ({session.user.email}).
+        </Alerte>
+        <p className="leading-relaxed">
+          Demandez à l&apos;administrateur de votre agence de vous inviter à nouveau.
         </p>
-        <p>Demandez à l&apos;administrateur de votre agence de vous inviter à nouveau.</p>
-      </main>
+      </EcranCentre>
     );
   }
 
   return (
-    <main>
-      <h1>Rejoindre {invitation.organizationName}</h1>
-      <p>
+    <EcranCentre>
+      <TitreEcran>Rejoindre {invitation.organizationName}</TitreEcran>
+      <p className="leading-relaxed">
         Vous êtes invité à rejoindre l&apos;agence « {invitation.organizationName} » en tant que{" "}
         {LIBELLES_ROLE[invitation.role] ?? "recruteur"}.
       </p>
       <form action={accepterInvitation}>
         <input type="hidden" name="id" value={id} />
-        <button type="submit">Accepter l&apos;invitation</button>
+        <Bouton type="submit" className="w-full">
+          Accepter l&apos;invitation
+        </Bouton>
       </form>
-    </main>
+    </EcranCentre>
   );
 }
