@@ -12,7 +12,7 @@ Jusqu'à l'étape 6, l'application n'avait aucun style. Avant l'invitation des c
 **Outils**
 
 - **Tailwind CSS v4**, via PostCSS. Les jetons de design sont déclarés une seule fois dans `src/app/globals.css` (`@theme`).
-- **Composants** : les nôtres dans `src/components/ui` (bouton, champ, alerte…). Les composants délicats (fenêtre modale, liste déroulante, onglets, info-bulle) viendront de **shadcn/ui** (primitives Radix), **copiés dans le dépôt** au moment où une page en a besoin, et restylés avec nos jetons. Pas de bibliothèque au style imposé (MUI, Chakra), pas de CSS-in-JS.
+- **Composants** : **shadcn/ui** (style `radix-nova`, primitives Radix, icônes Lucide), copiés dans `src/components/ui` et **adaptés** : leurs variables pointent vers nos jetons, les boutons et champs font 44 px, variantes ajoutées pour nos badges et messages (neutre, info, succès, attention, erreur). On ajoute un composant avec `pnpm dlx shadcn@latest add <nom>` au lieu de le réécrire. Fusion des classes par le paquet `cn` (publié par shadcn, sans dépendance). Pas de bibliothèque au style imposé (MUI, Chakra), pas de CSS-in-JS. _(Modifié le 2026-09-29 : shadcn/ui installé comme base dès maintenant, au lieu de composants maison.)_
 - **Graphiques** : ceux de shadcn/ui (Recharts) pour les courbes, barres et anneaux de **l'espace recruteur uniquement** ; SVG fait maison pour le rapport candidat, la carte de chaleur et le nuage de points ; `d3-sankey` pour **calculer** le diagramme de parcours, dessiné par nous. Aucun graphique en radar.
 - **Police** : Archivo, une seule famille, avec son axe de largeur (étroite pour les chiffres et les titres). Servie par `next/font` depuis notre domaine : le navigateur ne contacte jamais Google (RGPD).
 

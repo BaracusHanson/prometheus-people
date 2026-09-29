@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { Bouton } from "@/components/ui/bouton";
+import { Button } from "@/components/ui/button";
 import { TYPES_POSTE, type TypePoste } from "@/modules/candidats/schemas";
 import { ouvrirPassation } from "@/modules/passation/actions";
 import { apercuLien } from "@/modules/passation/queries";
@@ -27,9 +27,9 @@ export default async function PageLien({ params }: { params: Promise<{ jeton: st
       </p>
       <form action={ouvrirPassation} className="flex flex-col gap-3">
         <input type="hidden" name="jeton" value={jeton} />
-        <Bouton type="submit" className="min-h-13 w-full text-[17px]">
+        <Button type="submit" size="lg" className="w-full">
           Commencer
-        </Bouton>
+        </Button>
         <p className="text-center text-sm leading-relaxed text-gris">
           Ce lien ne fonctionne qu&apos;une fois : ensuite, vous pourrez faire une pause et
           reprendre sur cet appareil.

@@ -11,7 +11,7 @@ function Flamme({ taille = 26 }: { taille?: number }) {
       height={taille}
       viewBox="0 0 28 28"
       fill="none"
-      stroke="#F0B44C"
+      stroke="var(--color-flamme)"
       strokeWidth="2.5"
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -102,7 +102,7 @@ export function CadreApplication({
               key={lien.href}
               href={lien.href}
               aria-current={lien.cle === actif ? "page" : undefined}
-              className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-bloc px-2 py-2 text-[11px] leading-tight font-semibold text-[#C5CBD6] no-underline hover:text-white aria-[current=page]:bg-encre-2 aria-[current=page]:font-extrabold aria-[current=page]:text-white md:w-[76px]"
+              className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-bloc px-2 py-2 text-[11px] leading-tight font-semibold text-gris-clair no-underline hover:text-white aria-[current=page]:bg-encre-2 aria-[current=page]:font-extrabold aria-[current=page]:text-white md:w-[76px]"
             >
               <svg
                 width="22"

@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 
-import { Bouton } from "@/components/ui/bouton";
+import { Button } from "@/components/ui/button";
 import { relancerCandidat, type EtatInvitationCandidat } from "@/modules/candidats/actions";
 
 const ETAT_INITIAL: EtatInvitationCandidat = {};
@@ -14,9 +14,9 @@ export function BoutonRelance({ id, nom }: { id: string; nom: string }) {
   return (
     <form action={action} className="flex flex-col items-start gap-1 md:items-end">
       <input type="hidden" name="id" value={id} />
-      <Bouton type="submit" variante="discret" disabled={enCours} aria-label={`Relancer ${nom}`}>
+      <Button type="submit" variant="ghost" disabled={enCours} aria-label={`Relancer ${nom}`}>
         {enCours ? "Envoi…" : "Relancer"}
-      </Bouton>
+      </Button>
       {etat.succes && (
         <span role="status" className="text-xs font-bold text-vert">
           Lien renvoyé

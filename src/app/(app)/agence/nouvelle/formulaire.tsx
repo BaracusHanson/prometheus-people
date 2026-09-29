@@ -2,8 +2,9 @@
 
 import { useActionState } from "react";
 
-import { Bouton } from "@/components/ui/bouton";
-import { Champ } from "@/components/ui/champ";
+import { Button } from "@/components/ui/button";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { creerAgence, type EtatCreationAgence } from "@/modules/agences/actions";
 
 const ETAT_INITIAL: EtatCreationAgence = {};
@@ -13,21 +14,27 @@ export function FormulaireAgence() {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <Champ
-        id="nom"
-        name="nom"
-        type="text"
-        libelle="Nom de l'agence"
-        aide="Visible par vos candidats dans leurs emails."
-        required
-        minLength={2}
-        maxLength={80}
-        autoComplete="organization"
-        erreur={etat.erreur}
-      />
-      <Bouton type="submit" disabled={enCours} className="w-full">
+      <Field data-invalid={etat.erreur ? true : undefined}>
+        <FieldLabel htmlFor="nom">Nom de l&apos;agence</FieldLabel>
+        <Input
+          id="nom"
+          name="nom"
+          type="text"
+          required
+          minLength={2}
+          maxLength={80}
+          autoComplete="organization"
+          aria-invalid={etat.erreur ? true : undefined}
+          aria-describedby={etat.erreur ? "nom-aide nom-erreur" : "nom-aide"}
+        />
+        <FieldDescription id="nom-aide">
+          Visible par vos candidats dans leurs emails.
+        </FieldDescription>
+        <FieldError id="nom-erreur">{etat.erreur}</FieldError>
+      </Field>
+      <Button type="submit" disabled={enCours} className="w-full">
         {enCours ? "Création…" : "Créer mon agence"}
-      </Bouton>
+      </Button>
     </form>
   );
 }

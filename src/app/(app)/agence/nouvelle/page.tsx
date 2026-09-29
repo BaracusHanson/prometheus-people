@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { EcranCentre, TitreEcran } from "@/components/cadres";
-import { Alerte } from "@/components/ui/alerte";
+import { Alert } from "@/components/ui/alert";
 import { exigerSession } from "@/server/auth/session";
 import { contexteCourant } from "@/server/authz";
 
@@ -22,10 +22,10 @@ export default async function PageNouvelleAgence() {
         vous en serez l&apos;administrateur et pourrez ensuite inviter vos recruteurs.
       </p>
       <FormulaireAgence />
-      <Alerte>
+      <Alert variant="info" role="note">
         Votre agence utilise déjà Prometheus People ? Demandez plutôt à son administrateur de vous
         inviter.
-      </Alerte>
+      </Alert>
     </EcranCentre>
   );
 }

@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 
 import { EcranCentre, TitreEcran } from "@/components/cadres";
-import { Alerte } from "@/components/ui/alerte";
-import { Bouton, LienBouton } from "@/components/ui/bouton";
+import { Alert } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { accepterInvitation } from "@/modules/invitations/actions";
 import { cheminInvitation, idInvitationSchema } from "@/modules/invitations/schemas";
 import { getAuth } from "@/server/auth";
@@ -44,9 +45,9 @@ export default async function PageInvitation({
           Sinon, sachez qu&apos;une personne ne peut appartenir qu&apos;à une seule agence : cette
           invitation ne peut pas être acceptée avec cette adresse.
         </p>
-        <LienBouton href="/espace" variante="secondaire">
-          Retour à mon espace
-        </LienBouton>
+        <Button asChild variant="outline">
+          <Link href="/espace">Retour à mon espace</Link>
+        </Button>
       </EcranCentre>
     );
   }
@@ -59,10 +60,10 @@ export default async function PageInvitation({
     return (
       <EcranCentre>
         <TitreEcran>Invitation</TitreEcran>
-        <Alerte ton="attention" role="alert">
+        <Alert variant="attention">
           Cette invitation n&apos;est pas disponible : elle a expiré, a été annulée ou déjà
           utilisée, ou elle a été envoyée à une autre adresse que la vôtre ({session.user.email}).
-        </Alerte>
+        </Alert>
         <p className="leading-relaxed">
           Demandez à l&apos;administrateur de votre agence de vous inviter à nouveau.
         </p>
@@ -79,9 +80,9 @@ export default async function PageInvitation({
       </p>
       <form action={accepterInvitation}>
         <input type="hidden" name="id" value={id} />
-        <Bouton type="submit" className="w-full">
+        <Button type="submit" className="w-full">
           Accepter l&apos;invitation
-        </Bouton>
+        </Button>
       </form>
     </EcranCentre>
   );

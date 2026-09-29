@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { EcranCentre, TitreEcran } from "@/components/cadres";
-import { Alerte } from "@/components/ui/alerte";
+import { Alert } from "@/components/ui/alert";
 import { cheminDeSuite } from "@/modules/connexion/schemas";
 import { lireSession } from "@/server/auth/session";
 
@@ -24,15 +24,15 @@ export default async function PageConnexion({
     <EcranCentre>
       <TitreEcran>Connexion</TitreEcran>
       {erreur === "lien" && (
-        <Alerte ton="attention" role="alert">
+        <Alert variant="attention">
           Ce lien de connexion a expiré ou a déjà été utilisé. Demandez-en un nouveau ci-dessous.
-        </Alerte>
+        </Alert>
       )}
       {suite && (
-        <Alerte>
+        <Alert variant="info" role="status">
           Connectez-vous avec l&apos;adresse qui a reçu l&apos;invitation pour pouvoir
           l&apos;accepter.
-        </Alerte>
+        </Alert>
       )}
       <p className="leading-relaxed">
         Saisissez votre adresse email : vous recevrez un lien pour vous connecter, sans mot de
