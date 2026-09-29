@@ -19,7 +19,7 @@ describe.skipIf(!process.env.DATABASE_URL)("candidats et liens (intégration)", 
     obtenirCandidat,
     relancerCandidat,
   } = await import("./queries");
-  const { echangerJeton } = await import("@/modules/passation/queries");
+  const { apercuLien, echangerJeton, lirePassation } = await import("@/modules/passation/queries");
 
   // Suffixe unique : les fichiers de tests tournent en parallèle sur la même base.
   const suffixe = `${Date.now()}-${randomUUID().slice(0, 8)}`;
@@ -111,6 +111,19 @@ describe.skipIf(!process.env.DATABASE_URL)("candidats et liens (intégration)", 
       const ctxCandidat = await contexteCandidatPourSecret(session!.secret);
       expect(ctxCandidat?.candidatId).toBe(r.candidatId);
       expect(ctxCandidat?.orgId).toBe(ctxA.orgId);
+
+      const passation = await lirePassation(ctxCandidat!);
+      expect(passation?.nom).toBe("Candidat 3");
+      expect(passation?.agence).toBe(ids.orgA);
+    });
+
+    it("ouvrir le lien (aperçu) ne le consomme pas, même plusieurs fois", async () => {
+      const r = await creer(ctxA, 8);
+
+      expect((await apercuLien(r.jeton))?.nom).toBe("Candidat 8");
+      expect((await apercuLien(r.jeton))?.nom).toBe("Candidat 8");
+      expect(await echangerJeton(r.jeton)).not.toBeNull();
+      expect(await apercuLien(r.jeton)).toBeNull();
     });
 
     it.each([undefined, "", "jeton-invente", "a".repeat(43)])(
