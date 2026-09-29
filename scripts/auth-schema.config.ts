@@ -13,6 +13,7 @@ export const auth = betterAuth(
     secret: "generation-du-schema-uniquement-aucun-usage-reel",
     secureCookies: false,
     envoyerLienMagique: () => Promise.resolve(),
+    envoyerInvitation: () => Promise.resolve(),
     estMembreDUneAgence: () => Promise.resolve(false),
   }),
 );

@@ -36,6 +36,7 @@ describe.skipIf(!process.env.DATABASE_URL)("autorisation entre agences (intégra
           liens.push(lien);
           return Promise.resolve();
         },
+        envoyerInvitation: () => Promise.resolve(),
         estMembreDUneAgence,
       }),
     );

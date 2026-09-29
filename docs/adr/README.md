@@ -21,6 +21,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0015](0015-sauvegardes.md)                    | Sauvegardes de la base de production                      | Accepté                       |
 | [0016](0016-connexion-lien-magique.md)         | Connexion par lien magique (Better Auth + Resend)         | Accepté                       |
 | [0017](0017-agences-et-autorisation.md)        | Agences et module d'autorisation                          | Accepté                       |
+| [0018](0018-invitations-recruteurs.md)         | Invitation des recruteurs                                 | Accepté                       |
 
 ## Modèle
 

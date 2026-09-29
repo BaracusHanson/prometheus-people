@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { getAuth } from "@/server/auth";
 
-import { demandeLienSchema } from "./schemas";
+import { cheminDeSuite, demandeLienSchema } from "./schemas";
 
 export interface EtatDemandeLien {
   erreur?: string;
@@ -22,13 +22,16 @@ export async function demanderLienMagique(
     return { erreur: "Adresse email invalide." };
   }
 
+  // Après connexion : la page d'invitation d'où vient la personne, sinon son espace.
+  const suite = cheminDeSuite(formulaire.get("suite"));
+
   try {
     await getAuth().api.signInMagicLink({
       body: {
         email: saisie.data.email,
-        callbackURL: "/espace",
+        callbackURL: suite ?? "/espace",
         // Lien expiré, déjà utilisé ou inventé : retour à la connexion avec une explication.
-        errorCallbackURL: "/connexion?erreur=lien",
+        errorCallbackURL: `/connexion?erreur=lien${suite ? `&suite=${encodeURIComponent(suite)}` : ""}`,
       },
       headers: await headers(),
     });

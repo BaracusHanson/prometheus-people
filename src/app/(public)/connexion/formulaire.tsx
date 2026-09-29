@@ -6,11 +6,12 @@ import { demanderLienMagique, type EtatDemandeLien } from "@/modules/connexion/a
 
 const ETAT_INITIAL: EtatDemandeLien = {};
 
-export function FormulaireConnexion() {
+export function FormulaireConnexion({ suite }: { suite: string | null }) {
   const [etat, action, enCours] = useActionState(demanderLienMagique, ETAT_INITIAL);
 
   return (
     <form action={action}>
+      {suite && <input type="hidden" name="suite" value={suite} />}
       <label htmlFor="email">Adresse email</label>
       <input
         id="email"

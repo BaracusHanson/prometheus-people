@@ -27,6 +27,7 @@ describe.skipIf(!process.env.DATABASE_URL)("connexion par lien magique (intégra
           liensEnvoyes.push(lien);
           return Promise.resolve();
         },
+        envoyerInvitation: () => Promise.resolve(),
         estMembreDUneAgence: () => Promise.resolve(false),
       }),
     );
