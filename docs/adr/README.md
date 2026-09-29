@@ -13,7 +13,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0007](0007-structure-du-depot.md)             | Structure du dépôt et contexte d'autorisation obligatoire | Accepté                       |
 | [0008](0008-workflow-git-et-agents.md)         | Workflow git, GitHub et agents                            | Partiellement remplacé (0012) |
 | [0009](0009-deploiement-vps.md)                | Déploiement sur le VPS Hostinger KVM2                     | Accepté                       |
-| [0010](0010-perimetre-v1.md)                   | Périmètre fonctionnel de la v1                            | Accepté                       |
+| [0010](0010-perimetre-v1.md)                   | Périmètre fonctionnel de la v1                            | Accepté, modifié par 0019     |
 | [0011](0011-vente-et-facturation-v1.md)        | Vente et facturation en v1                                | Accepté                       |
 | [0012](0012-depot-public-sans-github-pro.md)   | Dépôt public, sans GitHub Pro                             | Accepté                       |
 | [0013](0013-deploiement-details.md)            | Détails du déploiement sur le VPS                         | Accepté                       |
@@ -22,6 +22,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0016](0016-connexion-lien-magique.md)         | Connexion par lien magique (Better Auth + Resend)         | Accepté                       |
 | [0017](0017-agences-et-autorisation.md)        | Agences et module d'autorisation                          | Accepté                       |
 | [0018](0018-invitations-recruteurs.md)         | Invitation des recruteurs                                 | Accepté                       |
+| [0019](0019-questionnaire-ipip-neo-120.md)     | Questionnaire IPIP-NEO-120 à la place du BFI-2-Fr         | Accepté                       |
 
 ## Modèle
 
