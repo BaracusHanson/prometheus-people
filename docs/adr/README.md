@@ -23,6 +23,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0017](0017-agences-et-autorisation.md)        | Agences et module d'autorisation                          | Accepté                       |
 | [0018](0018-invitations-recruteurs.md)         | Invitation des recruteurs                                 | Accepté                       |
 | [0019](0019-questionnaire-ipip-neo-120.md)     | Questionnaire IPIP-NEO-120 à la place du BFI-2-Fr         | Accepté                       |
+| [0020](0020-interface-et-design.md)            | Interface : styles, composants, graphiques, accessibilité | Accepté                       |
 
 ## Modèle
 

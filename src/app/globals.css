@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/*
+ * Jetons de design (ADR-0020). Chaque couleur a un rôle : une couleur absente d'ici
+ * n'existe pas dans l'application. Classes générées : bg-bleu, text-encre, border-bordure…
+ */
+@theme {
+  --font-sans: var(--font-archivo), system-ui, sans-serif;
+
+  --color-encre: #1b2230; /* texte, colonne de navigation — contraste 15:1 */
+  --color-encre-2: #313b52; /* élément actif sur fond encre */
+  --color-bleu: #2344a8; /* données, actions, liens : seule couleur « active » */
+  --color-bleu-fonce: #172f7a; /* survol, texte sur bleu pâle */
+  --color-bleu-clair: #8fa3de; /* données secondaires, jamais du texte */
+  --color-bleu-pale: #e3e9f8; /* zone moyenne, élément sélectionné */
+  --color-ambre: #d97706; /* attention seulement : relances, pertes, seuils */
+  --color-ambre-texte: #92400e; /* texte d'attention */
+  --color-ambre-pale: #fef3c7;
+  --color-vert: #14532d; /* terminé, réponses fiables — jamais pour juger un trait */
+  --color-vert-pale: #e6f2ea;
+  --color-rouge: #b42318; /* erreurs et suppressions uniquement */
+  --color-rouge-pale: #fdecea;
+  --color-gris: #505a6b; /* texte secondaire — contraste 6,9:1 */
+  --color-bordure: #d8dce3;
+  --color-trait: #eceef2; /* séparateurs légers */
+  --color-champ: #9aa3b2; /* contour des champs de saisie (contraste 3:1) */
+  --color-fond: #f5f6f8;
+
+  --radius-controle: 6px; /* boutons, champs */
+  --radius-bloc: 8px; /* cartes, blocs */
+}
+
+@layer base {
+  html {
+    color: var(--color-encre);
+    background: var(--color-fond);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Focus visible au clavier, partout, de la même façon (WCAG 2.2). */
+  :focus-visible {
+    outline: 3px solid var(--color-bleu);
+    outline-offset: 2px;
+  }
+
+  /* Chiffres alignés dans les tableaux et les chiffres clés. */
+  table,
+  .chiffres {
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+}

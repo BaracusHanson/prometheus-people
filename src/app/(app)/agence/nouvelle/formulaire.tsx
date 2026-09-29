@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 
+import { Bouton } from "@/components/ui/bouton";
+import { Champ } from "@/components/ui/champ";
 import { creerAgence, type EtatCreationAgence } from "@/modules/agences/actions";
 
 const ETAT_INITIAL: EtatCreationAgence = {};
@@ -10,26 +12,22 @@ export function FormulaireAgence() {
   const [etat, action, enCours] = useActionState(creerAgence, ETAT_INITIAL);
 
   return (
-    <form action={action}>
-      <label htmlFor="nom">Nom de l&apos;agence</label>
-      <input
+    <form action={action} className="flex flex-col gap-4">
+      <Champ
         id="nom"
         name="nom"
         type="text"
+        libelle="Nom de l'agence"
+        aide="Visible par vos candidats dans leurs emails."
         required
         minLength={2}
         maxLength={80}
         autoComplete="organization"
-        aria-describedby={etat.erreur ? "erreur-nom" : undefined}
+        erreur={etat.erreur}
       />
-      {etat.erreur && (
-        <p id="erreur-nom" role="alert">
-          {etat.erreur}
-        </p>
-      )}
-      <button type="submit" disabled={enCours}>
+      <Bouton type="submit" disabled={enCours} className="w-full">
         {enCours ? "Création…" : "Créer mon agence"}
-      </button>
+      </Bouton>
     </form>
   );
 }

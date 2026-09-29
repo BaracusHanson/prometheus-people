@@ -1,20 +1,25 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { EcranCentre, TitreEcran } from "@/components/cadres";
+
 export const metadata: Metadata = { title: "Vérifiez votre boîte mail — Prometheus People" };
 
 export default function PageLienEnvoye() {
   return (
-    <main>
-      <h1>Vérifiez votre boîte mail</h1>
-      <p>
+    <EcranCentre>
+      <TitreEcran>Vérifiez votre boîte mail</TitreEcran>
+      <p className="leading-relaxed">
         Si l&apos;adresse est valide, un lien de connexion vient de vous être envoyé. Il est valable
         10 minutes et ne sert qu&apos;une seule fois.
       </p>
-      <p>Pensez à regarder dans vos courriers indésirables.</p>
-      <p>
-        <Link href="/connexion">Recommencer avec une autre adresse</Link>
+      <p className="leading-relaxed text-gris">
+        Rien reçu ? Regardez dans vos courriers indésirables, ou{" "}
+        <Link href="/connexion" className="font-bold text-bleu underline underline-offset-2">
+          recommencez avec une autre adresse
+        </Link>
+        .
       </p>
-    </main>
+    </EcranCentre>
   );
 }
