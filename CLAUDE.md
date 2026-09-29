@@ -1,6 +1,6 @@
 # Prometheus People — règles de travail
 
-SaaS B2B pour agences d'intérim : un recruteur invite un candidat, le candidat passe le questionnaire BFI-2-Fr sur mobile, le recruteur lit un rapport. Le périmètre de la v1 est fixé par [ADR-0010](docs/adr/0010-perimetre-v1.md).
+SaaS B2B pour agences d'intérim : un recruteur invite un candidat, le candidat passe le questionnaire de personnalité IPIP-NEO-120 sur mobile, le recruteur lit un rapport. Le périmètre de la v1 est fixé par [ADR-0010](docs/adr/0010-perimetre-v1.md).
 
 Les décisions d'architecture sont dans [`docs/adr/`](docs/adr/README.md). Ce fichier ne contient **ni statut ni compteur** : l'état du projet se lit dans le code, les tests et les tickets GitHub.
 
@@ -47,7 +47,7 @@ La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. N
 7. **Pas de modification transverse** (beaucoup de fichiers à la fois, remplacement automatique) sans plan écrit dans le ticket et tests en place avant.
 8. **Les candidats n'ont pas de compte.** Leur accès repose sur un token haché, expirant, à usage unique, vérifié côté serveur.
 9. **Hors périmètre v1** (ADR-0010) : rapports générés par IA, intégration Stripe, mode équipe, API publique. Ne pas les ajouter sans nouvel ADR.
-10. **Le dépôt est public** ([ADR-0012](docs/adr/0012-depot-public-sans-github-pro.md)) : aucune donnée réelle (candidat, agence, prospect, email) dans le code, les tests, les tickets ou les PR ; le contenu du questionnaire BFI-2-Fr (questions, normes, barèmes) n'est jamais versionné ici. Un secret poussé par erreur est révoqué, pas seulement supprimé.
+10. **Le dépôt est public** ([ADR-0012](docs/adr/0012-depot-public-sans-github-pro.md)) : aucune donnée réelle (candidat, agence, prospect, email) dans le code, les tests, les tickets ou les PR ; rien du BFI-2 (questions, reformulations, normes, barèmes) n'est jamais versionné ici : le questionnaire est l'IPIP-NEO-120, du domaine public ([ADR-0019](docs/adr/0019-questionnaire-ipip-neo-120.md)), et le mot « validé » ne le qualifie jamais. Un secret poussé par erreur est révoqué, pas seulement supprimé.
 
 ## Workflow
 
