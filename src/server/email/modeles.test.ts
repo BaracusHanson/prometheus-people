@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { echapperHtml, emailInvitation, emailLienMagique } from "./modeles";
+import {
+  echapperHtml,
+  emailInvitation,
+  emailInvitationCandidat,
+  emailLienMagique,
+} from "./modeles";
 
 describe("echapperHtml", () => {
   it("neutralise les caractères HTML", () => {
@@ -63,5 +68,39 @@ describe("emailInvitation", () => {
     expect(email.objet).not.toContain("<img");
     expect(email.html).not.toContain("<img");
     expect(email.html).toContain("&lt;img src=x onerror=&quot;y&quot;&gt;");
+  });
+});
+
+describe("emailInvitationCandidat", () => {
+  const donnees = {
+    nom: "Martin Dupuis",
+    agence: "Intérim Exemple",
+    poste: "Cariste",
+    url: "https://prometheus-people.com/passation/abc",
+    expireLe: new Date("2026-10-06T10:00:00Z"),
+  };
+
+  it("contient le lien, l'agence, le poste et la date limite", () => {
+    const email = emailInvitationCandidat("martin@example.com", donnees);
+
+    expect(email.a).toBe("martin@example.com");
+    expect(email.texte).toContain(donnees.url);
+    expect(email.texte).toContain("« Intérim Exemple »");
+    expect(email.texte).toContain("poste de cariste");
+    expect(email.texte).toContain("6 octobre 2026");
+    expect(email.texte).toMatch(/ne fonctionne qu'une fois/);
+  });
+
+  it("échappe le nom du candidat et de l'agence, et les garde hors de l'objet", () => {
+    const email = emailInvitationCandidat("a@b.fr", {
+      ...donnees,
+      nom: "<b>x</b>",
+      agence: `<img src=x onerror="y">`,
+    });
+
+    expect(email.objet).toBe("Votre questionnaire avant l'entretien");
+    expect(email.html).not.toContain("<img");
+    expect(email.html).not.toContain("<b>x</b>");
+    expect(email.html).toContain("&lt;b&gt;x&lt;/b&gt;");
   });
 });

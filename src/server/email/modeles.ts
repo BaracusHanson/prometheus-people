@@ -82,3 +82,43 @@ export function emailInvitation(
   // qu'une agence ne puisse pas écrire le titre d'un email envoyé en notre nom.
   return { a, objet: "Invitation à rejoindre une agence sur Prometheus People", texte, html };
 }
+
+const formatDateLongue = new Intl.DateTimeFormat("fr-FR", {
+  dateStyle: "long",
+  timeZone: "Europe/Paris",
+});
+
+export function emailInvitationCandidat(
+  a: string,
+  invitation: { nom: string; agence: string; poste: string; url: string; expireLe: Date },
+): Email {
+  const { nom, agence, poste, url } = invitation;
+  const limite = formatDateLongue.format(invitation.expireLe);
+
+  const texte = [
+    `Bonjour ${nom},`,
+    "",
+    `L'agence « ${agence} » vous propose un questionnaire de personnalité avant votre entretien pour le poste de ${poste.toLowerCase()}.`,
+    "Comptez 15 à 20 minutes, sur votre téléphone ou votre ordinateur. Il n'y a pas de bonne ou de mauvaise réponse, et vous verrez votre profil à la fin.",
+    "",
+    "Pour commencer, ouvrez ce lien personnel :",
+    url,
+    "",
+    `Ce lien est valable jusqu'au ${limite}. Il ne fonctionne qu'une fois : vous pourrez ensuite faire une pause et reprendre sur le même appareil.`,
+    "Ne le transférez à personne.",
+  ].join("\n");
+
+  const html = `<!doctype html>
+<html lang="fr">
+  <body style="font-family: system-ui, sans-serif; color: #1b2230; line-height: 1.5;">
+    <p>Bonjour ${echapperHtml(nom)},</p>
+    <p>L'agence « ${echapperHtml(agence)} » vous propose un questionnaire de personnalité avant votre entretien pour le poste de ${echapperHtml(poste.toLowerCase())}.</p>
+    <p>Comptez 15 à 20 minutes, sur votre téléphone ou votre ordinateur. Il n'y a pas de bonne ou de mauvaise réponse, et vous verrez votre profil à la fin.</p>
+    <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 12px 20px; background: #2344a8; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700;">Commencer le questionnaire</a></p>
+    <p style="font-size: 14px; color: #505a6b;">Ce lien est valable jusqu'au ${limite}. Il ne fonctionne qu'une fois : vous pourrez ensuite faire une pause et reprendre sur le même appareil. Ne le transférez à personne.</p>
+  </body>
+</html>`;
+
+  // Objet fixe : le nom de l'agence, saisi par un client, n'écrit pas le titre (ADR-0021).
+  return { a, objet: "Votre questionnaire avant l'entretien", texte, html };
+}
