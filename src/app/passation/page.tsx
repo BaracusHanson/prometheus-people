@@ -4,7 +4,11 @@ import { CadreCandidat, Consigne, Fin, InformationCandidat, Reprise } from "@/co
 import { PageQuestions } from "@/components/passation-questions";
 import { TYPES_POSTE, type TypePoste } from "@/modules/candidats/schemas";
 import { confirmerLecture } from "@/modules/passation/actions";
-import { lireEtatQuestionnaire, lirePassation } from "@/modules/passation/queries";
+import {
+  lireEtatQuestionnaire,
+  lirePassation,
+  lireProfilCandidat,
+} from "@/modules/passation/queries";
 import { ORDRE_PRESENTATION, pageAReprendre, PAGES } from "@/modules/questionnaire/pages";
 import { ECHELLE_REPONSES } from "@/modules/questionnaire/questions";
 import { CHEMIN_PASSATION, contexteCandidatCourant } from "@/server/authz/candidat";
@@ -26,9 +30,10 @@ export default async function PagePassation({
   const { agence, nom } = passation;
 
   if (etat.termine) {
+    const profil = await lireProfilCandidat(ctx);
     return (
       <CadreCandidat agence={agence}>
-        <Fin nom={nom} agence={agence} />
+        <Fin nom={nom} agence={agence} profil={profil} />
       </CadreCandidat>
     );
   }

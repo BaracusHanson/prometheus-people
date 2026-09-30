@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { LIBELLES_FACETTES, LIBELLES_TRAITS, niveau, ORDRE_TRAITS } from "./libelles";
+import {
+  LIBELLES_FACETTES,
+  LIBELLES_TRAITS,
+  niveau,
+  ORDRE_TRAITS,
+  PHRASES_CANDIDAT,
+} from "./libelles";
 import { FACETTES_MESUREES, TRAITS } from "./structure";
 
 describe("libellés du rapport", () => {
@@ -29,5 +35,15 @@ describe("libellés du rapport", () => {
     expect(niveau(30)).toBe("moyen");
     expect(niveau(70)).toBe("moyen");
     expect(niveau(71)).toBe("haut");
+  });
+
+  it("a une phrase pour chaque trait et chaque niveau, sans chiffre", () => {
+    for (const t of TRAITS) {
+      for (const n of ["bas", "moyen", "haut"] as const) {
+        const phrase = PHRASES_CANDIDAT[t][n];
+        expect(phrase.length).toBeGreaterThan(20);
+        expect(phrase).not.toMatch(/[0-9]/);
+      }
+    }
   });
 });

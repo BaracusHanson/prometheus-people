@@ -6,6 +6,7 @@ import { getDb } from "@/server/db/client";
 import type { ContexteCandidat } from "@/server/authz/candidat";
 import { NUMEROS_VALIDES } from "@/modules/questionnaire/pages";
 import { calculerResultats } from "@/modules/questionnaire/resultats";
+import type { Trait } from "@/modules/questionnaire/structure";
 import {
   candidat,
   jetonCandidat,
@@ -231,4 +232,32 @@ export async function terminerQuestionnaire(ctx: ContexteCandidat): Promise<Resu
       .where(eq(candidat.id, ctx.candidatId));
     return { ok: true } as const;
   });
+}
+
+// Profil montré au candidat à la fin (étape 9) : seulement les rangs des cinq traits.
+// Ni sous-dimensions, ni points de vigilance, ni scores bruts : le détail est pour
+// l'entretien. Null tant que le questionnaire n'est pas terminé.
+export async function lireProfilCandidat(
+  ctx: ContexteCandidat,
+): Promise<Record<Trait, number> | null> {
+  const [ligne] = await getDb()
+    .select({ resultats: candidat.resultats })
+    .from(candidat)
+    .where(
+      and(
+        eq(candidat.id, ctx.candidatId),
+        eq(candidat.organizationId, ctx.orgId),
+        eq(candidat.statut, "termine"),
+      ),
+    )
+    .limit(1);
+  const traits = ligne?.resultats?.traits;
+  if (!traits) return null;
+  return {
+    N: traits.N.rang,
+    E: traits.E.rang,
+    O: traits.O.rang,
+    A: traits.A.rang,
+    C: traits.C.rang,
+  };
 }
