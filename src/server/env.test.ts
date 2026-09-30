@@ -20,6 +20,15 @@ function messageErreur(source: Record<string, string | undefined>): string {
 }
 
 describe("parseEnv", () => {
+  it("n'accepte le suivi des erreurs que dans la région UE de Sentry (ADR-0025)", () => {
+    const ue = "https://exemple@o1.ingest.de.sentry.io/2";
+    expect(parseEnv({ ...BASE, SENTRY_DSN: ue }).SENTRY_DSN).toBe(ue);
+    expect(
+      messageErreur({ ...BASE, SENTRY_DSN: "https://exemple@o1.ingest.us.sentry.io/2" }),
+    ).toContain("région UE");
+    expect(parseEnv(BASE).SENTRY_DSN).toBeUndefined();
+  });
+
   it("accepte une configuration de développement sans clé Resend", () => {
     const env = parseEnv(BASE);
 

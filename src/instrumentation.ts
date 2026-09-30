@@ -9,3 +9,16 @@ export async function register(): Promise<void> {
     await demarrerServeur();
   }
 }
+
+// Erreur pendant une requête (pages, actions, routes) : transmise au suivi des erreurs
+// (ADR-0025) avec le seul modèle de la route, jamais l'adresse réelle.
+export async function onRequestError(
+  erreur: unknown,
+  _requete: unknown,
+  contexte: { routePath: string },
+): Promise<void> {
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { signalerErreur } = await import("./server/erreurs");
+    signalerErreur(erreur, contexte.routePath);
+  }
+}
