@@ -80,7 +80,7 @@ export function TiroirInvitation({ restantes, limite }: { restantes: number; lim
               ))}
             </NativeSelect>
             <FieldDescription id="typePoste-aide">
-              Sert à afficher les zones indicatives du rapport.
+              Sert à regrouper les candidats d&apos;un même poste.
             </FieldDescription>
           </Field>
           <Alert variant="attention" role="note">

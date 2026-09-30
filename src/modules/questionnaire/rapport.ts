@@ -2,6 +2,7 @@ import { CONTROLES } from "./pages";
 import { SEUIL_SERIE_IDENTIQUE } from "./qualite";
 import { LIBELLES_NIVEAUX, LIBELLES_TRAITS, niveau, ORDRE_TRAITS } from "./libelles";
 import type { Resultats } from "./resultats";
+import type { Trait } from "./structure";
 
 // Phrases de synthèse du rapport : chaque graphique porte sa conclusion écrite
 // (ADR-0020). Aucun classement, aucune recommandation : on décrit, le recruteur juge.
@@ -57,4 +58,23 @@ export function qualiteDesReponses(resultats: Resultats): Qualite {
         ? "Aucun point de vigilance : les réponses semblent attentives."
         : `À vérifier en entretien : ${points.join(" et ")}. Le profil reste lisible, mais à interpréter avec prudence.`,
   };
+}
+
+// Conclusion de la comparaison : le trait où les candidats diffèrent le plus. Décrit un
+// écart, ne désigne personne : ce n'est pas un classement (ADR-0024).
+export function syntheseComparaison(profils: readonly { traits: Record<Trait, number> }[]): string {
+  if (profils.length < 2) return "Aucun autre candidat de ce poste n'a encore terminé.";
+
+  let plusEcarte: Trait = ORDRE_TRAITS[0]!;
+  let ecartMax = -1;
+  for (const t of ORDRE_TRAITS) {
+    const rangs = profils.map((p) => p.traits[t]);
+    const ecart = Math.max(...rangs) - Math.min(...rangs);
+    if (ecart > ecartMax) {
+      ecartMax = ecart;
+      plusEcarte = t;
+    }
+  }
+  const rangs = profils.map((p) => p.traits[plusEcarte]);
+  return `L'écart le plus marqué porte sur ${LIBELLES_TRAITS[plusEcarte].nom} : du ${ordinal(Math.min(...rangs))} au ${ordinal(Math.max(...rangs))} rang. Un bon sujet à creuser en entretien.`;
 }

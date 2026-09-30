@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ordinal, qualiteDesReponses, syntheseProfil } from "./rapport";
+import { ordinal, qualiteDesReponses, syntheseComparaison, syntheseProfil } from "./rapport";
 import type { Resultats } from "./resultats";
 import { FACETTES_MESUREES, TRAITS } from "./structure";
 
@@ -54,5 +54,19 @@ describe("qualité des réponses", () => {
     expect(q.controlesReussis).toBe(1);
     expect(q.synthese).toContain("1 contrôle d'attention sur 2 manqué");
     expect(q.synthese).toContain("14 réponses identiques d'affilée");
+  });
+});
+
+describe("synthèse de la comparaison", () => {
+  const profil = (E: number, C: number) => ({ traits: { N: 50, E, O: 50, A: 50, C } });
+
+  it("dit quand il n'y a personne à comparer", () => {
+    expect(syntheseComparaison([profil(50, 50)])).toContain("Aucun autre candidat");
+  });
+
+  it("cite le trait au plus grand écart, avec les rangs extrêmes", () => {
+    expect(syntheseComparaison([profil(40, 20), profil(55, 90), profil(45, 60)])).toBe(
+      "L'écart le plus marqué porte sur Conscienciosité : du 20e au 90e rang. Un bon sujet à creuser en entretien.",
+    );
   });
 });
