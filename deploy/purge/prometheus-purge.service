@@ -1,0 +1,19 @@
+# Purge nocturne des candidats (ADR-0023).
+# Installation (une fois, en tant que ops) :
+#   sudo cp prometheus-purge.service prometheus-purge.timer /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now prometheus-purge.timer
+# Lancer à la main : sudo systemctl start prometheus-purge.service
+# Journal         : journalctl -u prometheus-purge.service
+
+[Unit]
+Description=Purge des candidats dont la durée de conservation est dépassée
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=deploy
+WorkingDirectory=/srv/prometheus
+ExecStart=/bin/sh /srv/prometheus/purger.sh app-prod
+# La version de test purge aussi ses propres données ; son absence n'est pas une erreur.
+ExecStart=-/bin/sh /srv/prometheus/purger.sh app-staging

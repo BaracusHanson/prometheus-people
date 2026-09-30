@@ -1,0 +1,13 @@
+# Déclenche la purge chaque nuit vers 4 h (heure de Paris), après la sauvegarde de 3 h.
+# Persistent : si le serveur était éteint à 4 h, la purge part au redémarrage.
+
+[Unit]
+Description=Purge nocturne des candidats
+
+[Timer]
+OnCalendar=*-*-* 04:00:00 Europe/Paris
+RandomizedDelaySec=10min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -14,6 +14,8 @@
 		?Referrer-Policy "strict-origin-when-cross-origin"
 		-Server
 	}
+	# Routes internes (purge nocturne, ADR-0023) : appelées seulement depuis le conteneur.
+	respond /api/interne/* 404
 }
 
 prometheus-people.com {
