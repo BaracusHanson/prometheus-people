@@ -15,6 +15,7 @@ import { lireSession } from "@/server/auth/session";
 import { exigerContexte } from "@/server/authz";
 
 import { BoutonRelance } from "./bouton-relance";
+import { BoutonSupprimer } from "./bouton-supprimer";
 import { TiroirInvitation } from "./tiroir-invitation";
 
 export const metadata: Metadata = { title: "Candidats — Prometheus People" };
@@ -88,7 +89,7 @@ export default async function PageCandidats({
               {visibles.map((c) => (
                 <li
                   key={c.id}
-                  className="grid gap-2 border-t border-trait px-5 py-3 first:border-t-0 md:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_110px_90px_130px] md:items-center"
+                  className="grid gap-2 border-t border-trait px-5 py-3 first:border-t-0 md:grid-cols-[minmax(0,2fr)_minmax(0,1.5fr)_110px_90px_minmax(130px,auto)] md:items-center"
                 >
                   <span className="flex min-w-0 flex-col">
                     <span className="font-bold">{c.nom}</span>
@@ -110,7 +111,12 @@ export default async function PageCandidats({
                         </Link>
                       </Button>
                     ) : (
-                      <BoutonRelance id={c.id} nom={c.nom} />
+                      <span className="flex flex-wrap items-center gap-1 md:justify-end">
+                        <BoutonRelance id={c.id} nom={c.nom} />
+                        {ctx.role === "admin" ? (
+                          <BoutonSupprimer id={c.id} nom={c.nom} compact />
+                        ) : null}
+                      </span>
                     )}
                   </span>
                 </li>

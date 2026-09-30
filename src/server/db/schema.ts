@@ -108,3 +108,28 @@ export const reponseCandidat = pgTable(
     check("reponse_valeur_valide", sql`${table.valeur} between 1 and 5`),
   ],
 );
+
+// ---------------------------------------------------------------- Journal d'audit (ADR-0023)
+// Qui a consulté, imprimé ou supprimé quel candidat. Aucune donnée du candidat n'est
+// copiée ici : le lien passe à nul quand il est supprimé (« Candidat supprimé »).
+export const journalAudit = pgTable(
+  "journal_audit",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    // Nul pour une purge automatique (« Système ») ou un compte supprimé depuis.
+    userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+    action: text("action").notNull(),
+    candidatId: uuid("candidat_id").references(() => candidat.id, { onDelete: "set null" }),
+    creeLe: timestamp("cree_le", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("journal_audit_organization_cree_idx").on(table.organizationId, table.creeLe),
+    check(
+      "journal_audit_action_valide",
+      sql`${table.action} in ('consultation', 'impression', 'suppression', 'purge')`,
+    ),
+  ],
+);

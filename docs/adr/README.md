@@ -26,6 +26,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0020](0020-interface-et-design.md)            | Interface : styles, composants, graphiques, accessibilité | Accepté                       |
 | [0021](0021-candidats-et-liens.md)             | Candidats, lien d'invitation et session candidat          | Accepté                       |
 | [0022](0022-passation-du-questionnaire.md)     | Passation du questionnaire : information, réponses, fin   | Accepté                       |
+| [0023](0023-journal-et-suppression.md)         | Journal d'audit, suppression et purge des candidats       | Accepté                       |
 
 ## Modèle
 

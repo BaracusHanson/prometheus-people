@@ -5,7 +5,13 @@ import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Resultats } from "@/modules/questionnaire/resultats";
 import type { Contexte } from "@/server/authz";
 import { getDb } from "@/server/db/client";
-import { candidat, jetonCandidat, quotaAgence, sessionCandidat } from "@/server/db/schema";
+import {
+  candidat,
+  jetonCandidat,
+  journalAudit,
+  quotaAgence,
+  sessionCandidat,
+} from "@/server/db/schema";
 import { empreinteJeton, genererJeton } from "@/server/jetons";
 
 import { idCandidatSchema, type InvitationCandidat, type TypePoste } from "./schemas";
@@ -214,5 +220,34 @@ export async function relancerCandidat(ctx: Contexte, id: string): Promise<Resul
       email: cible.email,
       typePoste: cible.typePoste as TypePoste,
     } as const;
+  });
+}
+
+// Suppression manuelle (ADR-0023) : administrateurs seulement, vérifié ici aussi. Efface le
+// candidat, ses réponses, liens et sessions (cascade), et note la suppression dans le
+// journal, dans la même transaction. Ne rend pas de crédit d'essai.
+export async function supprimerCandidat(ctx: Contexte, id: unknown): Promise<boolean> {
+  if (ctx.role !== "admin") return false;
+  const valide = idCandidatSchema.safeParse(id);
+  if (!valide.success) return false;
+
+  return getDb().transaction(async (tx) => {
+    const [cible] = await tx
+      .select({ id: candidat.id })
+      .from(candidat)
+      .where(and(eq(candidat.id, valide.data), eq(candidat.organizationId, ctx.orgId)))
+      .for("update");
+    if (!cible) return false;
+
+    await tx.insert(journalAudit).values({
+      organizationId: ctx.orgId,
+      userId: ctx.userId,
+      action: "suppression",
+      candidatId: cible.id,
+    });
+    await tx
+      .delete(candidat)
+      .where(and(eq(candidat.id, cible.id), eq(candidat.organizationId, ctx.orgId)));
+    return true;
   });
 }
