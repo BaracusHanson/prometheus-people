@@ -32,6 +32,15 @@ export const envSchema = z
       .startsWith("re_", "RESEND_API_KEY doit commencer par re_")
       .optional(),
     EMAIL_EXPEDITEUR: z.string().default("Prometheus People <noreply@prometheus-people.com>"),
+
+    // Suivi des erreurs (ADR-0025). Facultatif ; seule la région UE de Sentry est acceptée.
+    SENTRY_DSN: z
+      .string()
+      .regex(
+        /^https:\/\/[^@/]+@[^/]+\.ingest\.de\.sentry\.io\/\d+$/,
+        "SENTRY_DSN doit pointer vers la région UE de Sentry (…ingest.de.sentry.io).",
+      )
+      .optional(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === "production" && !env.RESEND_API_KEY) {

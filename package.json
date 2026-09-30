@@ -26,6 +26,7 @@
     "auth:schema": "auth generate --config scripts/auth-schema.config.ts --output src/server/db/auth-schema.ts --adapter drizzle --dialect postgresql --yes"
   },
   "dependencies": {
+    "@sentry/node": "^11.1.0",
     "better-auth": "1.7.6",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
