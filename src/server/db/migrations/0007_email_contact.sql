@@ -1,0 +1,1 @@
+ALTER TABLE "parametres_agence" ADD COLUMN "email_contact" text;

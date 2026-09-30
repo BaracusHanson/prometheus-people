@@ -69,11 +69,26 @@ function Puce({ icone, children }: { icone: ReactNode; children: ReactNode }) {
   );
 }
 
+// Où exercer ses droits : l'adresse RGPD de l'agence si elle l'a donnée, sinon l'agence.
+function ContactDroits({ agence, contact }: { agence: string; contact: string | null }) {
+  return contact ? (
+    <>
+      en écrivant à{" "}
+      <a href={`mailto:${contact}`} className="font-bold break-all text-bleu">
+        {contact}
+      </a>
+    </>
+  ) : (
+    <>en vous adressant à {agence}</>
+  );
+}
+
 // C1 : accueil et information (ADR-0022 : intérêt légitime, information confirmée).
 // La case est exigée par le navigateur ET revérifiée par l'action serveur.
 export function InformationCandidat({
   nom,
   agence,
+  contact,
   poste,
   phrases,
   action,
@@ -81,6 +96,7 @@ export function InformationCandidat({
 }: {
   nom: string;
   agence: string;
+  contact: string | null;
   poste: string;
   phrases: number;
   action: (formulaire: FormData) => Promise<void>;
@@ -133,8 +149,8 @@ export function InformationCandidat({
             <strong>Combien de temps :</strong> 24 mois au plus, puis suppression automatique.
           </p>
           <p>
-            <strong>Vos droits :</strong> accès, rectification, suppression, en vous adressant à{" "}
-            {agence}.
+            <strong>Vos droits :</strong> accès, rectification, suppression,{" "}
+            <ContactDroits agence={agence} contact={contact} />.
           </p>
         </div>
       </details>
@@ -275,10 +291,12 @@ export function Reprise({
 export function Fin({
   nom,
   agence,
+  contact,
   profil,
 }: {
   nom: string;
   agence: string;
+  contact: string | null;
   profil: Record<Trait, number> | null;
 }) {
   return (
@@ -327,8 +345,8 @@ export function Fin({
       ) : null}
       <p className="text-[13px] leading-normal text-gris">
         Questionnaire basé sur l&apos;IPIP-NEO, inventaire du domaine public. Ce profil décrit des
-        tendances ; il ne dit rien de vos compétences. Pour exercer vos droits (accès, suppression),
-        adressez-vous à {agence}.
+        tendances ; il ne dit rien de vos compétences. Pour exercer vos droits (accès, suppression)
+        : <ContactDroits agence={agence} contact={contact} />.
       </p>
       {profil ? <BoutonCopie /> : null}
     </>

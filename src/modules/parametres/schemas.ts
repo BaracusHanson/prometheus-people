@@ -11,3 +11,12 @@ export const conservationSchema = z.coerce
   .refine((n): n is DureeConservation => (DUREES_CONSERVATION as readonly number[]).includes(n), {
     message: "Durée non proposée.",
   });
+
+// Adresse de contact RGPD de l'agence : vide = aucune (on l'efface).
+export const emailContactSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .max(254)
+  .pipe(z.union([z.literal(""), z.email({ error: "Adresse email invalide." })]))
+  .transform((v) => (v === "" ? null : v));

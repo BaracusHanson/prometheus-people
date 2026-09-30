@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { contexteCourant } from "@/server/authz";
 
-import { enregistrerConservation } from "./queries";
+import { enregistrerConservation, enregistrerEmailContact } from "./queries";
 
 export interface EtatParametres {
   erreur?: string;
@@ -29,4 +29,22 @@ export async function modifierConservation(
 
   revalidatePath("/parametres");
   return { succes: "Durée de conservation enregistrée." };
+}
+
+// Adresse de contact RGPD montrée aux candidats : administrateurs seulement.
+export async function modifierEmailContact(
+  _etat: EtatParametres,
+  formulaire: FormData,
+): Promise<EtatParametres> {
+  const ctx = await contexteCourant();
+  if (!ctx) redirect("/connexion");
+  if (ctx.role !== "admin") {
+    return { erreur: "Seul un administrateur de l'agence peut modifier ce réglage." };
+  }
+
+  const resultat = await enregistrerEmailContact(ctx, formulaire.get("email") ?? "");
+  if (!resultat.ok) return { erreur: resultat.erreur };
+
+  revalidatePath("/parametres");
+  return { succes: "Adresse enregistrée." };
 }

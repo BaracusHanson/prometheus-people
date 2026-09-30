@@ -11,15 +11,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { listerJournal, type ActionJournal } from "@/modules/journal/queries";
-import { compterAuDela, lireConservation } from "@/modules/parametres/queries";
+import { obtenirAgence } from "@/modules/agences/queries";
+import { compterAuDela, lireConservation, lireEmailContact } from "@/modules/parametres/queries";
 import { lireSession } from "@/server/auth/session";
 import { exigerContexte, type Contexte } from "@/server/authz";
 
 import { FormulaireConservation } from "./formulaire-conservation";
+import { FormulaireContact } from "./formulaire-contact";
 
 export const metadata: Metadata = { title: "Paramètres — Prometheus People" };
 
 const SECTIONS = [
+  { cle: "agence", libelle: "Agence" },
   { cle: "conservation", libelle: "Conservation des données" },
   { cle: "journal", libelle: "Journal d'audit" },
 ] as const;
@@ -68,7 +71,7 @@ export default async function PageParametres({
   }
 
   const demande = (await searchParams).section;
-  const section: Section = SECTIONS.find((s) => s.cle === demande)?.cle ?? "conservation";
+  const section: Section = SECTIONS.find((s) => s.cle === demande)?.cle ?? "agence";
 
   return (
     <CadreApplication actif="parametres" compte={compte}>
@@ -87,7 +90,9 @@ export default async function PageParametres({
           ))}
         </nav>
         <div className="min-w-0">
-          {section === "conservation" ? <Conservation ctx={ctx} /> : <Journal ctx={ctx} />}
+          {section === "agence" ? <Agence ctx={ctx} /> : null}
+          {section === "conservation" ? <Conservation ctx={ctx} /> : null}
+          {section === "journal" ? <Journal ctx={ctx} /> : null}
         </div>
       </div>
     </CadreApplication>
@@ -100,6 +105,27 @@ function phraseAuDela(nombre: number, mois: number): string {
     return `1 candidat dépasse aujourd'hui ${mois} mois : il sera supprimé à la prochaine suppression automatique.`;
   }
   return `${nombre} candidats dépassent aujourd'hui ${mois} mois : ils seront supprimés à la prochaine suppression automatique.`;
+}
+
+async function Agence({ ctx }: { ctx: Contexte }) {
+  const [agence, email] = await Promise.all([obtenirAgence(ctx), lireEmailContact(ctx)]);
+
+  return (
+    <section className={CARTE} aria-labelledby="titre-agence">
+      <h2 id="titre-agence" className={TITRE}>
+        Agence
+      </h2>
+      <p>
+        <span className="text-sm font-bold">Nom de l&apos;agence</span>
+        <br />
+        {agence?.nom}
+        <span className="block text-sm text-gris">
+          Apparaît dans les emails et sur les pages des candidats.
+        </span>
+      </p>
+      <FormulaireContact actuel={email} />
+    </section>
+  );
 }
 
 async function Conservation({ ctx }: { ctx: Contexte }) {

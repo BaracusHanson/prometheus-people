@@ -33,7 +33,7 @@ export default async function PagePassation({
     const profil = await lireProfilCandidat(ctx);
     return (
       <CadreCandidat agence={agence}>
-        <Fin nom={nom} agence={agence} profil={profil} />
+        <Fin nom={nom} agence={agence} contact={passation.contact} profil={profil} />
       </CadreCandidat>
     );
   }
@@ -44,6 +44,7 @@ export default async function PagePassation({
         <InformationCandidat
           nom={nom}
           agence={agence}
+          contact={passation.contact}
           poste={TYPES_POSTE[passation.typePoste as TypePoste] ?? passation.typePoste}
           phrases={ORDRE_PRESENTATION.length}
           action={confirmerLecture}
