@@ -26,6 +26,8 @@ Next.js (App Router, `standalone`) · Tailwind CSS v4 · TypeScript strict · Dr
 
 **Sauvegardes** (ADR-0015) : chaque nuit, chiffrées (age) vers Backblaze B2, verrouillées 30 jours ; vérifiées chaque matin par le workflow « Vérification des sauvegardes ». **Les journaux GitHub Actions sont publics** : aucun script ne doit y afficher une donnée ou un secret, seulement des comptages.
 
+**Purge** (ADR-0023) : chaque nuit vers 4 h, le minuteur `prometheus-purge.timer` du serveur appelle, depuis le conteneur, la route interne `/api/interne/purge` (jeton dérivé de `BETTER_AUTH_SECRET`, route bloquée par Caddy depuis Internet). Fichiers dans `deploy/purge/`.
+
 **Connexion** (ADR-0016) : Better Auth, lien magique uniquement. En local sans `RESEND_API_KEY`, le lien s'affiche dans le terminal. La configuration Better Auth est dans `src/server/auth/options.ts` (source unique) ; `src/server/db/auth-schema.ts` est généré, ne jamais le modifier à la main.
 
 **Build sans variables** : la CI construit l'application **sans aucune variable d'environnement**, alors qu'un build local charge `.env.local` et masque les erreurs. Un module ne lit donc jamais l'environnement à l'import (`getEnv()`, `getDb()`, `getAuth()` sont paresseux), et une page qui dépend de la requête lit `headers()` **avant** tout accès à l'environnement. Pour reproduire la CI : cloner le dépôt dans un dossier temporaire (sans `.env.local`) et lancer le build.
@@ -83,3 +85,13 @@ docs/adr/           décisions d'architecture
 ## Données sensibles
 
 Les résultats du questionnaire sont des données personnelles sensibles de candidats. Les données de test sont toujours fictives. Aucun agent n'a d'accès en écriture à la base de production.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
