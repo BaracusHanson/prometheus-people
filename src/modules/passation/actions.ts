@@ -7,6 +7,7 @@ import {
   CHEMIN_PASSATION,
   COOKIE_CANDIDAT,
   contexteCandidatCourant,
+  contexteCandidatPourSecret,
 } from "@/server/authz/candidat";
 import { getEnv } from "@/server/env";
 
@@ -18,12 +19,26 @@ import {
   type ResultatFin,
 } from "./queries";
 
-// Le candidat clique « Commencer » (ADR-0021) : le jeton, à usage unique, est échangé
-// contre une session stockée dans un cookie. Déclenché par un formulaire (POST) et non
-// à l'ouverture du lien, pour que les robots de messagerie ne le consomment pas.
+// Case « J'ai compris à quoi servent mes réponses » (ADR-0022), vérifiée côté serveur.
+function informationCochee(formulaire: FormData): boolean {
+  return formulaire.get("information") === "lue";
+}
+
+// Le candidat coche l'information et clique « Commencer » (ADR-0021, ADR-0022) : le
+// jeton, à usage unique, est échangé contre une session stockée dans un cookie.
+// Déclenché par un formulaire (POST) et non à l'ouverture du lien, pour que les robots
+// de messagerie ne le consomment pas.
 export async function ouvrirPassation(formulaire: FormData): Promise<void> {
-  const session = await echangerJeton(formulaire.get("jeton"));
+  const jeton = formulaire.get("jeton");
+  if (typeof jeton !== "string") redirect(`${CHEMIN_PASSATION}/lien-invalide`);
+  // Case non cochée : le lien n'est pas consommé, la page se réaffiche.
+  if (!informationCochee(formulaire)) redirect(`${CHEMIN_PASSATION}/${encodeURIComponent(jeton)}`);
+
+  const session = await echangerJeton(jeton);
   if (!session) redirect(`${CHEMIN_PASSATION}/lien-invalide`);
+
+  const ctx = await contexteCandidatPourSecret(session.secret);
+  if (ctx) await confirmerInformation(ctx);
 
   (await cookies()).set(COOKIE_CANDIDAT, session.secret, {
     httpOnly: true,
@@ -44,8 +59,10 @@ async function exigerCandidat() {
   return ctx;
 }
 
-export async function confirmerLecture(): Promise<void> {
-  await confirmerInformation(await exigerCandidat());
+// Pour une session ouverte sans avoir coché l'information (avant l'étape 8).
+export async function confirmerLecture(formulaire: FormData): Promise<void> {
+  const ctx = await exigerCandidat();
+  if (informationCochee(formulaire)) await confirmerInformation(ctx);
   redirect(CHEMIN_PASSATION);
 }
 

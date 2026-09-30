@@ -287,11 +287,14 @@ export const QUESTIONS: readonly Question[] = [
   },
 ];
 
-// Échelle de réponse de l'IPIP (traduction : nous), de 1 à 5.
+// Échelle de réponse, de 1 à 5, lue après « Cette phrase me décrit… » (maquette C3).
+// Même sens que l'échelle de l'IPIP (de « très inexact » à « très exact ») en mots
+// courts, qui tiennent en cinq cases sur un téléphone. Les contrôles d'attention
+// (pages.ts) citent ces libellés : un test vérifie qu'ils existent.
 export const ECHELLE_REPONSES = [
-  { valeur: 1, libelle: "Très inexact" },
-  { valeur: 2, libelle: "Plutôt inexact" },
-  { valeur: 3, libelle: "Ni exact ni inexact" },
-  { valeur: 4, libelle: "Plutôt exact" },
-  { valeur: 5, libelle: "Très exact" },
+  { valeur: 1, libelle: "Pas du tout" },
+  { valeur: 2, libelle: "Plutôt pas" },
+  { valeur: 3, libelle: "Ni l’un ni l’autre" },
+  { valeur: 4, libelle: "Plutôt" },
+  { valeur: 5, libelle: "Tout à fait" },
 ] as const;
