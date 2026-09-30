@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CONTROLES, NUMEROS_VALIDES, ORDRE_PRESENTATION, pageAReprendre, PAGES } from "./pages";
-import { QUESTIONS } from "./questions";
+import { ECHELLE_REPONSES, QUESTIONS } from "./questions";
 
 describe("pages du questionnaire", () => {
   it("compte 15 pages, chaque question une seule fois, plus 2 contrôles", () => {
@@ -22,6 +22,13 @@ describe("pages du questionnaire", () => {
     );
     expect(pagesDesControles).toEqual([3, 10]);
     for (const c of CONTROLES) expect(c.numero).toBeGreaterThan(300);
+  });
+
+  it("demande dans chaque contrôle le libellé de la réponse attendue", () => {
+    for (const c of CONTROLES) {
+      const attendu = ECHELLE_REPONSES.find((e) => e.valeur === c.attendue)!.libelle;
+      expect(c.texte).toContain(`« ${attendu} »`);
+    }
   });
 
   it("n'a aucune page de plus de 9 lignes", () => {
