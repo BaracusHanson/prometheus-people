@@ -2,12 +2,13 @@ import "server-only";
 
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 
+import type { Resultats } from "@/modules/questionnaire/resultats";
 import type { Contexte } from "@/server/authz";
 import { getDb } from "@/server/db/client";
 import { candidat, jetonCandidat, quotaAgence, sessionCandidat } from "@/server/db/schema";
 import { empreinteJeton, genererJeton } from "@/server/jetons";
 
-import type { InvitationCandidat, TypePoste } from "./schemas";
+import { idCandidatSchema, type InvitationCandidat, type TypePoste } from "./schemas";
 
 // Candidats d'une agence (ADR-0021). Toutes les fonctions prennent le Contexte et
 // filtrent sur ctx.orgId (CLAUDE.md, règle 4) : aucune ne reçoit un identifiant
@@ -124,6 +125,47 @@ export async function obtenirCandidat(ctx: Contexte, id: string): Promise<Candid
     .where(and(eq(candidat.id, id), eq(candidat.organizationId, ctx.orgId)))
     .limit(1);
   return ligne ? { ...ligne, typePoste: ligne.typePoste as TypePoste } : null;
+}
+
+export interface Rapport {
+  nom: string;
+  typePoste: TypePoste;
+  commenceLe: Date | null;
+  termineLe: Date;
+  resultats: Resultats;
+}
+
+// Rapport d'un candidat terminé (étape 9). Lit uniquement les résultats enregistrés à la
+// fin du questionnaire, jamais les réponses brutes (ADR-0022). Null si le candidat n'est
+// pas de l'agence, ou pas encore terminé.
+export async function lireRapport(ctx: Contexte, id: unknown): Promise<Rapport | null> {
+  const valide = idCandidatSchema.safeParse(id);
+  if (!valide.success) return null;
+
+  const [ligne] = await getDb()
+    .select({
+      nom: candidat.nom,
+      typePoste: candidat.typePoste,
+      commenceLe: candidat.commenceLe,
+      termineLe: candidat.termineLe,
+      resultats: candidat.resultats,
+    })
+    .from(candidat)
+    .where(
+      and(
+        eq(candidat.id, valide.data),
+        eq(candidat.organizationId, ctx.orgId),
+        eq(candidat.statut, "termine"),
+      ),
+    )
+    .limit(1);
+  if (!ligne?.resultats || !ligne.termineLe) return null;
+  return {
+    ...ligne,
+    typePoste: ligne.typePoste as TypePoste,
+    termineLe: ligne.termineLe,
+    resultats: ligne.resultats,
+  };
 }
 
 export type ResultatRelance =

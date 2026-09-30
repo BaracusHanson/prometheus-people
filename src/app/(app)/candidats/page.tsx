@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { CadreApplication } from "@/components/cadres";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   invitationsRestantes,
   LIMITE_ESSAI,
@@ -102,7 +103,15 @@ export default async function PageCandidats({
                     {formatDate.format(c.inviteLe)}
                   </span>
                   <span className="md:text-right">
-                    {c.statut !== "termine" && <BoutonRelance id={c.id} nom={c.nom} />}
+                    {c.statut === "termine" ? (
+                      <Button asChild variant="outline">
+                        <Link href={`/candidats/${c.id}`}>
+                          Voir le profil<span className="sr-only"> de {c.nom}</span>
+                        </Link>
+                      </Button>
+                    ) : (
+                      <BoutonRelance id={c.id} nom={c.nom} />
+                    )}
                   </span>
                 </li>
               ))}

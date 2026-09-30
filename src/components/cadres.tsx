@@ -93,7 +93,7 @@ export function CadreApplication({
 }) {
   return (
     <div className="flex min-h-dvh flex-col md:flex-row">
-      <aside className="flex shrink-0 items-center gap-2 bg-encre px-4 py-3 text-white md:w-[88px] md:flex-col md:px-0 md:py-4">
+      <aside className="flex shrink-0 items-center gap-2 bg-encre px-4 py-3 text-white md:w-[88px] md:flex-col md:px-0 md:py-4 print:hidden">
         <Flamme taille={30} />
         <span className="sr-only">Prometheus People</span>
         <nav aria-label="Navigation principale" className="flex gap-1 md:mt-4 md:flex-col">
