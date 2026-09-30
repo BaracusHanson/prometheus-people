@@ -144,6 +144,9 @@ export const parametresAgence = pgTable(
       .primaryKey()
       .references(() => organization.id, { onDelete: "cascade" }),
     conservationMois: smallint("conservation_mois").notNull().default(24),
+    // Adresse où les candidats exercent leurs droits (accès, suppression). Nulle : l'écran
+    // du candidat renvoie simplement vers l'agence.
+    emailContact: text("email_contact"),
     modifieLe: timestamp("modifie_le", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

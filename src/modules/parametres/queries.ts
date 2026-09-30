@@ -6,7 +6,12 @@ import type { Contexte } from "@/server/authz";
 import { getDb } from "@/server/db/client";
 import { candidat, parametresAgence } from "@/server/db/schema";
 
-import { CONSERVATION_PAR_DEFAUT, conservationSchema, type DureeConservation } from "./schemas";
+import {
+  CONSERVATION_PAR_DEFAUT,
+  conservationSchema,
+  emailContactSchema,
+  type DureeConservation,
+} from "./schemas";
 
 // Paramètres de l'agence (ADR-0023). Lecture pour tout membre ; modification réservée
 // aux administrateurs, vérifiée ici aussi (CLAUDE.md, règle 6).
@@ -52,4 +57,33 @@ export async function compterAuDela(ctx: Contexte, mois: DureeConservation): Pro
       ),
     );
   return ligne?.n ?? 0;
+}
+
+export async function lireEmailContact(ctx: Contexte): Promise<string | null> {
+  const [ligne] = await getDb()
+    .select({ email: parametresAgence.emailContact })
+    .from(parametresAgence)
+    .where(eq(parametresAgence.organizationId, ctx.orgId))
+    .limit(1);
+  return ligne?.email ?? null;
+}
+
+export type ResultatEmailContact = { ok: true } | { ok: false; erreur: string };
+
+export async function enregistrerEmailContact(
+  ctx: Contexte,
+  valeur: unknown,
+): Promise<ResultatEmailContact> {
+  if (ctx.role !== "admin") return { ok: false, erreur: "Réservé aux administrateurs." };
+  const valide = emailContactSchema.safeParse(valeur);
+  if (!valide.success) return { ok: false, erreur: "Adresse email invalide." };
+
+  await getDb()
+    .insert(parametresAgence)
+    .values({ organizationId: ctx.orgId, emailContact: valide.data })
+    .onConflictDoUpdate({
+      target: parametresAgence.organizationId,
+      set: { emailContact: valide.data, modifieLe: sql`now()` },
+    });
+  return { ok: true };
 }

@@ -10,7 +10,9 @@ describe.skipIf(!process.env.DATABASE_URL)("paramètres de l'agence (intégratio
   const { getSql } = await import("@/server/db/client");
   const { contextePourUtilisateur } = await import("@/server/authz");
   const { creerCandidat } = await import("@/modules/candidats/queries");
-  const { compterAuDela, enregistrerConservation, lireConservation } = await import("./queries");
+  const { compterAuDela, enregistrerConservation, enregistrerEmailContact, lireConservation } =
+    await import("./queries");
+  const { apercuLien } = await import("@/modules/passation/queries");
 
   // Suffixe unique : les fichiers de tests tournent en parallèle sur la même base.
   const suffixe = `${Date.now()}-${randomUUID().slice(0, 8)}`;
@@ -89,5 +91,29 @@ describe.skipIf(!process.env.DATABASE_URL)("paramètres de l'agence (intégratio
     await getSql()`update candidat set statut = 'termine', termine_le = now() - interval '1 month'
                    where id = ${r.candidatId}`;
     expect(await compterAuDela(adminA, 12)).toBe(0);
+  });
+
+  it("montre l'adresse RGPD aux seuls candidats de l'agence, réglée par un administrateur", async () => {
+    const inviter = async (ctx: Ctx, n: string) => {
+      const r = await creerCandidat(ctx, {
+        nom: n,
+        email: `${n}-${suffixe}@example.com`,
+        typePoste: "cariste",
+      });
+      if (!r.ok) throw new Error("quota");
+      return r.jeton;
+    };
+    const lienA = await inviter(adminA, "contact-a");
+    const lienB = await inviter(adminB, "contact-b");
+
+    expect((await enregistrerEmailContact(recruteurA, "x@agence.example")).ok).toBe(false);
+    expect((await enregistrerEmailContact(adminA, "pas-une-adresse")).ok).toBe(false);
+    expect((await enregistrerEmailContact(adminA, "RGPD@agence-a.example")).ok).toBe(true);
+
+    expect((await apercuLien(lienA))?.contact).toBe("rgpd@agence-a.example");
+    expect((await apercuLien(lienB))?.contact).toBeNull();
+
+    expect((await enregistrerEmailContact(adminA, "")).ok).toBe(true);
+    expect((await apercuLien(lienA))?.contact).toBeNull();
   });
 });

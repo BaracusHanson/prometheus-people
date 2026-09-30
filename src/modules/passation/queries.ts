@@ -11,6 +11,7 @@ import {
   candidat,
   jetonCandidat,
   organization,
+  parametresAgence,
   reponseCandidat,
   sessionCandidat,
 } from "@/server/db/schema";
@@ -95,6 +96,8 @@ export interface Passation {
   nom: string;
   typePoste: string;
   agence: string;
+  // Adresse RGPD de l'agence (Paramètres), ou null.
+  contact: string | null;
   statut: string;
 }
 
@@ -105,10 +108,12 @@ export async function lirePassation(ctx: ContexteCandidat): Promise<Passation | 
       nom: candidat.nom,
       typePoste: candidat.typePoste,
       agence: organization.name,
+      contact: parametresAgence.emailContact,
       statut: candidat.statut,
     })
     .from(candidat)
     .innerJoin(organization, eq(organization.id, candidat.organizationId))
+    .leftJoin(parametresAgence, eq(parametresAgence.organizationId, candidat.organizationId))
     .where(and(eq(candidat.id, ctx.candidatId), eq(candidat.organizationId, ctx.orgId)))
     .limit(1);
   return ligne ?? null;
@@ -117,6 +122,7 @@ export async function lirePassation(ctx: ContexteCandidat): Promise<Passation | 
 export interface ApercuLien {
   nom: string;
   agence: string;
+  contact: string | null;
   typePoste: string;
 }
 
@@ -127,10 +133,16 @@ export async function apercuLien(jeton: unknown): Promise<ApercuLien | null> {
   if (!estFormatJeton(jeton)) return null;
 
   const [ligne] = await getDb()
-    .select({ nom: candidat.nom, agence: organization.name, typePoste: candidat.typePoste })
+    .select({
+      nom: candidat.nom,
+      agence: organization.name,
+      contact: parametresAgence.emailContact,
+      typePoste: candidat.typePoste,
+    })
     .from(jetonCandidat)
     .innerJoin(candidat, eq(candidat.id, jetonCandidat.candidatId))
     .innerJoin(organization, eq(organization.id, candidat.organizationId))
+    .leftJoin(parametresAgence, eq(parametresAgence.organizationId, candidat.organizationId))
     .where(
       and(
         eq(jetonCandidat.empreinte, empreinteJeton(jeton)),

@@ -20,6 +20,7 @@ export default async function PageLien({ params }: { params: Promise<{ jeton: st
       <InformationCandidat
         nom={apercu.nom}
         agence={apercu.agence}
+        contact={apercu.contact}
         poste={TYPES_POSTE[apercu.typePoste as TypePoste] ?? apercu.typePoste}
         phrases={ORDRE_PRESENTATION.length}
         action={ouvrirPassation}
