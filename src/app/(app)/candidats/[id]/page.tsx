@@ -14,10 +14,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { lireRapport } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
 import { ORDRE_PRESENTATION } from "@/modules/questionnaire/pages";
+import { noterLecture } from "@/modules/journal/queries";
 import { qualiteDesReponses, syntheseProfil } from "@/modules/questionnaire/rapport";
 import { lireSession } from "@/server/auth/session";
 import { exigerContexte } from "@/server/authz";
 
+import { BoutonSupprimer } from "../bouton-supprimer";
 import { BoutonImprimer } from "./bouton-imprimer";
 
 export const metadata: Metadata = { title: "Profil du candidat — Prometheus People" };
@@ -39,11 +41,11 @@ function duree(debut: Date | null, fin: Date): string | null {
 // filtre la lecture : un candidat d'une autre agence donne une page introuvable.
 export default async function PageRapport({ params }: { params: Promise<{ id: string }> }) {
   const ctx = await exigerContexte();
-  const [session, rapport] = await Promise.all([
-    lireSession(),
-    lireRapport(ctx, (await params).id),
-  ]);
+  const { id } = await params;
+  const [session, rapport] = await Promise.all([lireSession(), lireRapport(ctx, id)]);
   if (!rapport) notFound();
+  // Chaque lecture d'un rapport est notée dans le journal de l'agence (ADR-0023).
+  await noterLecture(ctx, "consultation", id);
 
   const { resultats } = rapport;
   const qualite = qualiteDesReponses(resultats);
@@ -69,7 +71,8 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
             <Badge variant={qualite.fiable ? "succes" : "attention"}>
               {qualite.fiable ? "Réponses fiables" : "Points de vigilance"}
             </Badge>
-            <BoutonImprimer />
+            <BoutonImprimer id={id} />
+            {ctx.role === "admin" ? <BoutonSupprimer id={id} nom={rapport.nom} /> : null}
           </div>
         </div>
 

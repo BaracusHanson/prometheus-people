@@ -9,7 +9,7 @@ import { envoyerEmail } from "@/server/email/envoyer";
 import { emailInvitationCandidat } from "@/server/email/modeles";
 import { getEnv } from "@/server/env";
 
-import { creerCandidat, relancerCandidat as relancer } from "./queries";
+import { creerCandidat, relancerCandidat as relancer, supprimerCandidat } from "./queries";
 import { idCandidatSchema, invitationCandidatSchema, TYPES_POSTE, type TypePoste } from "./schemas";
 
 // Invitation des candidats (ADR-0021). Chaque action vérifie elle-même la session et
@@ -106,4 +106,22 @@ export async function relancerCandidat(
   return envoye
     ? { succes: `Nouveau lien envoyé à ${resultat.email}.` }
     : { erreur: "Le nouveau lien a été créé, mais l'email n'est pas parti. Réessayez." };
+}
+
+// Suppression manuelle (ADR-0023) : administrateurs seulement. La requête le revérifie.
+export async function supprimer(
+  _etat: EtatInvitationCandidat,
+  formulaire: FormData,
+): Promise<EtatInvitationCandidat> {
+  const ctx = await contexteCourant();
+  if (!ctx) redirect("/connexion");
+  if (ctx.role !== "admin") {
+    return { erreur: "Seul un administrateur de l'agence peut supprimer un candidat." };
+  }
+
+  const supprime = await supprimerCandidat(ctx, formulaire.get("id"));
+  if (!supprime) return { erreur: "Candidat introuvable." };
+
+  revalidatePath("/candidats");
+  redirect("/candidats");
 }
