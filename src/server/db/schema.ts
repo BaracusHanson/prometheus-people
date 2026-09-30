@@ -133,3 +133,20 @@ export const journalAudit = pgTable(
     ),
   ],
 );
+
+// ---------------------------------------------------------------- Paramètres (ADR-0023)
+// Durée de conservation choisie par l'agence : 24 mois par défaut (ADR-0010). Pas de
+// ligne = valeur par défaut.
+export const parametresAgence = pgTable(
+  "parametres_agence",
+  {
+    organizationId: text("organization_id")
+      .primaryKey()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    conservationMois: smallint("conservation_mois").notNull().default(24),
+    modifieLe: timestamp("modifie_le", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    check("parametres_conservation_valide", sql`${table.conservationMois} in (6, 12, 24)`),
+  ],
+);

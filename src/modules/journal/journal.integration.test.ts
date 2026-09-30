@@ -11,7 +11,7 @@ describe.skipIf(!process.env.DATABASE_URL)("journal et suppression (intégration
   const { contextePourUtilisateur } = await import("@/server/authz");
   const { creerCandidat, supprimerCandidat, obtenirCandidat } =
     await import("@/modules/candidats/queries");
-  const { noterLecture } = await import("./queries");
+  const { listerJournal, noterLecture } = await import("./queries");
 
   // Suffixe unique : les fichiers de tests tournent en parallèle sur la même base.
   const suffixe = `${Date.now()}-${randomUUID().slice(0, 8)}`;
@@ -111,5 +111,23 @@ describe.skipIf(!process.env.DATABASE_URL)("journal et suppression (intégration
     expect(await lignes(id, "consultation")).toHaveLength(0);
     expect((await lignes(null, "suppression")).length).toBeGreaterThanOrEqual(1);
     expect(await supprimerCandidat(adminA, id)).toBe(false);
+  });
+
+  it("montre le journal aux seuls administrateurs de l'agence, avec « supprimé »", async () => {
+    const id = await inviter(5);
+    await noterLecture(recruteurA, "consultation", id);
+
+    expect(await listerJournal(recruteurA)).toBeNull();
+    const avant = await listerJournal(adminA);
+    expect(avant?.find((l) => l.action === "consultation")?.candidat).toBe("Candidat 5");
+
+    await supprimerCandidat(adminA, id);
+    const apres = (await listerJournal(adminA)) ?? [];
+    expect(apres.some((l) => l.candidat === "Candidat 5")).toBe(false);
+    expect(apres[0]?.action).toBe("suppression");
+    expect(apres[0]?.candidat).toBeNull();
+
+    // L'agence B ne voit rien du journal de A.
+    expect(await listerJournal(adminB)).toEqual([]);
   });
 });
