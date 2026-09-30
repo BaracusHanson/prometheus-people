@@ -15,13 +15,14 @@ import {
 } from "@/server/db/schema";
 import { empreinteJeton, genererJeton } from "@/server/jetons";
 
+import { CLES_FORFAIT, FORFAITS, type EtatForfait, type Forfait } from "./forfaits";
 import { idCandidatSchema, type InvitationCandidat, type TypePoste } from "./schemas";
 
 // Candidats d'une agence (ADR-0021). Toutes les fonctions prennent le Contexte et
 // filtrent sur ctx.orgId (CLAUDE.md, règle 4) : aucune ne reçoit un identifiant
 // d'agence venu de la requête.
 
-export const LIMITE_ESSAI = 10;
+export const LIMITE_ESSAI = FORFAITS.essai.limite;
 export const DUREE_LIEN_JOURS = 7;
 
 export type StatutAffiche = "invite" | "en_cours" | "termine" | "expire";
@@ -43,8 +44,24 @@ function finDuLien(maintenant: Date): Date {
 export type ResultatInvitation =
   { ok: true; candidatId: string; jeton: string; expireLe: Date } | { ok: false; raison: "quota" };
 
+// Mois civil courant, heure de Paris (AAAA-MM), calculé par la base.
+const MOIS_COURANT = sql`to_char(now() at time zone 'Europe/Paris', 'YYYY-MM')`;
+
+// Condition « il reste de la place » pour chaque forfait, tirée de la grille FORFAITS.
+function placeDisponible() {
+  return sql.join(
+    CLES_FORFAIT.map((f) =>
+      FORFAITS[f].periode === "total"
+        ? sql`(${quotaAgence.forfait} = ${f} and ${quotaAgence.utilisees} < ${FORFAITS[f].limite})`
+        : sql`(${quotaAgence.forfait} = ${f} and (${quotaAgence.mois} is distinct from ${MOIS_COURANT} or ${quotaAgence.utiliseesMois} < ${FORFAITS[f].limite}))`,
+    ),
+    sql` or `,
+  );
+}
+
 // Crée le candidat et son premier lien. Le quota est consommé dans la même transaction,
 // par une seule requête atomique : deux invitations simultanées ne dépassent pas la limite.
+// Le compteur du mois repart à 1 à la première invitation d'un nouveau mois.
 export async function creerCandidat(
   ctx: Contexte,
   saisie: InvitationCandidat,
@@ -52,11 +69,15 @@ export async function creerCandidat(
   return getDb().transaction(async (tx) => {
     const quota = await tx
       .insert(quotaAgence)
-      .values({ organizationId: ctx.orgId, utilisees: 1 })
+      .values({ organizationId: ctx.orgId, utilisees: 1, mois: MOIS_COURANT, utiliseesMois: 1 })
       .onConflictDoUpdate({
         target: quotaAgence.organizationId,
-        set: { utilisees: sql`${quotaAgence.utilisees} + 1` },
-        setWhere: sql`${quotaAgence.utilisees} < ${LIMITE_ESSAI}`,
+        set: {
+          utilisees: sql`${quotaAgence.utilisees} + 1`,
+          utiliseesMois: sql`case when ${quotaAgence.mois} = ${MOIS_COURANT} then ${quotaAgence.utiliseesMois} + 1 else 1 end`,
+          mois: MOIS_COURANT,
+        },
+        setWhere: placeDisponible(),
       })
       .returning({ utilisees: quotaAgence.utilisees });
     if (quota.length === 0) return { ok: false, raison: "quota" } as const;
@@ -83,12 +104,32 @@ export async function creerCandidat(
   });
 }
 
-export async function invitationsRestantes(ctx: Contexte): Promise<number> {
+// Forfait de l'agence et place restante sur sa période (essai : total ; sinon : ce mois).
+export async function lireForfait(ctx: Contexte): Promise<EtatForfait> {
   const [ligne] = await getDb()
-    .select({ utilisees: quotaAgence.utilisees })
+    .select({
+      forfait: quotaAgence.forfait,
+      utilisees: quotaAgence.utilisees,
+      moisCompte: quotaAgence.mois,
+      utiliseesMois: quotaAgence.utiliseesMois,
+      moisCourant: sql<string>`${MOIS_COURANT}`,
+    })
     .from(quotaAgence)
     .where(eq(quotaAgence.organizationId, ctx.orgId));
-  return Math.max(0, LIMITE_ESSAI - (ligne?.utilisees ?? 0));
+
+  const forfait = (ligne?.forfait ?? "essai") as Forfait;
+  const { limite, periode } = FORFAITS[forfait];
+  const utilises =
+    periode === "total"
+      ? (ligne?.utilisees ?? 0)
+      : ligne?.moisCompte === ligne?.moisCourant
+        ? (ligne?.utiliseesMois ?? 0)
+        : 0;
+  return { forfait, utilises, limite, restants: Math.max(0, limite - utilises) };
+}
+
+export async function invitationsRestantes(ctx: Contexte): Promise<number> {
+  return (await lireForfait(ctx)).restants;
 }
 
 // Statut affiché : « expiré » quand le test n'est pas terminé et qu'aucun lien ni

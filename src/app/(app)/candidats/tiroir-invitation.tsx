@@ -25,7 +25,7 @@ const ETAT_INITIAL: EtatInvitationCandidat = {};
 
 // Tiroir « Inviter un candidat » (maquette, page Candidats) : Sheet de shadcn/ui
 // (Radix Dialog) — focus piégé, Échap, retour du focus gérés par la bibliothèque.
-export function TiroirInvitation({ restantes, limite }: { restantes: number; limite: number }) {
+export function TiroirInvitation({ restantes, phrase }: { restantes: number; phrase: string }) {
   const formulaire = useRef<HTMLFormElement>(null);
   const [etat, action, enCours] = useActionState(inviterCandidat, ETAT_INITIAL);
 
@@ -84,10 +84,7 @@ export function TiroirInvitation({ restantes, limite }: { restantes: number; lim
             </FieldDescription>
           </Field>
           <Alert variant="attention" role="note">
-            <span>
-              Il vous reste <strong>{restantes}</strong> candidat{restantes > 1 ? "s" : ""} sur les{" "}
-              {limite} de votre essai gratuit.
-            </span>
+            <span>{phrase}</span>
           </Alert>
           {etat.erreur && <Alert variant="erreur">{etat.erreur}</Alert>}
           {etat.succes && (

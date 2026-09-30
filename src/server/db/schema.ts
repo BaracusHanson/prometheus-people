@@ -83,13 +83,24 @@ export const sessionCandidat = pgTable(
   (table) => [index("session_candidat_candidat_idx").on(table.candidatId)],
 );
 
-// Invitations consommées par agence : compteur atomique du quota d'essai (ADR-0011).
-export const quotaAgence = pgTable("quota_agence", {
-  organizationId: text("organization_id")
-    .primaryKey()
-    .references(() => organization.id, { onDelete: "cascade" }),
-  utilisees: integer("utilisees").notNull().default(0),
-});
+// Forfait et invitations consommées par agence (ADR-0011) : compteurs atomiques.
+// `utilisees` compte depuis toujours (essai) ; `utilisees_mois` le mois `mois` (AAAA-MM,
+// heure de Paris), remis à 1 à la première invitation d'un nouveau mois.
+export const quotaAgence = pgTable(
+  "quota_agence",
+  {
+    organizationId: text("organization_id")
+      .primaryKey()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    utilisees: integer("utilisees").notNull().default(0),
+    forfait: text("forfait").notNull().default("essai"),
+    mois: text("mois"),
+    utiliseesMois: integer("utilisees_mois").notNull().default(0),
+  },
+  (table) => [
+    check("quota_forfait_valide", sql`${table.forfait} in ('essai', 'agence', 'agence_plus')`),
+  ],
+);
 
 // Réponses du candidat (ADR-0022) : numéro de la question (IPIP-NEO-300, ou contrôle
 // d'attention au-delà de 1000) et valeur de 1 à 5. Une seule réponse par question.

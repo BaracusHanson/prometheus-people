@@ -4,12 +4,8 @@ import Link from "next/link";
 import { CadreApplication } from "@/components/cadres";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  invitationsRestantes,
-  LIMITE_ESSAI,
-  listerCandidats,
-  type StatutAffiche,
-} from "@/modules/candidats/queries";
+import { lireForfait, listerCandidats, type StatutAffiche } from "@/modules/candidats/queries";
+import { phraseRestants } from "@/modules/candidats/forfaits";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
 import { lireSession } from "@/server/auth/session";
 import { exigerContexte } from "@/server/authz";
@@ -42,10 +38,10 @@ export default async function PageCandidats({
   searchParams: Promise<{ statut?: string }>;
 }) {
   const ctx = await exigerContexte();
-  const [session, candidats, restantes] = await Promise.all([
+  const [session, candidats, forfait] = await Promise.all([
     lireSession(),
     listerCandidats(ctx),
-    invitationsRestantes(ctx),
+    lireForfait(ctx),
   ]);
   const { statut } = await searchParams;
   const filtre = FILTRES.find((f) => f === statut) ?? "tous";
@@ -61,7 +57,7 @@ export default async function PageCandidats({
               {candidats.length} au total
             </span>
           </h1>
-          <TiroirInvitation restantes={restantes} limite={LIMITE_ESSAI} />
+          <TiroirInvitation restantes={forfait.restants} phrase={phraseRestants(forfait)} />
         </div>
 
         <nav aria-label="Filtrer par statut" className="flex flex-wrap gap-2">

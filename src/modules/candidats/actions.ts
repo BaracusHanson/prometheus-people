@@ -9,7 +9,13 @@ import { envoyerEmail } from "@/server/email/envoyer";
 import { emailInvitationCandidat } from "@/server/email/modeles";
 import { getEnv } from "@/server/env";
 
-import { creerCandidat, relancerCandidat as relancer, supprimerCandidat } from "./queries";
+import { messageQuotaAtteint } from "./forfaits";
+import {
+  creerCandidat,
+  lireForfait,
+  relancerCandidat as relancer,
+  supprimerCandidat,
+} from "./queries";
 import { idCandidatSchema, invitationCandidatSchema, TYPES_POSTE, type TypePoste } from "./schemas";
 
 // Invitation des candidats (ADR-0021). Chaque action vérifie elle-même la session et
@@ -65,10 +71,7 @@ export async function inviterCandidat(
 
   const resultat = await creerCandidat(ctx, saisie.data);
   if (!resultat.ok) {
-    return {
-      erreur:
-        "Vous avez utilisé les 10 candidats de votre essai. Contactez-nous pour passer au forfait Agence.",
-    };
+    return { erreur: messageQuotaAtteint((await lireForfait(ctx)).forfait) };
   }
 
   revalidatePath("/candidats");
