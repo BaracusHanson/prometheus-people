@@ -1,8 +1,9 @@
 import "server-only";
 
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 
 import type { Resultats } from "@/modules/questionnaire/resultats";
+import type { Trait } from "@/modules/questionnaire/structure";
 import type { Contexte } from "@/server/authz";
 import { getDb } from "@/server/db/client";
 import {
@@ -171,6 +172,55 @@ export async function lireRapport(ctx: Contexte, id: unknown): Promise<Rapport |
     typePoste: ligne.typePoste as TypePoste,
     termineLe: ligne.termineLe,
     resultats: ligne.resultats,
+  };
+}
+
+export interface ProfilCompare {
+  id: string;
+  nom: string;
+  traits: Record<Trait, number>;
+}
+
+export const AUTRES_COMPARES = 4;
+
+function rangsDesTraits(resultats: Resultats): Record<Trait, number> {
+  const t = resultats.traits;
+  return { N: t.N.rang, E: t.E.rang, O: t.O.rang, A: t.A.rang, C: t.C.rang };
+}
+
+// Comparaison côte à côte (étape 9c, ADR-0024) : le candidat et au plus 4 autres candidats
+// terminés du même poste dans l'agence, les plus récents d'abord. Jamais triés par score :
+// ce n'est pas un classement. Null si le candidat n'est pas de l'agence ou pas terminé.
+export async function lireComparaison(
+  ctx: Contexte,
+  id: unknown,
+): Promise<{ typePoste: TypePoste; profils: ProfilCompare[] } | null> {
+  const courant = await lireRapport(ctx, id);
+  if (!courant) return null;
+  const idCourant = idCandidatSchema.parse(id);
+
+  const autres = await getDb()
+    .select({ id: candidat.id, nom: candidat.nom, resultats: candidat.resultats })
+    .from(candidat)
+    .where(
+      and(
+        eq(candidat.organizationId, ctx.orgId),
+        eq(candidat.typePoste, courant.typePoste),
+        eq(candidat.statut, "termine"),
+        ne(candidat.id, idCourant),
+      ),
+    )
+    .orderBy(desc(candidat.termineLe))
+    .limit(AUTRES_COMPARES);
+
+  return {
+    typePoste: courant.typePoste,
+    profils: [
+      { id: idCourant, nom: courant.nom, traits: rangsDesTraits(courant.resultats) },
+      ...autres.flatMap((a) =>
+        a.resultats ? [{ id: a.id, nom: a.nom, traits: rangsDesTraits(a.resultats) }] : [],
+      ),
+    ],
   };
 }
 

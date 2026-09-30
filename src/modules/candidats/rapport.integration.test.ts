@@ -10,7 +10,7 @@ describe.skipIf(!process.env.DATABASE_URL)("rapport d'un candidat (intégration)
   const { getSql } = await import("@/server/db/client");
   const { contextePourUtilisateur } = await import("@/server/authz");
   const { contexteCandidatPourSecret } = await import("@/server/authz/candidat");
-  const { creerCandidat, lireRapport } = await import("./queries");
+  const { creerCandidat, lireComparaison, lireRapport } = await import("./queries");
   const passation = await import("@/modules/passation/queries");
   const { CONTROLES, ORDRE_PRESENTATION } = await import("@/modules/questionnaire/pages");
 
@@ -97,5 +97,23 @@ describe.skipIf(!process.env.DATABASE_URL)("rapport d'un candidat (intégration)
   it("refuse un identifiant mal formé sans erreur de base", async () => {
     expect(await lireRapport(ctxA, "pas-un-uuid")).toBeNull();
     expect(await lireRapport(ctxA, randomUUID())).toBeNull();
+  });
+
+  it("compare avec les seuls candidats terminés du même poste et de la même agence", async () => {
+    const sql = getSql();
+    // Un second candidat terminé du même poste, un d'un autre poste (résultats recopiés).
+    const memePoste = (await inviter(3)).id;
+    const autrePoste = (await inviter(4)).id;
+    await sql`update candidat c set statut = 'termine', termine_le = now(), resultats = r.resultats
+              from candidat r where r.id = ${termine} and c.id in ${sql([memePoste, autrePoste])}`;
+    await sql`update candidat set type_poste = 'agent-accueil' where id = ${autrePoste}`;
+
+    const comparaison = await lireComparaison(ctxA, termine);
+    expect(comparaison?.profils[0]?.id).toBe(termine);
+    expect(comparaison?.profils.map((p) => p.id).sort()).toEqual([termine, memePoste].sort());
+    expect(comparaison?.profils.some((p) => p.id === enCours)).toBe(false);
+
+    expect(await lireComparaison(ctxB, termine)).toBeNull();
+    expect(await lireComparaison(ctxA, enCours)).toBeNull();
   });
 });

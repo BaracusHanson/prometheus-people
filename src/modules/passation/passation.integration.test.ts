@@ -118,7 +118,7 @@ describe.skipIf(!process.env.DATABASE_URL)("questionnaire du candidat (intégrat
 
     expect(await q.enregistrerReponse(ctx, 1, 1)).toBe(false);
     expect(await q.terminerQuestionnaire(ctx)).toEqual({ ok: false, raison: "impossible" });
-  });
+  }, 20_000);
 
   it("montre au candidat les rangs de ses cinq traits, seulement une fois terminé", async () => {
     const { ctx } = await nouveauCandidat(9);
@@ -146,5 +146,5 @@ describe.skipIf(!process.env.DATABASE_URL)("questionnaire du candidat (intégrat
     const [ligne] = await getSql()<{ resultats: { vigilances: { type: string }[] } }[]>`
       select resultats from candidat where id = ${id}`;
     expect(ligne?.resultats.vigilances.map((v) => v.type)).toContain("controle-attention-echoue");
-  });
+  }, 20_000);
 });

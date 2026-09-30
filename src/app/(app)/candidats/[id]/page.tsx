@@ -10,6 +10,7 @@ import {
   QualiteReponses,
 } from "@/components/rapport";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { lireRapport } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
@@ -71,6 +72,9 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
             <Badge variant={qualite.fiable ? "succes" : "attention"}>
               {qualite.fiable ? "Réponses fiables" : "Points de vigilance"}
             </Badge>
+            <Button asChild variant="outline" className="print:hidden">
+              <Link href={`/candidats/${id}/comparer`}>Comparer</Link>
+            </Button>
             <BoutonImprimer id={id} />
             {ctx.role === "admin" ? <BoutonSupprimer id={id} nom={rapport.nom} /> : null}
           </div>
