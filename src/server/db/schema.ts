@@ -2,7 +2,20 @@
 // (`pnpm db:generate`) et versionnée. Jamais `drizzle-kit push` (CLAUDE.md, règle 2).
 
 import { sql } from "drizzle-orm";
-import { check, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import {
+  check,
+  index,
+  integer,
+  jsonb,
+  pgTable,
+  primaryKey,
+  smallint,
+  text,
+  timestamp,
+  uuid,
+} from "drizzle-orm/pg-core";
+
+import type { Resultats } from "@/modules/questionnaire/resultats";
 
 import { organization, user } from "./auth-schema";
 
@@ -26,6 +39,10 @@ export const candidat = pgTable(
     inviteLe: timestamp("invite_le", { withTimezone: true }).notNull().defaultNow(),
     commenceLe: timestamp("commence_le", { withTimezone: true }),
     termineLe: timestamp("termine_le", { withTimezone: true }),
+    // Le candidat a confirmé avoir lu l'information (ADR-0022) : condition pour répondre.
+    informationLueLe: timestamp("information_lue_le", { withTimezone: true }),
+    // Scores, rangs et points de vigilance, calculés une fois à la fin (étape 8).
+    resultats: jsonb("resultats").$type<Resultats>(),
   },
   (table) => [
     index("candidat_organization_invite_idx").on(table.organizationId, table.inviteLe),
@@ -73,3 +90,21 @@ export const quotaAgence = pgTable("quota_agence", {
     .references(() => organization.id, { onDelete: "cascade" }),
   utilisees: integer("utilisees").notNull().default(0),
 });
+
+// Réponses du candidat (ADR-0022) : numéro de la question (IPIP-NEO-300, ou contrôle
+// d'attention au-delà de 1000) et valeur de 1 à 5. Une seule réponse par question.
+export const reponseCandidat = pgTable(
+  "reponse_candidat",
+  {
+    candidatId: uuid("candidat_id")
+      .notNull()
+      .references(() => candidat.id, { onDelete: "cascade" }),
+    numero: integer("numero").notNull(),
+    valeur: smallint("valeur").notNull(),
+    reponduLe: timestamp("repondu_le", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.candidatId, table.numero] }),
+    check("reponse_valeur_valide", sql`${table.valeur} between 1 and 5`),
+  ],
+);

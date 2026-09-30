@@ -4,7 +4,15 @@ import { and, eq, gt, isNull, sql } from "drizzle-orm";
 
 import { getDb } from "@/server/db/client";
 import type { ContexteCandidat } from "@/server/authz/candidat";
-import { candidat, jetonCandidat, organization, sessionCandidat } from "@/server/db/schema";
+import { NUMEROS_VALIDES } from "@/modules/questionnaire/pages";
+import { calculerResultats } from "@/modules/questionnaire/resultats";
+import {
+  candidat,
+  jetonCandidat,
+  organization,
+  reponseCandidat,
+  sessionCandidat,
+} from "@/server/db/schema";
 import { empreinteJeton, estFormatJeton, genererJeton } from "@/server/jetons";
 
 // Accès du candidat (ADR-0021). Le candidat n'a pas de compte ni de Contexte d'agence :
@@ -133,4 +141,94 @@ export async function apercuLien(jeton: unknown): Promise<ApercuLien | null> {
     )
     .limit(1);
   return ligne ?? null;
+}
+
+// ---------------------------------------------------------------- Questionnaire (ADR-0022)
+// Toutes ces fonctions ne prennent que le ContexteCandidat : un candidat ne lit et
+// n'écrit que ses propres réponses, jamais celles d'un autre.
+
+export async function confirmerInformation(ctx: ContexteCandidat): Promise<void> {
+  await getDb()
+    .update(candidat)
+    .set({ informationLueLe: sql`coalesce(${candidat.informationLueLe}, now())` })
+    .where(and(eq(candidat.id, ctx.candidatId), eq(candidat.organizationId, ctx.orgId)));
+}
+
+export interface EtatQuestionnaire {
+  informationLue: boolean;
+  termine: boolean;
+  reponses: Map<number, number>;
+}
+
+export async function lireEtatQuestionnaire(
+  ctx: ContexteCandidat,
+): Promise<EtatQuestionnaire | null> {
+  const [cible] = await getDb()
+    .select({ informationLueLe: candidat.informationLueLe, statut: candidat.statut })
+    .from(candidat)
+    .where(and(eq(candidat.id, ctx.candidatId), eq(candidat.organizationId, ctx.orgId)));
+  if (!cible) return null;
+
+  const lignes = await getDb()
+    .select({ numero: reponseCandidat.numero, valeur: reponseCandidat.valeur })
+    .from(reponseCandidat)
+    .where(eq(reponseCandidat.candidatId, ctx.candidatId));
+
+  return {
+    informationLue: cible.informationLueLe !== null,
+    termine: cible.statut === "termine",
+    reponses: new Map(lignes.map((l) => [l.numero, l.valeur])),
+  };
+}
+
+// Enregistre (ou corrige) une réponse. Refusée si la question n'existe pas, si la
+// valeur sort de l'échelle, si l'information n'a pas été lue, ou si le test est fini :
+// la condition est vérifiée dans la même requête que l'écriture.
+export async function enregistrerReponse(
+  ctx: ContexteCandidat,
+  numero: unknown,
+  valeur: unknown,
+): Promise<boolean> {
+  if (typeof numero !== "number" || !NUMEROS_VALIDES.has(numero)) return false;
+  if (typeof valeur !== "number" || !Number.isInteger(valeur) || valeur < 1 || valeur > 5)
+    return false;
+
+  const ecrit = await getDb().execute<{ numero: number }>(sql`
+    insert into ${reponseCandidat} (candidat_id, numero, valeur, repondu_le)
+    select "candidat"."id", ${numero}, ${valeur}, now() from ${candidat}
+    where "candidat"."id" = ${ctx.candidatId} and "candidat"."organization_id" = ${ctx.orgId}
+      and "candidat"."statut" = 'en_cours' and "candidat"."information_lue_le" is not null
+    on conflict (candidat_id, numero) do update set valeur = excluded.valeur, repondu_le = now()
+    returning numero`);
+  return ecrit.length === 1;
+}
+
+export type ResultatFin = { ok: true } | { ok: false; raison: "incomplet" | "impossible" };
+
+// Fin du questionnaire : n'est acceptée que si toutes les lignes ont une réponse.
+// Les résultats sont calculés une fois et enregistrés ; ensuite, plus aucune écriture.
+export async function terminerQuestionnaire(ctx: ContexteCandidat): Promise<ResultatFin> {
+  return getDb().transaction(async (tx) => {
+    const [cible] = await tx
+      .select({ statut: candidat.statut, informationLueLe: candidat.informationLueLe })
+      .from(candidat)
+      .where(and(eq(candidat.id, ctx.candidatId), eq(candidat.organizationId, ctx.orgId)))
+      .for("update");
+    if (!cible || cible.statut !== "en_cours" || !cible.informationLueLe) {
+      return { ok: false, raison: "impossible" } as const;
+    }
+
+    const lignes = await tx
+      .select({ numero: reponseCandidat.numero, valeur: reponseCandidat.valeur })
+      .from(reponseCandidat)
+      .where(eq(reponseCandidat.candidatId, ctx.candidatId));
+    const calcul = calculerResultats(new Map(lignes.map((l) => [l.numero, l.valeur])));
+    if (!calcul.complet) return { ok: false, raison: "incomplet" } as const;
+
+    await tx
+      .update(candidat)
+      .set({ statut: "termine", termineLe: sql`now()`, resultats: calcul.resultats })
+      .where(eq(candidat.id, ctx.candidatId));
+    return { ok: true } as const;
+  });
 }
