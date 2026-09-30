@@ -120,6 +120,22 @@ describe.skipIf(!process.env.DATABASE_URL)("questionnaire du candidat (intégrat
     expect(await q.terminerQuestionnaire(ctx)).toEqual({ ok: false, raison: "impossible" });
   });
 
+  it("montre au candidat les rangs de ses cinq traits, seulement une fois terminé", async () => {
+    const { ctx } = await nouveauCandidat(9);
+    await q.confirmerInformation(ctx);
+    await toutRepondre(ctx);
+    expect(await q.lireProfilCandidat(ctx)).toBeNull();
+
+    await q.terminerQuestionnaire(ctx);
+    const profil = await q.lireProfilCandidat(ctx);
+    expect(Object.keys(profil ?? {}).sort()).toEqual(["A", "C", "E", "N", "O"]);
+    for (const rang of Object.values(profil ?? {})) expect(rang).toBeGreaterThanOrEqual(1);
+
+    // Un autre candidat, pas terminé, ne reçoit rien.
+    const autre = await nouveauCandidat(10);
+    expect(await q.lireProfilCandidat(autre.ctx)).toBeNull();
+  }, 20_000);
+
   it("signale un contrôle d'attention échoué dans les résultats", async () => {
     const { ctx, id } = await nouveauCandidat(8);
     await q.confirmerInformation(ctx);

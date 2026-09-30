@@ -1,8 +1,18 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { BarreRang } from "@/components/barre-rang";
+import { BoutonCopie } from "@/components/bouton-copie";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  LIBELLES_NIVEAUX,
+  LIBELLES_TRAITS,
+  niveau,
+  ORDRE_TRAITS,
+  PHRASES_CANDIDAT,
+} from "@/modules/questionnaire/libelles";
+import type { Trait } from "@/modules/questionnaire/structure";
 
 // Écrans du candidat (maquette, parcours candidat C1 à C6 ; ADR-0020, ADR-0022).
 // Pages légères : aucune bibliothèque de graphiques, uniquement nos jetons.
@@ -260,33 +270,67 @@ export function Reprise({
   );
 }
 
-// C5 : fin. Le profil du candidat et sa copie PDF arrivent avec le rapport (étape 9).
-export function Fin({ nom, agence }: { nom: string; agence: string }) {
+// C5 : fin et profil du candidat (étape 9). Mots et position sur une ligne, aucun
+// chiffre : le détail (sous-dimensions, rangs) sert à l'entretien, pas à ce résumé.
+export function Fin({
+  nom,
+  agence,
+  profil,
+}: {
+  nom: string;
+  agence: string;
+  profil: Record<Trait, number> | null;
+}) {
   return (
-    <div className="flex flex-col items-center gap-3 pt-2 text-center">
-      <span className="flex size-16 items-center justify-center rounded-full bg-vert-pale text-vert">
-        <svg
-          width="34"
-          height="34"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="m5 12 5 5L20 7" />
-        </svg>
-      </span>
-      <TitreCandidat>Merci {nom}, c&apos;est terminé</TitreCandidat>
-      <p className="text-base leading-relaxed">
-        Vos réponses sont envoyées à {agence}. Votre recruteur vous recontactera pour la suite.
+    <>
+      <div className="flex flex-col items-center gap-3 pt-2 text-center">
+        <span className="flex size-16 items-center justify-center rounded-full bg-vert-pale text-vert print:hidden">
+          <svg
+            width="34"
+            height="34"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m5 12 5 5L20 7" />
+          </svg>
+        </span>
+        <TitreCandidat>Merci {nom}, c&apos;est terminé</TitreCandidat>
+        <p className="text-base leading-relaxed">
+          Vos réponses sont envoyées à {agence}. Votre recruteur vous recontactera pour la suite.
+        </p>
+      </div>
+      {profil ? (
+        <section className="flex flex-col rounded-bloc border border-bordure bg-white px-4 pt-4 pb-1.5">
+          <h2 className="text-xl font-extrabold font-stretch-[85%]">Votre profil en bref</h2>
+          <p className="mt-1 mb-2 text-[13px] leading-snug text-gris">
+            Comparé à un large groupe de volontaires (en ligne, aux États-Unis). La zone claire
+            correspond à la moyenne. Aucun trait n&apos;est « bon » ou « mauvais » en soi.
+          </p>
+          {ORDRE_TRAITS.map((t) => (
+            <div key={t} className="flex flex-col gap-1.5 border-t border-trait py-3">
+              <div className="flex items-baseline justify-between gap-2">
+                <h3 className="text-base font-extrabold">{LIBELLES_TRAITS[t].nom}</h3>
+                <span className="shrink-0 text-right text-[13px] font-bold text-bleu-fonce">
+                  {LIBELLES_NIVEAUX[niveau(profil[t])].toLowerCase()}
+                </span>
+              </div>
+              <BarreRang rang={profil[t]} />
+              <p className="text-sm leading-snug">{PHRASES_CANDIDAT[t][niveau(profil[t])]}</p>
+            </div>
+          ))}
+        </section>
+      ) : null}
+      <p className="text-[13px] leading-normal text-gris">
+        Questionnaire basé sur l&apos;IPIP-NEO, inventaire du domaine public. Ce profil décrit des
+        tendances ; il ne dit rien de vos compétences. Pour exercer vos droits (accès, suppression),
+        adressez-vous à {agence}.
       </p>
-      <p className="text-sm leading-relaxed text-gris">
-        Questionnaire basé sur l&apos;IPIP-NEO, inventaire scientifique du domaine public. Pour
-        exercer vos droits (accès, suppression), adressez-vous à {agence}.
-      </p>
-    </div>
+      {profil ? <BoutonCopie /> : null}
+    </>
   );
 }

@@ -62,3 +62,34 @@ export const LIBELLES_NIVEAUX: Record<Niveau, string> = {
   moyen: "Dans la moyenne",
   haut: "Plus haut que la plupart",
 };
+
+// Profil montré au candidat à la fin (maquette C5) : une phrase par trait et par niveau,
+// en « vous », sans chiffre et sans adjectif accordé (on ne connaît pas son genre).
+// Décrit une tendance, ne juge pas : à relire par un psychologue du travail.
+export const PHRASES_CANDIDAT: Record<Trait, Record<Niveau, string>> = {
+  E: {
+    bas: "Vous appréciez le calme et les échanges en petit comité.",
+    moyen: "Vous alliez goût des autres et moments plus calmes, selon les situations.",
+    haut: "Vous aimez le contact, le mouvement et l'animation autour de vous.",
+  },
+  N: {
+    bas: "Vous gardez votre calme face aux contrariétés et à la pression.",
+    moyen: "Vous ressentez la pression comme la plupart des gens, sans qu'elle prenne le dessus.",
+    haut: "Vous ressentez fortement les tensions et les imprévus.",
+  },
+  O: {
+    bas: "Vous préférez le concret et les méthodes qui ont fait leurs preuves.",
+    moyen: "Vous appréciez les méthodes éprouvées, sans fermer la porte aux changements utiles.",
+    haut: "La nouveauté et les idées différentes vous attirent.",
+  },
+  A: {
+    bas: "Vous dites franchement ce que vous pensez et savez défendre vos intérêts.",
+    moyen: "Vous savez coopérer tout en défendant votre point de vue.",
+    haut: "Vous aimez coopérer et vous êtes à l'écoute des autres.",
+  },
+  C: {
+    bas: "Vous préférez la souplesse et l'improvisation à un cadre très organisé.",
+    moyen: "Vous savez vous organiser et tenir vos engagements, sans rigidité.",
+    haut: "Vous aimez l'organisation et tenez à finir ce que vous commencez.",
+  },
+};
