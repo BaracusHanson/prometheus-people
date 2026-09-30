@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/table";
 import { listerJournal, type ActionJournal } from "@/modules/journal/queries";
 import { obtenirAgence } from "@/modules/agences/queries";
+import { CLES_FORFAIT, FORFAITS, phraseRestants } from "@/modules/candidats/forfaits";
+import { lireForfait } from "@/modules/candidats/queries";
 import { compterAuDela, lireConservation, lireEmailContact } from "@/modules/parametres/queries";
 import { lireSession } from "@/server/auth/session";
 import { exigerContexte, type Contexte } from "@/server/authz";
@@ -24,6 +26,7 @@ export const metadata: Metadata = { title: "Paramètres — Prometheus People" }
 const SECTIONS = [
   { cle: "agence", libelle: "Agence" },
   { cle: "conservation", libelle: "Conservation des données" },
+  { cle: "forfait", libelle: "Forfait" },
   { cle: "journal", libelle: "Journal d'audit" },
 ] as const;
 type Section = (typeof SECTIONS)[number]["cle"];
@@ -92,6 +95,7 @@ export default async function PageParametres({
         <div className="min-w-0">
           {section === "agence" ? <Agence ctx={ctx} /> : null}
           {section === "conservation" ? <Conservation ctx={ctx} /> : null}
+          {section === "forfait" ? <Forfait ctx={ctx} /> : null}
           {section === "journal" ? <Journal ctx={ctx} /> : null}
         </div>
       </div>
@@ -144,6 +148,63 @@ async function Conservation({ ctx }: { ctx: Contexte }) {
       <FormulaireConservation actuelle={mois} />
       <p className="max-w-2xl rounded-controle bg-trait px-3.5 py-3 text-sm">
         {phraseAuDela(auDela, mois)}
+      </p>
+    </section>
+  );
+}
+
+async function Forfait({ ctx }: { ctx: Contexte }) {
+  const etat = await lireForfait(ctx);
+  const courant = FORFAITS[etat.forfait];
+
+  return (
+    <section className={CARTE} aria-labelledby="titre-forfait">
+      <h2 id="titre-forfait" className={TITRE}>
+        Forfait
+      </h2>
+      <p className="flex flex-wrap items-baseline gap-x-3">
+        <span className="chiffres text-4xl font-extrabold font-stretch-[70%]">
+          {etat.utilises} / {etat.limite}
+        </span>
+        <span>
+          {courant.periode === "total" ? (
+            "candidats utilisés sur votre essai gratuit"
+          ) : (
+            <>
+              candidats invités ce mois-ci, forfait <strong>{courant.libelle}</strong>
+            </>
+          )}
+        </span>
+      </p>
+      <p className="text-sm text-gris">{phraseRestants(etat)}</p>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Formule</TableHead>
+            <TableHead>Candidats</TableHead>
+            <TableHead className="text-right">Prix HT</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {CLES_FORFAIT.map((f) => (
+            <TableRow key={f} className={f === etat.forfait ? "font-bold" : ""}>
+              <TableCell>
+                {FORFAITS[f].libelle}
+                {f === etat.forfait ? <span className="sr-only"> (votre forfait)</span> : null}
+              </TableCell>
+              <TableCell>
+                {FORFAITS[f].limite} {FORFAITS[f].periode === "total" ? "au total" : "par mois"}
+              </TableCell>
+              <TableCell className="chiffres text-right">
+                {FORFAITS[f].prixHT === 0 ? "Gratuit" : `${FORFAITS[f].prixHT} € / mois`}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <p className="text-sm">
+        Pour changer de forfait, contactez Prometheus People : le nouveau forfait est activé dans
+        les 24 heures ouvrées après le paiement.
       </p>
     </section>
   );
