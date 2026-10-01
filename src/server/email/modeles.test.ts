@@ -5,7 +5,18 @@ import {
   emailInvitation,
   emailInvitationCandidat,
   emailLienMagique,
+  emailMotDePasseModifie,
 } from "./modeles";
+
+describe("emailMotDePasseModifie", () => {
+  it("prévient du changement, sans contenir le mot de passe, avec un lien échappé", () => {
+    const email = emailMotDePasseModifie("a@exemple.fr", 'https://x.exemple/connexion?a="b"');
+    expect(email.objet).toBe("Votre mot de passe Prometheus People a été modifié");
+    expect(email.texte).toContain("Si ce n'est pas vous");
+    expect(email.html).toContain("&quot;b&quot;");
+    expect(email.html).not.toContain('"b"');
+  });
+});
 
 describe("echapperHtml", () => {
   it("neutralise les caractères HTML", () => {

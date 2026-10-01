@@ -4,6 +4,7 @@ import {
   LayoutDashboardIcon,
   LogOutIcon,
   SettingsIcon,
+  UserRoundIcon,
   UsersIcon,
   UsersRoundIcon,
   type LucideIcon,
@@ -106,6 +107,12 @@ export function MenuCompte({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Link href="/compte">
+              <UserRoundIcon aria-hidden="true" />
+              Mon compte
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem disabled={enCours} onSelect={() => demarrer(() => seDeconnecter())}>
             <LogOutIcon aria-hidden="true" />
             {enCours ? "Déconnexion…" : "Me déconnecter"}
