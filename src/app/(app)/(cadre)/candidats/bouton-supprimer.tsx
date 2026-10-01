@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2Icon } from "lucide-react";
 import { useActionState } from "react";
 
 import {
@@ -12,6 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { supprimer, type EtatInvitationCandidat } from "@/modules/candidats/actions";
 
@@ -36,14 +38,17 @@ export function BoutonSupprimer({
       <AlertDialogTrigger asChild>
         {compact ? (
           <Button
-            variant="ghost"
-            className="text-rouge print:hidden"
-            aria-label={`Supprimer ${nom}`}
+            variant="destructive-ghost"
+            size="icon"
+            className="print:hidden"
+            aria-label={`Supprimer les données de ${nom}`}
+            title="Supprimer les données"
           >
-            Supprimer
+            <Trash2Icon aria-hidden="true" />
           </Button>
         ) : (
-          <Button variant="destructive" className="print:hidden">
+          <Button variant="destructive-ghost" className="print:hidden">
+            <Trash2Icon aria-hidden="true" />
             Supprimer les données
           </Button>
         )}
@@ -52,7 +57,7 @@ export function BoutonSupprimer({
         <form action={action} className="grid gap-4">
           <input type="hidden" name="id" value={id} />
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-lg font-extrabold">
+            <AlertDialogTitle className="text-xl font-extrabold font-stretch-[85%]">
               Supprimer les données de {nom} ?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-left text-sm leading-relaxed text-encre">
@@ -61,11 +66,7 @@ export function BoutonSupprimer({
               suppression est notée dans le journal de l&apos;agence.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          {etat.erreur && (
-            <p role="alert" className="text-sm font-bold text-rouge">
-              {etat.erreur}
-            </p>
-          )}
+          {etat.erreur && <Alert variant="erreur">{etat.erreur}</Alert>}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={enCours}>Annuler</AlertDialogCancel>
             <Button type="submit" variant="destructive" disabled={enCours}>

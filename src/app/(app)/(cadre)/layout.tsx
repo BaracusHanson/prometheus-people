@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { CadreApplication } from "@/components/cadres";
+import { Toaster } from "@/components/ui/sonner";
 import { FORFAITS, messageQuotaAtteint, phraseRestants } from "@/modules/candidats/forfaits";
 import { lireForfait } from "@/modules/candidats/queries";
 import { lireSession } from "@/server/auth/session";
@@ -31,6 +32,7 @@ export default async function LayoutCadre({ children }: { children: ReactNode })
       }}
     >
       {children}
+      <Toaster />
     </CadreApplication>
   );
 }
