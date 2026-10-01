@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { CadreApplication } from "@/components/cadres";
 import {
   Table,
   TableBody,
@@ -15,7 +14,6 @@ import { obtenirAgence } from "@/modules/agences/queries";
 import { CLES_FORFAIT, FORFAITS, phraseRestants } from "@/modules/candidats/forfaits";
 import { lireForfait } from "@/modules/candidats/queries";
 import { compterAuDela, lireConservation, lireEmailContact } from "@/modules/parametres/queries";
-import { lireSession } from "@/server/auth/session";
 import { exigerContexte, type Contexte } from "@/server/authz";
 
 import { FormulaireConservation } from "./formulaire-conservation";
@@ -58,19 +56,15 @@ export default async function PageParametres({
   searchParams: Promise<{ section?: string }>;
 }) {
   const ctx = await exigerContexte();
-  const session = await lireSession();
-  const compte = session?.user.email ?? "";
 
   if (ctx.role !== "admin") {
     return (
-      <CadreApplication actif="parametres" compte={compte}>
-        <div className="flex max-w-xl flex-col gap-3">
-          <h1 className="text-3xl font-extrabold font-stretch-75%">Paramètres</h1>
-          <p className="leading-relaxed">
-            Les paramètres de l&apos;agence sont réservés à ses administrateurs.
-          </p>
-        </div>
-      </CadreApplication>
+      <div className="flex max-w-xl flex-col gap-3">
+        <h1 className="text-3xl font-extrabold font-stretch-75%">Paramètres</h1>
+        <p className="leading-relaxed">
+          Les paramètres de l&apos;agence sont réservés à ses administrateurs.
+        </p>
+      </div>
     );
   }
 
@@ -78,29 +72,27 @@ export default async function PageParametres({
   const section: Section = SECTIONS.find((s) => s.cle === demande)?.cle ?? "agence";
 
   return (
-    <CadreApplication actif="parametres" compte={compte}>
-      <div className="grid max-w-6xl gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
-        <h1 className="text-3xl font-extrabold font-stretch-75% md:col-span-2">Paramètres</h1>
-        <nav aria-label="Sections des paramètres" className="flex flex-col gap-1">
-          {SECTIONS.map((s) => (
-            <Link
-              key={s.cle}
-              href={`/parametres?section=${s.cle}`}
-              aria-current={s.cle === section ? "page" : undefined}
-              className="flex min-h-11 items-center rounded-r-controle border-l-4 border-transparent px-3.5 text-[15px] font-semibold text-encre no-underline hover:bg-white aria-[current=page]:border-bleu aria-[current=page]:bg-bleu-pale aria-[current=page]:font-extrabold aria-[current=page]:text-bleu-fonce"
-            >
-              {s.libelle}
-            </Link>
-          ))}
-        </nav>
-        <div className="min-w-0">
-          {section === "agence" ? <Agence ctx={ctx} /> : null}
-          {section === "conservation" ? <Conservation ctx={ctx} /> : null}
-          {section === "forfait" ? <Forfait ctx={ctx} /> : null}
-          {section === "journal" ? <Journal ctx={ctx} /> : null}
-        </div>
+    <div className="grid max-w-6xl gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
+      <h1 className="text-3xl font-extrabold font-stretch-75% md:col-span-2">Paramètres</h1>
+      <nav aria-label="Sections des paramètres" className="flex flex-col gap-1">
+        {SECTIONS.map((s) => (
+          <Link
+            key={s.cle}
+            href={`/parametres?section=${s.cle}`}
+            aria-current={s.cle === section ? "page" : undefined}
+            className="flex min-h-11 items-center rounded-r-controle border-l-4 border-transparent px-3.5 text-[15px] font-semibold text-encre no-underline hover:bg-white aria-[current=page]:border-bleu aria-[current=page]:bg-bleu-pale aria-[current=page]:font-extrabold aria-[current=page]:text-bleu-fonce"
+          >
+            {s.libelle}
+          </Link>
+        ))}
+      </nav>
+      <div className="min-w-0">
+        {section === "agence" ? <Agence ctx={ctx} /> : null}
+        {section === "conservation" ? <Conservation ctx={ctx} /> : null}
+        {section === "forfait" ? <Forfait ctx={ctx} /> : null}
+        {section === "journal" ? <Journal ctx={ctx} /> : null}
       </div>
-    </CadreApplication>
+    </div>
   );
 }
 

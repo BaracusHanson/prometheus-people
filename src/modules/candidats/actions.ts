@@ -74,7 +74,8 @@ export async function inviterCandidat(
     return { erreur: messageQuotaAtteint((await lireForfait(ctx)).forfait) };
   }
 
-  revalidatePath("/candidats");
+  // Le cadre (compteur du forfait), le tableau de bord et la liste changent.
+  revalidatePath("/", "layout");
   const envoye = await envoyerLien(ctx, saisie.data, resultat.jeton, resultat.expireLe);
   if (!envoye) {
     return {
@@ -104,7 +105,8 @@ export async function relancerCandidat(
     };
   }
 
-  revalidatePath("/candidats");
+  // Le cadre (compteur du forfait), le tableau de bord et la liste changent.
+  revalidatePath("/", "layout");
   const envoye = await envoyerLien(ctx, resultat, resultat.jeton, resultat.expireLe);
   return envoye
     ? { succes: `Nouveau lien envoyé à ${resultat.email}.` }
@@ -125,6 +127,7 @@ export async function supprimer(
   const supprime = await supprimerCandidat(ctx, formulaire.get("id"));
   if (!supprime) return { erreur: "Candidat introuvable." };
 
-  revalidatePath("/candidats");
+  // Le cadre (compteur du forfait), le tableau de bord et la liste changent.
+  revalidatePath("/", "layout");
   redirect("/candidats");
 }
