@@ -121,7 +121,7 @@ export const reponseCandidat = pgTable(
 );
 
 // ---------------------------------------------------------------- Journal d'audit (ADR-0023)
-// Qui a consulté, imprimé ou supprimé quel candidat. Aucune donnée du candidat n'est
+// Qui a consulté, imprimé ou supprimé quel candidat, et les changements de forfait. Aucune donnée du candidat n'est
 // copiée ici : le lien passe à nul quand il est supprimé (« Candidat supprimé »).
 export const journalAudit = pgTable(
   "journal_audit",
@@ -140,7 +140,7 @@ export const journalAudit = pgTable(
     index("journal_audit_organization_cree_idx").on(table.organizationId, table.creeLe),
     check(
       "journal_audit_action_valide",
-      sql`${table.action} in ('consultation', 'impression', 'suppression', 'purge')`,
+      sql`${table.action} in ('consultation', 'impression', 'suppression', 'purge', 'forfait')`,
     ),
   ],
 );

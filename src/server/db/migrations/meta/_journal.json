@@ -64,6 +64,13 @@
       "when": 1790778164587,
       "tag": "0008_forfaits",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790865165488,
+      "tag": "0009_journal_forfait",
+      "breakpoints": true
     }
   ]
 }

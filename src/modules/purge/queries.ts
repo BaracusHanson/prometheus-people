@@ -10,7 +10,7 @@ import { candidat, journalAudit } from "@/server/db/schema";
 // la date de référence (fin du questionnaire, sinon invitation) dépasse la durée de
 // conservation de leur agence (24 mois sans réglage). Une ligne « purge » par candidat
 // dans le journal de son agence, écrite dans la même transaction que la suppression.
-export async function purgerCandidatsExpires(ctx: ContexteSysteme): Promise<number> {
+export async function purgerCandidatsExpires(ctx: ContexteSysteme<"purge">): Promise<number> {
   if (ctx.tache !== "purge") return 0;
   return getDb().transaction(async (tx) => {
     const cibles = await tx.execute<{ id: string; organization_id: string }>(sql`

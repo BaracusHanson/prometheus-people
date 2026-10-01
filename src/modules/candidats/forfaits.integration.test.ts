@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
+import type { ContexteSysteme } from "@/server/authz/systeme";
+
 vi.mock("server-only", () => ({}));
 
 // Forfaits et quota mensuel (ADR-0011) contre une vraie base (CI : Postgres jetable) ;
@@ -10,7 +12,7 @@ vi.mock("server-only", () => ({}));
 describe.skipIf(!process.env.DATABASE_URL)("forfaits et quota mensuel (intégration)", async () => {
   const { getSql } = await import("@/server/db/client");
   const { contextePourUtilisateur } = await import("@/server/authz");
-  const { creerCandidat, lireForfait } = await import("./queries");
+  const { changerForfait, creerCandidat, lireForfait } = await import("./queries");
 
   const suffixe = `${Date.now()}-${randomUUID().slice(0, 8)}`;
   const ids = {
@@ -55,6 +57,10 @@ describe.skipIf(!process.env.DATABASE_URL)("forfaits et quota mensuel (intégrat
       await sql`insert into member (id, organization_id, user_id, role, created_at)
                 values (${"m-" + u}, ${org}, ${u}, 'admin', now())`;
     }
+    await sql`insert into "user" (id, name, email, email_verified, created_at, updated_at)
+              values (${"rec-" + suffixe}, 'rec', ${"rec-" + suffixe + "@example.com"}, true, now(), now())`;
+    await sql`insert into member (id, organization_id, user_id, role, created_at)
+              values (${"m-rec-" + suffixe}, ${ids.orgA}, ${"rec-" + suffixe}, 'member', now())`;
     ctxA = (await contextePourUtilisateur(ids.userA))!;
     ctxB = (await contextePourUtilisateur(ids.userB))!;
   });
@@ -62,7 +68,7 @@ describe.skipIf(!process.env.DATABASE_URL)("forfaits et quota mensuel (intégrat
   afterAll(async () => {
     const sql = getSql();
     await sql`delete from organization where id in ${sql([ids.orgA, ids.orgB])}`;
-    await sql`delete from "user" where id in ${sql([ids.userA, ids.userB])}`;
+    await sql`delete from "user" where id in ${sql([ids.userA, ids.userB, "rec-" + suffixe])}`;
     await sql.end();
   });
 
@@ -99,5 +105,35 @@ describe.skipIf(!process.env.DATABASE_URL)("forfaits et quota mensuel (intégrat
   it("le forfait d'une agence ne change rien pour une autre", async () => {
     await poser("agence_plus", 0, 0);
     expect((await lireForfait(ctxB)).forfait).toBe("essai");
+  });
+
+  it("active un forfait par l'email d'un administrateur, et le note dans le journal", async () => {
+    const systeme = { tache: "forfait" } as ContexteSysteme<"forfait">;
+    await getSql()`delete from quota_agence where organization_id = ${ids.orgA}`;
+
+    expect(await changerForfait(systeme, `${ids.userA}@EXAMPLE.com`, "premium")).toEqual({
+      ok: false,
+      raison: "forfait-inconnu",
+    });
+    expect(await changerForfait(systeme, `rec-${suffixe}@example.com`, "agence")).toEqual({
+      ok: false,
+      raison: "agence-introuvable",
+    });
+    expect(await changerForfait(systeme, `inconnu-${suffixe}@example.com`, "agence")).toEqual({
+      ok: false,
+      raison: "agence-introuvable",
+    });
+
+    expect(await changerForfait(systeme, ` ${ids.userA}@EXAMPLE.com `, "agence")).toEqual({
+      ok: true,
+      agence: ids.orgA,
+      forfait: "agence",
+    });
+    expect((await lireForfait(ctxA)).forfait).toBe("agence");
+    expect((await lireForfait(ctxB)).forfait).toBe("essai");
+
+    const lignes = await getSql()`select user_id, candidat_id from journal_audit
+                                  where organization_id = ${ids.orgA} and action = 'forfait'`;
+    expect(lignes).toEqual([{ user_id: null, candidat_id: null }]);
   });
 });

@@ -7,7 +7,7 @@ import { contexteSysteme } from "@/server/authz/systeme";
 export const dynamic = "force-dynamic";
 
 export async function POST(requete: Request): Promise<Response> {
-  const ctx = contexteSysteme(requete.headers.get("authorization"));
+  const ctx = contexteSysteme(requete.headers.get("authorization"), "purge");
   if (!ctx) return new Response(null, { status: 404 });
 
   const supprimes = await purgerCandidatsExpires(ctx);

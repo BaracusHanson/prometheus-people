@@ -5,6 +5,7 @@ import { and, desc, eq, isNull, ne, sql } from "drizzle-orm";
 import type { Resultats } from "@/modules/questionnaire/resultats";
 import type { Trait } from "@/modules/questionnaire/structure";
 import type { Contexte } from "@/server/authz";
+import type { ContexteSysteme } from "@/server/authz/systeme";
 import { getDb } from "@/server/db/client";
 import {
   candidat,
@@ -15,7 +16,7 @@ import {
 } from "@/server/db/schema";
 import { empreinteJeton, genererJeton } from "@/server/jetons";
 
-import { CLES_FORFAIT, FORFAITS, type EtatForfait, type Forfait } from "./forfaits";
+import { CLES_FORFAIT, estForfait, FORFAITS, type EtatForfait, type Forfait } from "./forfaits";
 import { idCandidatSchema, type InvitationCandidat, type TypePoste } from "./schemas";
 
 // Candidats d'une agence (ADR-0021). Toutes les fonctions prennent le Contexte et
@@ -340,5 +341,45 @@ export async function supprimerCandidat(ctx: Contexte, id: unknown): Promise<boo
       .delete(candidat)
       .where(and(eq(candidat.id, cible.id), eq(candidat.organizationId, ctx.orgId)));
     return true;
+  });
+}
+
+export type ResultatChangementForfait =
+  | { ok: true; agence: string; forfait: Forfait }
+  | { ok: false; raison: "forfait-inconnu" | "agence-introuvable" | "plusieurs-agences" };
+
+// Activation d'un forfait après paiement (ADR-0011) : tâche système, lancée par
+// Prometheus People depuis le serveur, jamais par une agence. L'agence est retrouvée par
+// l'email d'un de ses administrateurs ; le changement est noté dans son journal.
+export async function changerForfait(
+  ctx: ContexteSysteme<"forfait">,
+  emailAdmin: unknown,
+  forfait: unknown,
+): Promise<ResultatChangementForfait> {
+  if (ctx.tache !== "forfait" || !estForfait(forfait)) {
+    return { ok: false, raison: "forfait-inconnu" };
+  }
+  if (typeof emailAdmin !== "string" || emailAdmin.trim() === "") {
+    return { ok: false, raison: "agence-introuvable" };
+  }
+
+  return getDb().transaction(async (tx) => {
+    const agences = await tx.execute<{ id: string; nom: string }>(sql`
+      select distinct o.id, o.name as nom from "member" m
+      join "user" u on u.id = m.user_id
+      join "organization" o on o.id = m.organization_id
+      where lower(u.email) = lower(${emailAdmin.trim()}) and m.role in ('owner', 'admin')`);
+    if (agences.length === 0) return { ok: false, raison: "agence-introuvable" } as const;
+    if (agences.length > 1) return { ok: false, raison: "plusieurs-agences" } as const;
+    const agence = agences[0]!;
+
+    await tx
+      .insert(quotaAgence)
+      .values({ organizationId: agence.id, forfait })
+      .onConflictDoUpdate({ target: quotaAgence.organizationId, set: { forfait } });
+    await tx
+      .insert(journalAudit)
+      .values({ organizationId: agence.id, userId: null, action: "forfait", candidatId: null });
+    return { ok: true, agence: agence.nom, forfait } as const;
   });
 }

@@ -1,0 +1,2 @@
+ALTER TABLE "journal_audit" DROP CONSTRAINT "journal_audit_action_valide";--> statement-breakpoint
+ALTER TABLE "journal_audit" ADD CONSTRAINT "journal_audit_action_valide" CHECK ("journal_audit"."action" in ('consultation', 'impression', 'suppression', 'purge', 'forfait'));

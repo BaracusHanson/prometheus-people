@@ -39,6 +39,7 @@ runs:
       run: |
         scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
           deploy/compose.yml deploy/Caddyfile deploy/deploy.sh deploy/purge/purger.sh \
+          deploy/forfait/forfait.sh \
           "deploy@${HOST}:/srv/prometheus/"
 
     - name: Lancer le déploiement

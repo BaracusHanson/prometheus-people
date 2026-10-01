@@ -15,7 +15,7 @@ describe.skipIf(!process.env.DATABASE_URL)("purge automatique (intégration)", a
   const suffixe = `${Date.now()}-${randomUUID().slice(0, 8)}`;
   const orgA = `pur-a-${suffixe}`; // conservation réglée à 6 mois
   const orgB = `pur-b-${suffixe}`; // sans réglage : 24 mois
-  const systeme = { tache: "purge" } as ContexteSysteme;
+  const systeme = { tache: "purge" } as ContexteSysteme<"purge">;
 
   async function candidat(org: string, invite: string, termine: string | null): Promise<string> {
     const [ligne] = await getSql()<{ id: string }[]>`
