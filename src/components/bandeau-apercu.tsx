@@ -6,7 +6,7 @@ import { useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { basculerApercu } from "@/modules/apercu/actions";
 
-// Bandeau du mode aperçu (ADR-0026), en tête de chaque page : impossible de confondre
+// Bandeau du mode aperçu (ADR-0027), en tête de chaque page : impossible de confondre
 // des candidats fictifs avec de vrais candidats. Ambre = attention (ADR-0020).
 export function BandeauApercu() {
   const [enCours, demarrer] = useTransition();

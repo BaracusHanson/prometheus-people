@@ -6,7 +6,7 @@ import { Field, FieldContent, FieldDescription, FieldLabel } from "@/components/
 import { Switch } from "@/components/ui/switch";
 import { basculerApercu } from "@/modules/apercu/actions";
 
-// Interrupteur du mode aperçu (ADR-0026). L'état affiché suit le clic tout de suite,
+// Interrupteur du mode aperçu (ADR-0027). L'état affiché suit le clic tout de suite,
 // puis celui du serveur une fois le cookie posé.
 export function InterrupteurApercu({ actif }: { actif: boolean }) {
   const [enCours, demarrer] = useTransition();

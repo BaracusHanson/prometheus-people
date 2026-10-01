@@ -271,7 +271,7 @@ async function Journal({ ctx }: { ctx: Contexte }) {
   );
 }
 
-// Mode aperçu (ADR-0026) : des candidats fictifs à la place des vrais, pour voir chaque
+// Mode aperçu (ADR-0027) : des candidats fictifs à la place des vrais, pour voir chaque
 // écran rempli (démonstration, prise en main). Rien n'est écrit en base.
 async function Apercu() {
   const actif = await lireApercu();

@@ -31,10 +31,20 @@ export interface DependancesAuth {
   envoyerInvitation: EnvoiInvitation;
   // Vrai si l'utilisateur appartient déjà à une agence (une seule agence par personne en v1).
   estMembreDUneAgence: (userId: string) => Promise<boolean>;
+  // Limite de débit : active par défaut en production seulement (Better Auth) ; les
+  // tests la forcent pour la vérifier.
+  limiteDeDebit?: boolean;
 }
 
 export const DUREE_LIEN_MAGIQUE_SECONDES = 10 * 60;
 export const DUREE_INVITATION_JOURS = 7;
+
+// Mot de passe facultatif (ADR-0026) : 12 caractères au moins ; essais de connexion
+// limités par adresse IP. Better Auth ne limite que les requêtes reçues par sa route
+// /api/auth/* : le formulaire de connexion par mot de passe l'appelle donc directement.
+export const LONGUEUR_MIN_MOT_DE_PASSE = 12;
+export const LONGUEUR_MAX_MOT_DE_PASSE = 128;
+export const ESSAIS_MOT_DE_PASSE = { fenetreSecondes: 60, max: 5 } as const;
 
 // Rôles Better Auth attribuables par invitation ou changement de rôle : « admin » et
 // « member » (affiché « recruteur »). Le rôle par défaut « owner » de Better Auth, ou
@@ -66,8 +76,28 @@ export function creerOptionsAuth(deps: DependancesAuth) {
     secret: deps.secret,
     database: drizzleAdapter(deps.db, { provider: "pg", schema: deps.schema }),
 
-    // Connexion uniquement par lien magique : aucun mot de passe stocké.
-    emailAndPassword: { enabled: false },
+    // Lien magique, et mot de passe facultatif (ADR-0026). Pas d'inscription par mot de
+    // passe : un compte naît toujours d'un lien magique (adresse prouvée), puis la
+    // personne choisit un mot de passe une fois connectée. L'oubli se règle par le lien.
+    emailAndPassword: {
+      enabled: true,
+      disableSignUp: true,
+      minPasswordLength: LONGUEUR_MIN_MOT_DE_PASSE,
+      maxPasswordLength: LONGUEUR_MAX_MOT_DE_PASSE,
+    },
+    // Fermées en plus de disableSignUp : inscription et réinitialisation par email
+    // (remplacée par le lien magique).
+    disabledPaths: ["/sign-up/email", "/request-password-reset", "/reset-password"],
+
+    rateLimit: {
+      ...(deps.limiteDeDebit === undefined ? {} : { enabled: deps.limiteDeDebit }),
+      customRules: {
+        "/sign-in/email": {
+          window: ESSAIS_MOT_DE_PASSE.fenetreSecondes,
+          max: ESSAIS_MOT_DE_PASSE.max,
+        },
+      },
+    },
 
     session: {
       expiresIn: 60 * 60 * 24 * 7, // 7 jours

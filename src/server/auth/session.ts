@@ -16,6 +16,13 @@ export async function lireSession() {
   return getAuth().api.getSession({ headers: entetes });
 }
 
+// Vrai si la personne connectée a déjà un mot de passe (compte « credential », ADR-0026).
+export async function aUnMotDePasse(): Promise<boolean> {
+  const entetes = await headers();
+  const comptes = await getAuth().api.listUserAccounts({ headers: entetes });
+  return comptes.some((c) => c.providerId === "credential");
+}
+
 export async function exigerSession() {
   const session = await lireSession();
   if (!session) redirect("/connexion");

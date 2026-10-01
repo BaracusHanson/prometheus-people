@@ -19,17 +19,18 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0013](0013-deploiement-details.md)            | Détails du déploiement sur le VPS                         | Accepté                         |
 | [0014](0014-base-de-donnees-mise-en-oeuvre.md) | Base de données : mise en œuvre                           | Accepté                         |
 | [0015](0015-sauvegardes.md)                    | Sauvegardes de la base de production                      | Accepté                         |
-| [0016](0016-connexion-lien-magique.md)         | Connexion par lien magique (Better Auth + Resend)         | Accepté                         |
+| [0016](0016-connexion-lien-magique.md)         | Connexion par lien magique (Better Auth + Resend)         | Accepté, modifié par 0026       |
 | [0017](0017-agences-et-autorisation.md)        | Agences et module d'autorisation                          | Accepté                         |
 | [0018](0018-invitations-recruteurs.md)         | Invitation des recruteurs                                 | Accepté                         |
 | [0019](0019-questionnaire-ipip-neo-120.md)     | Questionnaire IPIP-NEO-120 à la place du BFI-2-Fr         | Accepté                         |
-| [0020](0020-interface-et-design.md)            | Interface : styles, composants, graphiques, accessibilité | Accepté                         |
+| [0020](0020-interface-et-design.md)            | Interface : styles, composants, graphiques, accessibilité | Accepté, précisé par 0027       |
 | [0021](0021-candidats-et-liens.md)             | Candidats, lien d'invitation et session candidat          | Accepté                         |
 | [0022](0022-passation-du-questionnaire.md)     | Passation du questionnaire : information, réponses, fin   | Accepté                         |
 | [0023](0023-journal-et-suppression.md)         | Journal d'audit, suppression et purge des candidats       | Accepté                         |
-| [0025](0025-suivi-des-erreurs.md)              | Suivi des erreurs du serveur (Sentry, région UE)          | Accepté                         |
-| [0026](0026-mode-apercu-donnees-fictives.md)   | Mode aperçu avec des données fictives                     | Accepté                         |
 | [0024](0024-sans-adequation-au-poste.md)       | Pas de score d'adéquation au poste en v1                  | Accepté                         |
+| [0025](0025-suivi-des-erreurs.md)              | Suivi des erreurs du serveur (Sentry, région UE)          | Accepté                         |
+| [0026](0026-mot-de-passe-facultatif.md)        | Mot de passe facultatif, en plus du lien magique          | Accepté                         |
+| [0027](0027-mode-apercu-donnees-fictives.md)   | Mode aperçu avec des données fictives                     | Accepté                         |
 
 ## Modèle
 

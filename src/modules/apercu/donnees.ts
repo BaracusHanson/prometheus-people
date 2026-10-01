@@ -17,7 +17,7 @@ import {
   type Trait,
 } from "@/modules/questionnaire/structure";
 
-// Données fictives du mode aperçu (ADR-0026). Générées en mémoire, toujours les mêmes
+// Données fictives du mode aperçu (ADR-0027). Générées en mémoire, toujours les mêmes
 // (graine fixe), datées par rapport à « maintenant » : rien n'est écrit en base, rien
 // ne se mélange aux vrais candidats. Noms courants et adresses en .test : aucune
 // personne réelle.

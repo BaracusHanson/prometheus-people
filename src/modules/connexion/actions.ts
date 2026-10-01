@@ -1,11 +1,16 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAuth } from "@/server/auth";
+import { aUnMotDePasse } from "@/server/auth/session";
+import { envoyerEmail } from "@/server/email/envoyer";
+import { emailMotDePasseModifie } from "@/server/email/modeles";
+import { getEnv } from "@/server/env";
 
-import { cheminDeSuite, demandeLienSchema } from "./schemas";
+import { changementMotDePasseSchema, cheminDeSuite, demandeLienSchema } from "./schemas";
 
 export interface EtatDemandeLien {
   erreur?: string;
@@ -41,6 +46,60 @@ export async function demanderLienMagique(
   }
 
   redirect("/connexion/envoye");
+}
+
+export interface EtatMotDePasse {
+  erreur?: string;
+  succes?: string;
+}
+
+// Choix ou changement du mot de passe (ADR-0026). Exige une session ; l'actuel est exigé
+// s'il existe. Un changement ferme les autres sessions ouvertes, et un email d'alerte
+// part dans tous les cas.
+export async function modifierMotDePasse(
+  _etat: EtatMotDePasse,
+  formulaire: FormData,
+): Promise<EtatMotDePasse> {
+  const entetes = await headers();
+  const session = await getAuth().api.getSession({ headers: entetes });
+  if (!session) redirect("/connexion");
+
+  const saisie = changementMotDePasseSchema.safeParse({
+    actuel: formulaire.get("actuel") ?? undefined,
+    nouveau: formulaire.get("nouveau"),
+    confirmation: formulaire.get("confirmation"),
+  });
+  if (!saisie.success) return { erreur: saisie.error.issues[0]?.message ?? "Saisie invalide." };
+  const { actuel, nouveau } = saisie.data;
+
+  const existant = await aUnMotDePasse();
+  try {
+    if (existant) {
+      if (!actuel) return { erreur: "Saisissez votre mot de passe actuel." };
+      await getAuth().api.changePassword({
+        body: { currentPassword: actuel, newPassword: nouveau, revokeOtherSessions: true },
+        headers: entetes,
+      });
+    } else {
+      await getAuth().api.setPassword({ body: { newPassword: nouveau }, headers: entetes });
+    }
+  } catch {
+    return {
+      erreur: existant
+        ? "Mot de passe actuel incorrect, ou nouveau mot de passe refusé."
+        : "Ce mot de passe n'a pas pu être enregistré.",
+    };
+  }
+
+  try {
+    await envoyerEmail(
+      emailMotDePasseModifie(session.user.email, `${getEnv().BETTER_AUTH_URL}/connexion`),
+    );
+  } catch {
+    // L'alerte n'a pas pu partir : le mot de passe est tout de même changé.
+  }
+  revalidatePath("/compte");
+  return { succes: existant ? "Mot de passe modifié." : "Mot de passe enregistré." };
 }
 
 export async function seDeconnecter(): Promise<void> {

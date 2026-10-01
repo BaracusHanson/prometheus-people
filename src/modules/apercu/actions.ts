@@ -9,7 +9,7 @@ import { contexteCourant } from "@/server/authz";
 
 import { COOKIE_APERCU } from "./etat";
 
-// Active ou coupe le mode aperçu (ADR-0026). L'activer est réservé aux administrateurs
+// Active ou coupe le mode aperçu (ADR-0027). L'activer est réservé aux administrateurs
 // (le réglage est dans Paramètres) ; le couper est permis à tout membre, depuis le
 // bandeau. Le cookie ne donne accès à rien : il remplace l'affichage par des données
 // fictives et masque les vraies.

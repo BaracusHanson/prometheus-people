@@ -12,7 +12,7 @@ const ETAT_INITIAL: EtatInvitationCandidat = {};
 // Relance : annule le lien en cours et en envoie un nouveau, valable 7 jours (ADR-0021).
 // Le résultat s'affiche dans une notification (annoncée aux lecteurs d'écran) : la
 // ligne peut disparaître de la liste « À relancer » dès que la page se met à jour.
-// En mode aperçu (ADR-0026), le bouton est affiché mais désactivé : le candidat est fictif.
+// En mode aperçu (ADR-0027), le bouton est affiché mais désactivé : le candidat est fictif.
 export function BoutonRelance({
   id,
   nom,

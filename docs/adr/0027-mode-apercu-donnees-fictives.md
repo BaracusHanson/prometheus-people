@@ -1,4 +1,4 @@
-# ADR-0026 — Mode aperçu avec des données fictives
+# ADR-0027 — Mode aperçu avec des données fictives
 
 - **Statut** : Accepté
 - **Date** : 2026-10-01
