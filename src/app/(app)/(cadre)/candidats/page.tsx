@@ -13,6 +13,8 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { listeFictive } from "@/modules/apercu/donnees";
+import { lireApercu } from "@/modules/apercu/etat";
 import { listerCandidats, type StatutAffiche } from "@/modules/candidats/queries";
 import { exigerContexte } from "@/server/authz";
 
@@ -32,7 +34,8 @@ export default async function PageCandidats({
   searchParams: Promise<{ statut?: string }>;
 }) {
   const ctx = await exigerContexte();
-  const candidats = await listerCandidats(ctx);
+  const apercu = await lireApercu();
+  const candidats = apercu ? listeFictive() : await listerCandidats(ctx);
   const { statut } = await searchParams;
   const filtre = FILTRES.find((f) => f === statut) ?? "tous";
   const visibles = filtre === "tous" ? candidats : candidats.filter((c) => c.statut === filtre);
@@ -67,6 +70,7 @@ export default async function PageCandidats({
         <TableauCandidats
           candidats={visibles}
           admin={ctx.role === "admin"}
+          apercu={apercu}
           statut={filtre === "tous" ? null : STATUTS[filtre].libelle}
           filtres={
             <nav aria-label="Filtrer par statut" className="flex flex-wrap gap-2">

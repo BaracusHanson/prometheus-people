@@ -28,6 +28,7 @@ Une décision structurante = un fichier. Un ADR accepté ne se modifie pas : pou
 | [0022](0022-passation-du-questionnaire.md)     | Passation du questionnaire : information, réponses, fin   | Accepté                         |
 | [0023](0023-journal-et-suppression.md)         | Journal d'audit, suppression et purge des candidats       | Accepté                         |
 | [0025](0025-suivi-des-erreurs.md)              | Suivi des erreurs du serveur (Sentry, région UE)          | Accepté                         |
+| [0026](0026-mode-apercu-donnees-fictives.md)   | Mode aperçu avec des données fictives                     | Accepté                         |
 | [0024](0024-sans-adequation-au-poste.md)       | Pas de score d'adéquation au poste en v1                  | Accepté                         |
 
 ## Modèle
