@@ -122,3 +122,30 @@ export function emailInvitationCandidat(
   // Objet fixe : le nom de l'agence, saisi par un client, n'écrit pas le titre (ADR-0021).
   return { a, objet: "Votre questionnaire avant l'entretien", texte, html };
 }
+
+// Alerte après le choix ou le changement d'un mot de passe (ADR-0026) : si ce n'est pas
+// la personne, elle le voit tout de suite et peut reprendre la main par un lien.
+export function emailMotDePasseModifie(a: string, urlConnexion: string): Email {
+  const texte = [
+    "Bonjour,",
+    "",
+    "Le mot de passe de votre compte Prometheus People vient d'être choisi ou modifié.",
+    "",
+    "Si c'est vous, il n'y a rien à faire.",
+    "Si ce n'est pas vous : connectez-vous avec un lien envoyé par email, changez votre mot",
+    "de passe dans « Mon compte », et prévenez l'administrateur de votre agence :",
+    urlConnexion,
+  ].join("\n");
+
+  const html = `<!doctype html>
+<html lang="fr">
+  <body style="font-family: system-ui, sans-serif; color: #1f2937; line-height: 1.5;">
+    <p>Bonjour,</p>
+    <p>Le mot de passe de votre compte Prometheus People vient d'être choisi ou modifié.</p>
+    <p>Si c'est vous, il n'y a rien à faire.</p>
+    <p>Si ce n'est pas vous : <a href="${echapperHtml(urlConnexion)}">connectez-vous avec un lien envoyé par email</a>, changez votre mot de passe dans « Mon compte », et prévenez l'administrateur de votre agence.</p>
+  </body>
+</html>`;
+
+  return { a, objet: "Votre mot de passe Prometheus People a été modifié", texte, html };
+}
