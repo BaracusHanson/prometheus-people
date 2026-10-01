@@ -8,7 +8,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        default: "bg-primary text-primary-foreground hover:bg-bleu-fonce",
         outline:
           "border-[1.5px] border-primary bg-card text-primary hover:bg-accent aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
@@ -17,6 +17,8 @@ const buttonVariants = cva(
         destructive:
           "border-[1.5px] border-destructive bg-card text-destructive hover:bg-destructive/10 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
         link: "text-primary underline-offset-4 hover:underline",
+        // Action destructive secondaire, dans une liste ou une ligne de tableau.
+        "destructive-ghost": "text-destructive hover:bg-rouge-pale",
       },
       size: {
         default:
