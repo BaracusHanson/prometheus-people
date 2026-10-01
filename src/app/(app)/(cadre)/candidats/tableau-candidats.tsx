@@ -54,11 +54,13 @@ function annonce(nombre: number): string {
 export function TableauCandidats({
   candidats,
   admin,
+  apercu,
   statut,
   filtres,
 }: {
   candidats: CandidatListe[];
   admin: boolean;
+  apercu: boolean;
   statut: string | null;
   filtres: ReactNode;
 }) {
@@ -171,8 +173,10 @@ export function TableauCandidats({
                       </Button>
                     ) : (
                       <span className="flex items-center justify-end gap-1">
-                        <BoutonRelance id={c.id} nom={c.nom} />
-                        {admin ? <BoutonSupprimer id={c.id} nom={c.nom} compact /> : null}
+                        <BoutonRelance id={c.id} nom={c.nom} apercu={apercu} />
+                        {admin && !apercu ? (
+                          <BoutonSupprimer id={c.id} nom={c.nom} compact />
+                        ) : null}
                       </span>
                     )}
                   </TableCell>

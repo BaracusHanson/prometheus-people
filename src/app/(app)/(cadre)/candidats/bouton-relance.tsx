@@ -12,7 +12,16 @@ const ETAT_INITIAL: EtatInvitationCandidat = {};
 // Relance : annule le lien en cours et en envoie un nouveau, valable 7 jours (ADR-0021).
 // Le résultat s'affiche dans une notification (annoncée aux lecteurs d'écran) : la
 // ligne peut disparaître de la liste « À relancer » dès que la page se met à jour.
-export function BoutonRelance({ id, nom }: { id: string; nom: string }) {
+// En mode aperçu (ADR-0027), le bouton est affiché mais désactivé : le candidat est fictif.
+export function BoutonRelance({
+  id,
+  nom,
+  apercu = false,
+}: {
+  id: string;
+  nom: string;
+  apercu?: boolean;
+}) {
   const [etat, action, enCours] = useActionState(relancerCandidat, ETAT_INITIAL);
 
   useEffect(() => {
@@ -26,7 +35,7 @@ export function BoutonRelance({ id, nom }: { id: string; nom: string }) {
       <Button
         type="submit"
         variant="ghost"
-        disabled={enCours}
+        disabled={enCours || apercu}
         aria-label={`Relancer ${nom}`}
         className="max-sm:size-11 max-sm:px-0"
       >

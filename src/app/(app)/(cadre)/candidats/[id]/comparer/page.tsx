@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { BarreRang } from "@/components/barre-rang";
 import { EnTetePage } from "@/components/cadres";
 import { NoteMethode } from "@/components/rapport";
+import { comparaisonFictive } from "@/modules/apercu/donnees";
+import { lireApercu } from "@/modules/apercu/etat";
 import { lireComparaison } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
 import { noterLecture } from "@/modules/journal/queries";
@@ -21,11 +23,12 @@ export const metadata: Metadata = { title: "Comparer — Prometheus People" };
 export default async function PageComparer({ params }: { params: Promise<{ id: string }> }) {
   const ctx = await exigerContexte();
   const { id } = await params;
-  const comparaison = await lireComparaison(ctx, id);
+  const apercu = await lireApercu();
+  const comparaison = apercu ? comparaisonFictive(id) : await lireComparaison(ctx, id);
   if (!comparaison) notFound();
 
   const { profils, typePoste } = comparaison;
-  await Promise.all(profils.map((p) => noterLecture(ctx, "consultation", p.id)));
+  if (!apercu) await Promise.all(profils.map((p) => noterLecture(ctx, "consultation", p.id)));
   const lettre = (i: number) => String.fromCharCode(65 + i);
 
   return (

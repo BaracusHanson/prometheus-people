@@ -12,6 +12,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { journalFictif } from "@/modules/apercu/donnees";
+import { lireApercu } from "@/modules/apercu/etat";
 import { listerJournal, type ActionJournal } from "@/modules/journal/queries";
 import { obtenirAgence } from "@/modules/agences/queries";
 import { CLES_FORFAIT, FORFAITS, phraseRestants } from "@/modules/candidats/forfaits";
@@ -21,6 +23,7 @@ import { exigerContexte, type Contexte } from "@/server/authz";
 
 import { FormulaireConservation } from "./formulaire-conservation";
 import { FormulaireContact } from "./formulaire-contact";
+import { InterrupteurApercu } from "./interrupteur-apercu";
 
 export const metadata: Metadata = { title: "Paramètres — Prometheus People" };
 
@@ -29,6 +32,7 @@ const SECTIONS = [
   { cle: "conservation", libelle: "Conservation des données" },
   { cle: "forfait", libelle: "Forfait" },
   { cle: "journal", libelle: "Journal d'audit" },
+  { cle: "apercu", libelle: "Données fictives" },
 ] as const;
 type Section = (typeof SECTIONS)[number]["cle"];
 
@@ -96,6 +100,7 @@ export default async function PageParametres({
           {section === "conservation" ? <Conservation ctx={ctx} /> : null}
           {section === "forfait" ? <Forfait ctx={ctx} /> : null}
           {section === "journal" ? <Journal ctx={ctx} /> : null}
+          {section === "apercu" ? <Apercu /> : null}
         </div>
       </div>
     </div>
@@ -217,7 +222,7 @@ async function Forfait({ ctx }: { ctx: Contexte }) {
 }
 
 async function Journal({ ctx }: { ctx: Contexte }) {
-  const lignes = (await listerJournal(ctx)) ?? [];
+  const lignes = (await lireApercu()) ? journalFictif() : ((await listerJournal(ctx)) ?? []);
 
   return (
     <section className={CARTE} aria-labelledby="titre-journal">
@@ -262,6 +267,35 @@ async function Journal({ ctx }: { ctx: Contexte }) {
           </TableBody>
         </Table>
       )}
+    </section>
+  );
+}
+
+// Mode aperçu (ADR-0027) : des candidats fictifs à la place des vrais, pour voir chaque
+// écran rempli (démonstration, prise en main). Rien n'est écrit en base.
+async function Apercu() {
+  const actif = await lireApercu();
+
+  return (
+    <section className={CARTE} aria-labelledby="titre-apercu">
+      <div className="flex flex-col gap-1">
+        <h2 id="titre-apercu" className={TITRE}>
+          Données fictives
+        </h2>
+        <p className="max-w-2xl text-sm text-gris">
+          Pour voir l&apos;application remplie, avant d&apos;avoir vos propres candidats ou pour la
+          présenter.
+        </p>
+      </div>
+      <InterrupteurApercu actif={actif} />
+      <ul className="flex max-w-2xl list-disc flex-col gap-1.5 pl-5 text-sm leading-relaxed">
+        <li>Vos vrais candidats sont masqués tant que l&apos;aperçu est actif, jamais mélangés.</li>
+        <li>Rien n&apos;est écrit dans la base : ni candidat, ni journal, ni forfait.</li>
+        <li>
+          Relancer et supprimer sont désactivés. Inviter un candidat reste possible : il s&apos;agit
+          alors d&apos;un vrai candidat, visible quand vous revenez à vos données.
+        </li>
+      </ul>
     </section>
   );
 }

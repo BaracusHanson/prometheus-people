@@ -15,6 +15,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { obtenirAgence } from "@/modules/agences/queries";
+import { listeFictive } from "@/modules/apercu/donnees";
+import { lireApercu } from "@/modules/apercu/etat";
 import {
   listerCandidats,
   type CandidatListe,
@@ -55,7 +57,11 @@ const CHIFFRES: { statut: StatutAffiche; libelle: string }[] = [
 // Uniquement des chiffres tirés des candidats de l'agence, aucun classement.
 export default async function PageTableauDeBord() {
   const ctx = await exigerContexte();
-  const [agence, candidats] = await Promise.all([obtenirAgence(ctx), listerCandidats(ctx)]);
+  const apercu = await lireApercu();
+  const [agence, candidats] = await Promise.all([
+    obtenirAgence(ctx),
+    apercu ? listeFictive() : listerCandidats(ctx),
+  ]);
   const nomAgence = agence?.nom ?? "Mon agence";
 
   if (candidats.length === 0) {
@@ -139,7 +145,7 @@ export default async function PageTableauDeBord() {
                         )}
                       </span>
                     </span>
-                    <BoutonRelance id={c.id} nom={c.nom} />
+                    <BoutonRelance id={c.id} nom={c.nom} apercu={apercu} />
                   </li>
                 ))}
               </ul>

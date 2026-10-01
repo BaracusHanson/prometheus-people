@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { rapportFictif } from "@/modules/apercu/donnees";
+import { lireApercu } from "@/modules/apercu/etat";
 import { lireRapport } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
 import { ORDRE_PRESENTATION } from "@/modules/questionnaire/pages";
@@ -44,10 +46,11 @@ function duree(debut: Date | null, fin: Date): string | null {
 export default async function PageRapport({ params }: { params: Promise<{ id: string }> }) {
   const ctx = await exigerContexte();
   const { id } = await params;
-  const rapport = await lireRapport(ctx, id);
+  const apercu = await lireApercu();
+  const rapport = apercu ? rapportFictif(id) : await lireRapport(ctx, id);
   if (!rapport) notFound();
   // Chaque lecture d'un rapport est notée dans le journal de l'agence (ADR-0023).
-  await noterLecture(ctx, "consultation", id);
+  if (!apercu) await noterLecture(ctx, "consultation", id);
 
   const { resultats } = rapport;
   const qualite = qualiteDesReponses(resultats);
@@ -79,7 +82,7 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
               </Link>
             </Button>
             <BoutonImprimer id={id} />
-            {ctx.role === "admin" ? <BoutonSupprimer id={id} nom={rapport.nom} /> : null}
+            {ctx.role === "admin" && !apercu ? <BoutonSupprimer id={id} nom={rapport.nom} /> : null}
           </>
         }
       />

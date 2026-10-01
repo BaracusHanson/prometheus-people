@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 
+import { BandeauApercu } from "@/components/bandeau-apercu";
 import { CadreApplication } from "@/components/cadres";
 import { Toaster } from "@/components/ui/sonner";
+import { lireApercu } from "@/modules/apercu/etat";
 import { FORFAITS, messageQuotaAtteint, phraseRestants } from "@/modules/candidats/forfaits";
 import { lireForfait } from "@/modules/candidats/queries";
 import { lireSession } from "@/server/auth/session";
@@ -14,7 +16,11 @@ const LIBELLES_ROLE = { admin: "Administrateur", recruteur: "Recruteur" } as con
 // cadre ne protège rien, il affiche seulement.
 export default async function LayoutCadre({ children }: { children: ReactNode }) {
   const ctx = await exigerContexte();
-  const [session, forfait] = await Promise.all([lireSession(), lireForfait(ctx)]);
+  const [session, forfait, apercu] = await Promise.all([
+    lireSession(),
+    lireForfait(ctx),
+    lireApercu(),
+  ]);
   const essai = FORFAITS[forfait.forfait].periode === "total";
 
   return (
@@ -31,6 +37,7 @@ export default async function LayoutCadre({ children }: { children: ReactNode })
         periode: essai ? "essai" : "ce mois",
       }}
     >
+      {apercu ? <BandeauApercu /> : null}
       {children}
       <Toaster />
     </CadreApplication>
