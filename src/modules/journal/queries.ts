@@ -12,7 +12,7 @@ import { candidat, journalAudit, user } from "@/server/db/schema";
 // appartient à ctx.orgId).
 
 export type ActionLecture = "consultation" | "impression";
-export type ActionJournal = ActionLecture | "suppression" | "purge";
+export type ActionJournal = ActionLecture | "suppression" | "purge" | "forfait";
 
 // Regroupement : une même lecture n'est notée qu'une fois par personne et par candidat
 // sur 10 minutes, pour qu'un rechargement ne remplisse pas le journal.

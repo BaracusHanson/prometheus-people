@@ -28,6 +28,8 @@ Next.js (App Router, `standalone`) · Tailwind CSS v4 · TypeScript strict · Dr
 
 **Purge** (ADR-0023) : chaque nuit vers 4 h, le minuteur `prometheus-purge.timer` du serveur appelle, depuis le conteneur, la route interne `/api/interne/purge` (jeton dérivé de `BETTER_AUTH_SECRET`, route bloquée par Caddy depuis Internet). Fichiers dans `deploy/purge/`.
 
+**Forfaits** (ADR-0011) : essai 10 candidats au total, Agence 30/mois, Agence+ 100/mois (`src/modules/candidats/forfaits.ts`). Activation après paiement, sur le serveur : `sudo sh /srv/prometheus/forfait.sh app-prod <email d'un admin> agence|agence_plus|essai` (route interne `/api/interne/forfait`, notée dans le journal de l'agence).
+
 **Connexion** (ADR-0016) : Better Auth, lien magique uniquement. En local sans `RESEND_API_KEY`, le lien s'affiche dans le terminal. La configuration Better Auth est dans `src/server/auth/options.ts` (source unique) ; `src/server/db/auth-schema.ts` est généré, ne jamais le modifier à la main.
 
 **Build sans variables** : la CI construit l'application **sans aucune variable d'environnement**, alors qu'un build local charge `.env.local` et masque les erreurs. Un module ne lit donc jamais l'environnement à l'import (`getEnv()`, `getDb()`, `getAuth()` sont paresseux), et une page qui dépend de la requête lit `headers()` **avant** tout accès à l'environnement. Pour reproduire la CI : cloner le dépôt dans un dossier temporaire (sans `.env.local`) et lancer le build.

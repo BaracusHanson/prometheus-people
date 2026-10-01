@@ -36,6 +36,7 @@ const ACTIONS: Record<ActionJournal, string> = {
   impression: "A imprimé le rapport",
   suppression: "A supprimé les données",
   purge: "Suppression automatique",
+  forfait: "Forfait modifié par Prometheus People",
 };
 
 const formatQuand = new Intl.DateTimeFormat("fr-FR", {
@@ -242,11 +243,14 @@ async function Journal({ ctx }: { ctx: Contexte }) {
                   {formatQuand.format(l.quand)}
                 </TableCell>
                 <TableCell className="font-bold">
-                  {l.qui ?? (l.action === "purge" ? "Système" : "Compte supprimé")}
+                  {l.qui ??
+                    (l.action === "purge" || l.action === "forfait"
+                      ? "Système"
+                      : "Compte supprimé")}
                 </TableCell>
                 <TableCell>{ACTIONS[l.action]}</TableCell>
                 <TableCell className={l.candidat ? "" : "text-gris"}>
-                  {l.candidat ?? "Candidat supprimé"}
+                  {l.action === "forfait" ? "—" : (l.candidat ?? "Candidat supprimé")}
                 </TableCell>
               </TableRow>
             ))}
