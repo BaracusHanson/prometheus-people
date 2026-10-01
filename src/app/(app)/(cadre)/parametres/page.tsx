@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { EnTetePage } from "@/components/cadres";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -45,7 +48,7 @@ const formatQuand = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
 });
 
-const CARTE = "flex flex-col gap-4 rounded-bloc border border-bordure bg-white p-5 md:p-6";
+const CARTE = "flex flex-col gap-5 rounded-bloc border border-bordure bg-white p-5 md:p-7";
 const TITRE = "text-xl font-extrabold font-stretch-[85%]";
 
 // Paramètres de l'agence (maquette « Paramètres », ADR-0023). Réservés aux
@@ -59,12 +62,10 @@ export default async function PageParametres({
 
   if (ctx.role !== "admin") {
     return (
-      <div className="flex max-w-xl flex-col gap-3">
-        <h1 className="text-3xl font-extrabold font-stretch-75%">Paramètres</h1>
-        <p className="leading-relaxed">
-          Les paramètres de l&apos;agence sont réservés à ses administrateurs.
-        </p>
-      </div>
+      <EnTetePage
+        titre="Paramètres"
+        description="Les paramètres de l'agence sont réservés à ses administrateurs."
+      />
     );
   }
 
@@ -72,25 +73,30 @@ export default async function PageParametres({
   const section: Section = SECTIONS.find((s) => s.cle === demande)?.cle ?? "agence";
 
   return (
-    <div className="grid max-w-6xl gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
-      <h1 className="text-3xl font-extrabold font-stretch-75% md:col-span-2">Paramètres</h1>
-      <nav aria-label="Sections des paramètres" className="flex flex-col gap-1">
-        {SECTIONS.map((s) => (
-          <Link
-            key={s.cle}
-            href={`/parametres?section=${s.cle}`}
-            aria-current={s.cle === section ? "page" : undefined}
-            className="flex min-h-11 items-center rounded-r-controle border-l-4 border-transparent px-3.5 text-[15px] font-semibold text-encre no-underline hover:bg-white aria-[current=page]:border-bleu aria-[current=page]:bg-bleu-pale aria-[current=page]:font-extrabold aria-[current=page]:text-bleu-fonce"
-          >
-            {s.libelle}
-          </Link>
-        ))}
-      </nav>
-      <div className="min-w-0">
-        {section === "agence" ? <Agence ctx={ctx} /> : null}
-        {section === "conservation" ? <Conservation ctx={ctx} /> : null}
-        {section === "forfait" ? <Forfait ctx={ctx} /> : null}
-        {section === "journal" ? <Journal ctx={ctx} /> : null}
+    <div className="flex max-w-6xl flex-col gap-6">
+      <EnTetePage titre="Paramètres" />
+      <div className="grid gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
+        <nav
+          aria-label="Sections des paramètres"
+          className="-mx-4 flex gap-1 overflow-x-auto px-4 md:mx-0 md:flex-col md:overflow-visible md:px-0"
+        >
+          {SECTIONS.map((s) => (
+            <Link
+              key={s.cle}
+              href={`/parametres?section=${s.cle}`}
+              aria-current={s.cle === section ? "page" : undefined}
+              className="flex min-h-11 shrink-0 items-center rounded-controle border-b-[3px] border-transparent px-3.5 text-[15px] font-semibold whitespace-nowrap text-encre no-underline transition-colors hover:bg-white md:rounded-l-none md:border-b-0 md:border-l-4 aria-[current=page]:border-bleu aria-[current=page]:bg-bleu-pale aria-[current=page]:font-extrabold aria-[current=page]:text-bleu-fonce"
+            >
+              {s.libelle}
+            </Link>
+          ))}
+        </nav>
+        <div className="min-w-0">
+          {section === "agence" ? <Agence ctx={ctx} /> : null}
+          {section === "conservation" ? <Conservation ctx={ctx} /> : null}
+          {section === "forfait" ? <Forfait ctx={ctx} /> : null}
+          {section === "journal" ? <Journal ctx={ctx} /> : null}
+        </div>
       </div>
     </div>
   );
@@ -169,6 +175,11 @@ async function Forfait({ ctx }: { ctx: Contexte }) {
           )}
         </span>
       </p>
+      <Progress
+        value={etat.limite > 0 ? Math.min((etat.utilises / etat.limite) * 100, 100) : 0}
+        aria-label="Part du forfait utilisée"
+        className="max-w-md"
+      />
       <p className="text-sm text-gris">{phraseRestants(etat)}</p>
       <Table>
         <TableHeader>
@@ -180,10 +191,12 @@ async function Forfait({ ctx }: { ctx: Contexte }) {
         </TableHeader>
         <TableBody>
           {CLES_FORFAIT.map((f) => (
-            <TableRow key={f} className={f === etat.forfait ? "font-bold" : ""}>
+            <TableRow key={f} className={f === etat.forfait ? "bg-bleu-pale/50 font-bold" : ""}>
               <TableCell>
-                {FORFAITS[f].libelle}
-                {f === etat.forfait ? <span className="sr-only"> (votre forfait)</span> : null}
+                <span className="flex items-center gap-2">
+                  {FORFAITS[f].libelle}
+                  {f === etat.forfait ? <Badge variant="info">Votre forfait</Badge> : null}
+                </span>
               </TableCell>
               <TableCell>
                 {FORFAITS[f].limite} {FORFAITS[f].periode === "total" ? "au total" : "par mois"}

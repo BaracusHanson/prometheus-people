@@ -1,5 +1,7 @@
 "use client";
 
+import { PrinterIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { noterImpression } from "@/modules/journal/actions";
 
@@ -14,6 +16,7 @@ export function BoutonImprimer({ id }: { id: string }) {
       }}
       className="print:hidden"
     >
+      <PrinterIcon aria-hidden="true" />
       Imprimer
     </Button>
   );

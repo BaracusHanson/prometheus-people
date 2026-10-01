@@ -1,7 +1,9 @@
+import { Columns2Icon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { EnTetePage } from "@/components/cadres";
 import {
   NoteMethode,
   ProfilImprime,
@@ -10,6 +12,7 @@ import {
 } from "@/components/rapport";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { lireRapport } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
@@ -52,30 +55,34 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
 
   return (
     <div className="flex max-w-5xl flex-col gap-5">
-      <Link href="/candidats" className="text-sm font-bold print:hidden">
-        ← Candidats
-      </Link>
-
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-extrabold font-stretch-75%">{rapport.nom}</h1>
-          <p className="text-gris">
-            {TYPES_POSTE[rapport.typePoste]}. Questionnaire terminé le{" "}
-            {formatDate.format(rapport.termineLe)}
-            {temps ? ` ${temps}` : ""}.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Badge variant={qualite.fiable ? "succes" : "attention"}>
-            {qualite.fiable ? "Réponses fiables" : "Points de vigilance"}
-          </Badge>
-          <Button asChild variant="outline" className="print:hidden">
-            <Link href={`/candidats/${id}/comparer`}>Comparer</Link>
-          </Button>
-          <BoutonImprimer id={id} />
-          {ctx.role === "admin" ? <BoutonSupprimer id={id} nom={rapport.nom} /> : null}
-        </div>
-      </div>
+      <EnTetePage
+        retour={{ href: "/candidats", libelle: "Candidats" }}
+        titre={rapport.nom}
+        description={
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>
+              {TYPES_POSTE[rapport.typePoste]}. Questionnaire terminé le{" "}
+              {formatDate.format(rapport.termineLe)}
+              {temps ? ` ${temps}` : ""}.
+            </span>
+            <Badge variant={qualite.fiable ? "succes" : "attention"}>
+              {qualite.fiable ? "Réponses fiables" : "Points de vigilance"}
+            </Badge>
+          </span>
+        }
+        actions={
+          <>
+            <Button asChild variant="outline">
+              <Link href={`/candidats/${id}/comparer`}>
+                <Columns2Icon aria-hidden="true" />
+                Comparer
+              </Link>
+            </Button>
+            <BoutonImprimer id={id} />
+            {ctx.role === "admin" ? <BoutonSupprimer id={id} nom={rapport.nom} /> : null}
+          </>
+        }
+      />
 
       <Tabs defaultValue="profil" className="print:hidden">
         <TabsList variant="line" className="h-12 border-b border-bordure">
@@ -88,15 +95,19 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
         </TabsList>
         <TabsContent value="profil" className="flex flex-col gap-4 pt-4">
           <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
-          <section className="rounded-bloc border border-bordure bg-white p-5">
-            <ProfilInteractif resultats={resultats} />
-          </section>
+          <Card className="px-1 md:px-2">
+            <CardContent>
+              <ProfilInteractif resultats={resultats} />
+            </CardContent>
+          </Card>
           <NoteMethode />
         </TabsContent>
         <TabsContent value="qualite" className="pt-4">
-          <section className="rounded-bloc border border-bordure bg-white p-5">
-            <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
-          </section>
+          <Card className="px-1 md:px-2">
+            <CardContent>
+              <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
 

@@ -37,7 +37,9 @@ function Rang({ rang }: { rang: number }) {
   );
 }
 
-const GRILLE = "grid grid-cols-[minmax(0,15rem)_minmax(0,1fr)_3.5rem] items-center gap-x-4";
+// Sur téléphone, le nom occupe sa propre ligne, la barre et le rang passent dessous.
+const GRILLE =
+  "grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 gap-y-1 *:first:col-span-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_3.5rem] sm:gap-x-4 sm:*:first:col-span-1";
 
 // À l'écran, la flèche de dépliage occupe 28 px à droite de chaque trait : les lignes
 // sans flèche (en-tête, sous-dimensions) gardent ce retrait pour rester alignées.
@@ -50,7 +52,7 @@ function EnTeteEchelle({ fleche }: { fleche: boolean }) {
       className={`${GRILLE} ${fleche ? RETRAIT_FLECHE : ""} items-end pb-2 text-xs leading-tight font-bold text-gris`}
       aria-hidden="true"
     >
-      <span>Trait</span>
+      <span className="max-sm:hidden">Trait</span>
       <span className="grid grid-cols-[30fr_40fr_30fr] gap-1">
         <span>{LIBELLES_NIVEAUX.bas}</span>
         <span className="text-center">{LIBELLES_NIVEAUX.moyen}</span>

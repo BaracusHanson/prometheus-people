@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { BarreRang } from "@/components/barre-rang";
+import { EnTetePage } from "@/components/cadres";
 import { NoteMethode } from "@/components/rapport";
 import { lireComparaison } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
@@ -29,17 +30,17 @@ export default async function PageComparer({ params }: { params: Promise<{ id: s
 
   return (
     <div className="flex max-w-5xl flex-col gap-5">
-      <Link href={`/candidats/${id}`} className="text-sm font-bold">
-        ← Retour au profil de {profils[0]!.nom}
-      </Link>
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-extrabold font-stretch-75%">Comparer</h1>
-        <p className="text-gris">
-          {TYPES_POSTE[typePoste]}, {profils.length} candidat{profils.length > 1 ? "s" : ""} terminé
-          {profils.length > 1 ? "s" : ""}. Aide à préparer les entretiens : ce n&apos;est pas un
-          classement.
-        </p>
-      </div>
+      <EnTetePage
+        retour={{ href: `/candidats/${id}`, libelle: `Profil de ${profils[0]!.nom}` }}
+        titre="Comparer"
+        description={
+          <>
+            {TYPES_POSTE[typePoste]}, {profils.length} candidat{profils.length > 1 ? "s" : ""}{" "}
+            terminé{profils.length > 1 ? "s" : ""}. Aide à préparer les entretiens : ce n&apos;est
+            pas un classement.
+          </>
+        }
+      />
       <p className="text-base font-semibold">{syntheseComparaison(profils)}</p>
 
       {profils.length > 1 ? (
@@ -48,7 +49,7 @@ export default async function PageComparer({ params }: { params: Promise<{ id: s
             <section
               key={t}
               aria-labelledby={`trait-${t}`}
-              className="flex flex-col gap-2 rounded-bloc border border-bordure bg-white p-4"
+              className="flex flex-col gap-3 rounded-bloc border border-bordure bg-white p-5"
             >
               <h2 id={`trait-${t}`} className="flex flex-col">
                 <span className="text-base font-extrabold">{LIBELLES_TRAITS[t].nom}</span>
