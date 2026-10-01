@@ -76,7 +76,7 @@ export async function inviterMembre(
     };
   }
 
-  revalidatePath("/espace");
+  revalidatePath("/equipe");
   return { succes: `Invitation envoyée à ${saisie.data.email}.` };
 }
 
@@ -93,7 +93,7 @@ export async function annulerInvitation(formulaire: FormData): Promise<void> {
     body: { invitationId: id.data },
     headers: await headers(),
   });
-  revalidatePath("/espace");
+  revalidatePath("/equipe");
 }
 
 export async function accepterInvitation(formulaire: FormData): Promise<void> {
