@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import { CadreVitrine } from "@/components/vitrine/cadre";
+import { CadreStatique } from "@/components/vitrine/habillage";
 import { BOUTON_ACCENT, BOUTON_CONTOUR, TYPO } from "@/components/vitrine/planche";
 
 // Page introuvable (maquette P5), pour toutes les adresses inconnues. Next.js la sert avec
@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Page introuvable · Prometheus Peopl
 
 export default function PageIntrouvable() {
   return (
-    <CadreVitrine>
+    <CadreStatique>
       <div className="mx-auto flex w-full max-w-[1312px] flex-1 flex-col items-start justify-center gap-6 px-5 py-16 md:border-x md:border-ligne md:px-12">
         <span
           aria-hidden="true"
@@ -33,6 +33,6 @@ export default function PageIntrouvable() {
           </Button>
         </div>
       </div>
-    </CadreVitrine>
+    </CadreStatique>
   );
 }

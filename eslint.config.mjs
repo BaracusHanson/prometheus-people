@@ -77,6 +77,42 @@ export default defineConfig([
     },
   },
 
+  // Pages hors du site public (candidat, recruteur, connexion, 404 globale présente dans
+  // l'arbre de toutes les routes) : ni Motion, ni composant animé du site (ADR-0028).
+  {
+    files: [
+      "src/app/not-found.tsx",
+      "src/app/passation/**",
+      "src/app/(app)/**",
+      "src/app/(public)/**",
+    ],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["motion", "motion/*", "framer-motion"],
+              message:
+                "Motion ne s'utilise que dans src/components/vitrine (site public, ADR-0028).",
+            },
+            {
+              group: [
+                "@/components/vitrine/*",
+                "!@/components/vitrine/habillage",
+                "!@/components/vitrine/planche",
+                "!@/components/vitrine/liens",
+                "!@/components/vitrine/menu",
+              ],
+              message:
+                "Composant animé du site public : il chargerait Motion sur cette page (ADR-0028). Utiliser habillage.tsx.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // Fichiers de configuration JS : pas d'analyse des types.
   {
     files: ["**/*.mjs", "**/*.js"],
