@@ -38,7 +38,7 @@ export function Logo() {
 
 export function EcranCentre({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col items-center px-4 py-10 sm:justify-center sm:py-16">
+    <div className="flex min-h-dvh flex-col items-center px-4 py-10">
       <div className="mb-8">
         <Logo />
       </div>

@@ -6,6 +6,7 @@ import { headers } from "next/headers";
 import { EcranCentre, TitreEcran } from "@/components/cadres";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { seDeconnecter } from "@/modules/connexion/actions";
 import { accepterInvitation } from "@/modules/invitations/actions";
 import { cheminInvitation, idInvitationSchema } from "@/modules/invitations/schemas";
 import { getAuth } from "@/server/auth";
@@ -73,16 +74,31 @@ export default async function PageInvitation({
 
   return (
     <EcranCentre>
-      <TitreEcran>Rejoindre {invitation.organizationName}</TitreEcran>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-bold text-gris">Invitation</span>
+        <TitreEcran>Rejoindre {invitation.organizationName}</TitreEcran>
+      </div>
       <p className="leading-relaxed">
-        Vous êtes invité à rejoindre l&apos;agence « {invitation.organizationName} » en tant que{" "}
-        {LIBELLES_ROLE[invitation.role] ?? "recruteur"}.
+        {invitation.inviterEmail} vous invite à rejoindre l&apos;agence en tant que{" "}
+        <strong>{LIBELLES_ROLE[invitation.role] ?? "recruteur"}</strong> :{" "}
+        {invitation.role === "admin"
+          ? "vous gérerez aussi l'équipe, le forfait et les paramètres."
+          : "vous pourrez inviter des candidats et lire leurs profils."}
       </p>
       <form action={accepterInvitation}>
         <input type="hidden" name="id" value={id} />
         <Button type="submit" className="w-full">
           Accepter l&apos;invitation
         </Button>
+      </form>
+      <form action={seDeconnecter} className="text-center text-[13px] text-gris">
+        Connecté en tant que {session.user.email}. Ce n&apos;est pas vous ?{" "}
+        <button
+          type="submit"
+          className="relative cursor-pointer font-bold text-bleu underline underline-offset-2 after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] hover:text-bleu-fonce"
+        >
+          Se déconnecter
+        </button>
       </form>
     </EcranCentre>
   );

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { EcranCentre, TitreEcran } from "@/components/cadres";
-import { Alert } from "@/components/ui/alert";
+import { FORFAITS } from "@/modules/candidats/forfaits";
 import { exigerSession } from "@/server/auth/session";
 import { contexteCourant } from "@/server/authz";
 
@@ -18,14 +18,14 @@ export default async function PageNouvelleAgence() {
     <EcranCentre>
       <TitreEcran>Créer mon agence</TitreEcran>
       <p className="leading-relaxed">
-        Vous êtes connecté, mais vous n&apos;appartenez encore à aucune agence. Créez la vôtre :
-        vous en serez l&apos;administrateur et pourrez ensuite inviter vos recruteurs.
+        Vous en serez l&apos;administrateur et pourrez inviter vos recruteurs. Votre essai de{" "}
+        {FORFAITS.essai.limite} candidats commence aussitôt.
       </p>
       <FormulaireAgence />
-      <Alert variant="info" role="note">
+      <p role="note" className="rounded-bloc bg-fond px-3.5 py-3 text-sm leading-relaxed">
         Votre agence utilise déjà Prometheus People ? Demandez plutôt à son administrateur de vous
         inviter.
-      </Alert>
+      </p>
     </EcranCentre>
   );
 }

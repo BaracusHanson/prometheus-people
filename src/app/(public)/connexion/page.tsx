@@ -3,10 +3,9 @@ import { redirect } from "next/navigation";
 
 import { EcranCentre, TitreEcran } from "@/components/cadres";
 import { Alert } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cheminDeSuite } from "@/modules/connexion/schemas";
 import { lireSession } from "@/server/auth/session";
-
-import { Separator } from "@/components/ui/separator";
 
 import { FormulaireConnexion } from "./formulaire";
 import { FormulaireMotDePasse } from "./formulaire-mot-de-passe";
@@ -37,24 +36,37 @@ export default async function PageConnexion({
           l&apos;accepter.
         </Alert>
       )}
-      <section aria-labelledby="titre-mot-de-passe" className="flex flex-col gap-3">
-        <h2 id="titre-mot-de-passe" className="font-extrabold">
-          Avec votre mot de passe
-        </h2>
-        <FormulaireMotDePasse suite={suite} />
-      </section>
-      <Separator />
-      <section aria-labelledby="titre-lien" className="flex flex-col gap-3">
-        <h2 id="titre-lien" className="font-extrabold">
-          Ou avec un lien reçu par email
-        </h2>
-        <p className="text-sm leading-relaxed text-gris">
-          Pour une première connexion, ou si vous avez oublié votre mot de passe : vous recevrez un
-          lien qui vous connecte d&apos;un clic. Vous pourrez ensuite choisir un mot de passe dans «
-          Mon compte ».
-        </p>
-        <FormulaireConnexion suite={suite} />
-      </section>
+      {/* Deux façons de se connecter (ADR-0016, ADR-0026). Le lien d'abord, comme sur la
+          maquette A1 : c'est la seule possible à la première connexion. */}
+      <Tabs defaultValue="lien" className="gap-4">
+        <TabsList variant="line" className="h-11 w-full justify-start border-b border-bordure">
+          <TabsTrigger value="lien" className="flex-none px-3 text-[15px] font-semibold">
+            Lien par email
+          </TabsTrigger>
+          <TabsTrigger value="mot-de-passe" className="flex-none px-3 text-[15px] font-semibold">
+            Mot de passe
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="lien" className="flex flex-col gap-4">
+          <p className="leading-relaxed">
+            Saisissez votre adresse email : vous recevrez un lien pour vous connecter, sans mot de
+            passe.
+          </p>
+          <FormulaireConnexion suite={suite} />
+          <p className="text-center text-[13px] text-gris">
+            Pas encore de compte ? Le même lien crée votre compte.
+          </p>
+        </TabsContent>
+        <TabsContent value="mot-de-passe" className="flex flex-col gap-4">
+          <p className="leading-relaxed">
+            Si vous avez choisi un mot de passe dans « Mon compte ».
+          </p>
+          <FormulaireMotDePasse suite={suite} />
+          <p className="text-center text-[13px] text-gris">
+            Mot de passe oublié ? Utilisez le lien par email.
+          </p>
+        </TabsContent>
+      </Tabs>
     </EcranCentre>
   );
 }
