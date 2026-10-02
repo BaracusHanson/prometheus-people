@@ -11,6 +11,7 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
+  FieldTitle,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -18,7 +19,8 @@ import { inviterMembre, type EtatInvitation } from "@/modules/invitations/action
 
 const ETAT_INITIAL: EtatInvitation = {};
 
-// Rôles expliqués au moment du choix (maquette Équipe) plutôt qu'une liste muette.
+// Rôles expliqués au moment du choix plutôt qu'une liste muette : chaque rôle est une
+// carte entière cliquable, celle choisie passe en braise.
 const ROLES = [
   { valeur: "recruteur", libelle: "Recruteur", aide: "Invite des candidats et lit les rapports." },
   {
@@ -44,20 +46,26 @@ export function FormulaireMembre() {
       </Field>
       <FieldSet>
         <FieldLegend variant="label">Rôle</FieldLegend>
-        <RadioGroup name="role" defaultValue="recruteur" className="gap-3">
+        <RadioGroup name="role" defaultValue="recruteur" className="gap-2">
           {ROLES.map((r) => (
-            <Field key={r.valeur} orientation="horizontal" className="items-start">
-              <RadioGroupItem
-                value={r.valeur}
-                id={`role-${r.valeur}`}
-                aria-describedby={`role-${r.valeur}-aide`}
-                className="mt-0.5"
-              />
-              <FieldContent>
-                <FieldLabel htmlFor={`role-${r.valeur}`}>{r.libelle}</FieldLabel>
-                <FieldDescription id={`role-${r.valeur}-aide`}>{r.aide}</FieldDescription>
-              </FieldContent>
-            </Field>
+            <FieldLabel
+              key={r.valeur}
+              htmlFor={`role-${r.valeur}`}
+              className="rounded-controle! border-bordure bg-white has-data-checked:border-braise has-data-checked:bg-braise-pale/50"
+            >
+              <Field orientation="horizontal" className="min-h-11 items-start gap-3 p-3!">
+                <RadioGroupItem
+                  value={r.valeur}
+                  id={`role-${r.valeur}`}
+                  aria-describedby={`role-${r.valeur}-aide`}
+                  className="mt-0.5"
+                />
+                <FieldContent>
+                  <FieldTitle className="text-[15px] font-bold">{r.libelle}</FieldTitle>
+                  <FieldDescription id={`role-${r.valeur}-aide`}>{r.aide}</FieldDescription>
+                </FieldContent>
+              </Field>
+            </FieldLabel>
           ))}
         </RadioGroup>
       </FieldSet>
