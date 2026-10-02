@@ -79,14 +79,11 @@ export default async function PageParametres({
 
   return (
     <>
-      {/* Sur téléphone, le titre passe au-dessus des onglets de section. */}
-      <div className="mb-4 md:hidden">
-        <EnTetePage titre="Paramètres" />
-      </div>
+      <EnTetePage titre="Paramètres" />
       <div className="grid max-w-[1170px] gap-4 md:grid-cols-[240px_minmax(0,900px)] md:gap-6">
         <nav
           aria-label="Sections des paramètres"
-          className="-mx-4 flex gap-1 overflow-x-auto px-4 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pt-[52px]"
+          className="-mx-4 flex gap-1 overflow-x-auto px-4 md:mx-0 md:flex-col md:overflow-visible md:px-0"
         >
           {SECTIONS.map((s) => (
             <Link
@@ -100,9 +97,6 @@ export default async function PageParametres({
           ))}
         </nav>
         <div className="flex min-w-0 flex-col gap-4">
-          <div className="max-md:hidden">
-            <EnTetePage titre="Paramètres" />
-          </div>
           {section === "agence" ? <Agence ctx={ctx} /> : null}
           {section === "conservation" ? <Conservation ctx={ctx} /> : null}
           {section === "forfait" ? <Forfait ctx={ctx} /> : null}

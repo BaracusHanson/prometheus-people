@@ -41,7 +41,15 @@ function estActif(chemin: string, href: string): boolean {
   return chemin === href || chemin.startsWith(`${href}/`);
 }
 
-// Colonne de gauche (ordinateur, tablette) ou barre du bas (téléphone), ADR-0020.
+// Colonne de gauche (ordinateur, tablette) ou barre du bas (téléphone), ADR-0029. Dans
+// la colonne : icône et libellé sur une ligne ; colonne repliée : icône seule, libellé
+// lu par les lecteurs d'écran et affiché au survol. Élément actif : fond braise pâle et
+// trait de braise, jamais la couleur seule (le libellé passe en gras).
+const LIEN_COLONNE =
+  "relative flex min-h-11 items-center gap-3 rounded-controle px-3 text-[15px] font-semibold text-gris-fonce no-underline transition-colors hover:bg-ivoire-2 hover:text-encre aria-[current=page]:bg-braise-pale aria-[current=page]:font-extrabold aria-[current=page]:text-encre before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-full before:bg-braise before:opacity-0 aria-[current=page]:before:opacity-100 max-xl:justify-center max-xl:px-0 group-data-[repliee=true]/colonne:justify-center group-data-[repliee=true]/colonne:px-0";
+const LIEN_BARRE =
+  "flex min-h-14 flex-col items-center justify-center gap-1 rounded-bloc px-1 py-2 text-center text-[11px] leading-tight font-semibold text-gris no-underline aria-[current=page]:font-extrabold aria-[current=page]:text-braise-fonce";
+
 export function NavigationPrincipale({
   admin,
   disposition,
@@ -62,11 +70,18 @@ export function NavigationPrincipale({
         <Link
           key={href}
           href={href}
+          title={colonne ? libelle : undefined}
           aria-current={estActif(chemin, href) ? "page" : undefined}
-          className={`relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-bloc px-1 py-2 text-center text-[11px] leading-tight font-semibold text-gris-clair no-underline transition-colors hover:bg-encre-2/60 hover:text-white aria-[current=page]:bg-encre-2 aria-[current=page]:font-extrabold aria-[current=page]:text-white aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-5 aria-[current=page]:after:bottom-1 aria-[current=page]:after:h-[3px] aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-braise focus-visible:outline-braise-pale ${colonne ? "w-[76px]" : ""}`}
+          className={colonne ? LIEN_COLONNE : LIEN_BARRE}
         >
-          <Icone className="size-[22px]" strokeWidth={2} aria-hidden="true" />
-          {libelle}
+          <Icone className="size-5 shrink-0" strokeWidth={2} aria-hidden="true" />
+          {colonne ? (
+            <span className="max-xl:sr-only group-data-[repliee=true]/colonne:sr-only">
+              {libelle}
+            </span>
+          ) : (
+            libelle
+          )}
         </Link>
       ))}
     </nav>
@@ -92,11 +107,11 @@ export function MenuCompte({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="flex size-11 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-braise-pale"
+        className="flex size-11 cursor-pointer items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-braise/40"
         aria-label={`Mon compte : ${compte}`}
       >
         <Avatar className="size-9 after:border-transparent">
-          <AvatarFallback className="bg-encre-2 text-[13px] font-extrabold text-white">
+          <AvatarFallback className="bg-encre text-[13px] font-extrabold text-white">
             {initiales(compte)}
           </AvatarFallback>
         </Avatar>

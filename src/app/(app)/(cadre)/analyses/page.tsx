@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import { FournisseurAnime } from "@/components/anime/mouvement";
 import { NuageRangs } from "@/components/anime/nuage-rangs";
+import { EnTetePage } from "@/components/cadres";
 import { ChoixPeriode } from "@/components/choix-periode";
 import {
   carteChaleur,
@@ -65,24 +66,20 @@ export default async function PageAnalyses({
   return (
     <FournisseurAnime>
       <div className="flex flex-col gap-3.5 xl:min-h-0 xl:flex-1">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <h1 className="text-3xl leading-tight font-extrabold font-stretch-75%">
-            Analyses{" "}
-            <span className="text-sm font-semibold text-gris font-stretch-100%">
-              {LIBELLES_PERIODE[periode].toLowerCase()}, {invites} candidat{invites > 1 ? "s" : ""}{" "}
-              invité{invites > 1 ? "s" : ""}
-              {apercu ? ", données fictives" : ""}
-            </span>
-          </h1>
-          <div className="w-72">
-            <ChoixPeriode
-              periode={periode}
-              permises={PERIODES_ANALYSES}
-              action="/analyses"
-              disposition="ligne"
-            />
-          </div>
-        </div>
+        <EnTetePage
+          titre="Analyses"
+          precision={`${LIBELLES_PERIODE[periode].toLowerCase()}, ${invites} candidat${invites > 1 ? "s" : ""} invité${invites > 1 ? "s" : ""}${apercu ? ", données fictives" : ""}`}
+          actions={
+            <div className="w-64">
+              <ChoixPeriode
+                periode={periode}
+                permises={PERIODES_ANALYSES}
+                action="/analyses"
+                disposition="ligne"
+              />
+            </div>
+          }
+        />
 
         <div className="grid gap-3.5 lg:grid-cols-3 xl:min-h-0 xl:flex-1 xl:grid-rows-[minmax(0,1.2fr)_minmax(0,1fr)]">
           <section aria-labelledby="titre-chaleur" className={CARTE}>

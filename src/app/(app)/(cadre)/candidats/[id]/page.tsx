@@ -57,7 +57,7 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
   const temps = duree(rapport.commenceLe, rapport.termineLe);
 
   return (
-    <div className="flex max-w-5xl flex-col gap-5">
+    <>
       <EnTetePage
         retour={{ href: "/candidats", libelle: "Candidats" }}
         titre={rapport.nom}
@@ -86,48 +86,49 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
           </>
         }
       />
+      <div className="flex max-w-5xl flex-col gap-5">
+        <Tabs defaultValue="profil" className="print:hidden">
+          <TabsList variant="line" className="h-12 w-full justify-start border-b border-bordure">
+            <TabsTrigger
+              value="profil"
+              className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
+            >
+              Profil
+            </TabsTrigger>
+            <TabsTrigger
+              value="qualite"
+              className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
+            >
+              Qualité des réponses
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="profil" className="flex flex-col gap-4 pt-4">
+            <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
+            <Card className="px-1 md:px-2">
+              <CardContent>
+                <ProfilInteractif resultats={resultats} />
+              </CardContent>
+            </Card>
+            <NoteMethode />
+          </TabsContent>
+          <TabsContent value="qualite" className="pt-4">
+            <Card className="px-1 md:px-2">
+              <CardContent>
+                <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-      <Tabs defaultValue="profil" className="print:hidden">
-        <TabsList variant="line" className="h-12 w-full justify-start border-b border-bordure">
-          <TabsTrigger
-            value="profil"
-            className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
-          >
-            Profil
-          </TabsTrigger>
-          <TabsTrigger
-            value="qualite"
-            className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
-          >
-            Qualité des réponses
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="profil" className="flex flex-col gap-4 pt-4">
+        {/* Version imprimée : tout le profil déplié, puis la qualité des réponses. */}
+        <div className="hidden flex-col gap-5 print:flex">
           <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
-          <Card className="px-1 md:px-2">
-            <CardContent>
-              <ProfilInteractif resultats={resultats} />
-            </CardContent>
-          </Card>
+          <ProfilImprime resultats={resultats} />
+          <h2 className="text-lg font-extrabold">Qualité des réponses</h2>
+          <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
           <NoteMethode />
-        </TabsContent>
-        <TabsContent value="qualite" className="pt-4">
-          <Card className="px-1 md:px-2">
-            <CardContent>
-              <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-
-      {/* Version imprimée : tout le profil déplié, puis la qualité des réponses. */}
-      <div className="hidden flex-col gap-5 print:flex">
-        <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
-        <ProfilImprime resultats={resultats} />
-        <h2 className="text-lg font-extrabold">Qualité des réponses</h2>
-        <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
-        <NoteMethode />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
