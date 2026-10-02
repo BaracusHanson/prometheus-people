@@ -32,6 +32,14 @@
   --color-fond: #f5f6f8;
   --color-flamme: #f0b44c; /* logo uniquement */
 
+  /* Site public uniquement (ADR-0028) : jamais dans l'espace recruteur ni chez le candidat. */
+  --color-braise: #c2410c; /* accent signature : action principale, focus, donnée à regarder */
+  --color-braise-fonce: #9a3412; /* survol */
+  --color-braise-pale: #fdeee4; /* fond d'un élément mis en avant */
+  --color-ivoire: #f7f4ee; /* fond du site — braise dessus : 4,7:1 */
+  --color-ivoire-2: #eee9df; /* bandeaux */
+  --color-ligne: #e3ddd2; /* trame et séparateurs sur ivoire */
+
   --radius-controle: 6px; /* boutons, champs */
   --radius-bloc: 8px; /* cartes, blocs */
 }

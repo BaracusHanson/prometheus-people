@@ -48,7 +48,10 @@ function Contenu({ gras, texte, lien }: Paragraphe) {
       {lien && (
         <>
           {" "}
-          <Link href={lien.href} className="font-bold text-bleu underline underline-offset-2">
+          <Link
+            href={lien.href}
+            className="font-bold text-encre underline decoration-braise decoration-2 underline-offset-2 hover:text-braise"
+          >
             {lien.libelle}
           </Link>
           .
@@ -109,7 +112,7 @@ function BlocLegal({ bloc }: { bloc: Bloc }) {
 export function PageLegale({ texte }: { texte: TexteLegal }) {
   const brouillon = JSON.stringify(texte).match(TROU) !== null;
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] gap-10 px-4 pt-10 pb-14 md:px-8 md:pt-16 md:pb-20 lg:grid-cols-[240px_minmax(0,760px)] lg:gap-16 xl:grid-cols-[280px_minmax(0,760px)] xl:px-16">
+    <div className="mx-auto grid w-full max-w-[1312px] grid-cols-[minmax(0,1fr)] gap-10 px-5 pt-10 pb-14 md:border-x md:border-ligne md:px-12 md:pt-16 md:pb-20 lg:grid-cols-[240px_minmax(0,760px)] lg:gap-16 xl:grid-cols-[280px_minmax(0,760px)]">
       <nav
         aria-label="Sommaire"
         className="hidden flex-col gap-1 self-start lg:sticky lg:top-6 lg:flex"
@@ -119,7 +122,7 @@ export function PageLegale({ texte }: { texte: TexteLegal }) {
           <a
             key={s.id}
             href={`#${s.id}`}
-            className="border-l-[3px] border-trait px-3 py-2 text-[15px] text-encre no-underline hover:border-bleu"
+            className="border-l-[3px] border-ligne px-3 py-2 text-[15px] text-encre no-underline hover:border-braise"
           >
             {s.titre}
           </a>

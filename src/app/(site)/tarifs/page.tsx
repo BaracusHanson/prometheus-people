@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 
-import { GrilleForfaits, QuestionsSite } from "@/components/site";
+import { Planche, TYPO } from "@/components/vitrine/planche";
+import { GrilleForfaits } from "@/components/vitrine/prix";
+import { Questions } from "@/components/vitrine/questions";
 import { MENTION_TVA } from "@/lib/contact";
 import { FORFAITS } from "@/modules/candidats/forfaits";
 
@@ -29,37 +31,40 @@ const QUESTIONS = [
 
 export default function Tarifs() {
   return (
-    <div className="flex flex-1 flex-col gap-10 bg-fond px-4 pt-10 pb-14 md:gap-12 md:px-8 md:pt-18 md:pb-20 xl:px-16">
-      <div className="flex max-w-[820px] flex-col gap-3.5">
-        <p className="text-[13px] font-bold tracking-[0.08em] text-gris uppercase">Tarifs</p>
-        <h1 className="text-[48px] leading-[0.95] font-extrabold font-stretch-[62%] tracking-[-0.015em] text-balance md:text-[80px]">
-          Un prix simple, sans engagement.
+    <>
+      <Planche interieur="pt-14 pb-16 md:pt-20 md:pb-20">
+        <p className={`mb-6 text-gris ${TYPO.legende}`}>Tarifs</p>
+        <h1 className={`mb-6 max-w-[900px] ${TYPO.display}`}>
+          Un prix simple, <span className="text-braise">sans engagement.</span>
         </h1>
-        <p className="text-lg leading-normal md:text-xl">
-          Essayez sur {FORFAITS.essai.limite} vrais candidats. Passez au forfait quand l&apos;outil
-          a fait ses preuves dans votre agence.
+        <p className={`mb-14 max-w-[640px] ${TYPO.corpsL}`}>
+          Essayez sur {FORFAITS.essai.limite} vrais candidats.{" "}
+          <span className="text-gris">
+            Passez au forfait quand l&apos;outil a fait ses preuves dans votre agence.
+          </span>
         </p>
-      </div>
-      <div className="flex max-w-[1280px] flex-col gap-3 rounded-bloc border border-bordure bg-white px-5 pt-6 pb-5 md:px-8 md:pt-8">
         <GrilleForfaits niveau={2} />
-        <p className="text-sm text-gris">{MENTION_TVA}.</p>
-      </div>
-      <section className="flex max-w-[1280px] flex-col gap-3.5 rounded-bloc border border-bordure bg-white p-6 md:px-8 md:py-7">
-        <h2 className="text-[26px] font-extrabold font-stretch-[80%]">
-          Ce qui compte comme un candidat
-        </h2>
-        <p className="max-w-[820px] text-[17px] leading-relaxed">
-          Un candidat est compté au moment où vous l&apos;invitez. Le relancer ne compte pas deux
-          fois ; le supprimer ne rend pas de crédit. Sur les forfaits payants, le compteur repart à
-          zéro le 1er de chaque mois et les candidats non utilisés ne sont pas reportés.
-        </p>
-      </section>
-      <section aria-labelledby="questions-tarifs" className="flex max-w-[1280px] flex-col gap-2">
-        <h2 id="questions-tarifs" className="sr-only">
-          Questions sur les tarifs
-        </h2>
-        <QuestionsSite questions={QUESTIONS} />
-      </section>
-    </div>
+        <p className="mt-2 text-sm text-gris">{MENTION_TVA}.</p>
+      </Planche>
+      <Planche bandeau>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
+          <div className="flex flex-col gap-4">
+            <h2 className={TYPO.h3}>Ce qui compte comme un candidat</h2>
+            <p className="text-[17px] leading-relaxed text-gris-fonce">
+              Un candidat est compté au moment où vous l&apos;invitez. Le relancer ne compte pas
+              deux fois ; le supprimer ne rend pas de crédit. Sur les forfaits payants, le compteur
+              repart à zéro le 1er de chaque mois et les candidats non utilisés ne sont pas
+              reportés.
+            </p>
+          </div>
+          <section aria-labelledby="questions-tarifs">
+            <h2 id="questions-tarifs" className="sr-only">
+              Questions sur les tarifs
+            </h2>
+            <Questions questions={QUESTIONS} />
+          </section>
+        </div>
+      </Planche>
+    </>
   );
 }

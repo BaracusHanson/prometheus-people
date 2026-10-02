@@ -56,6 +56,27 @@ export default defineConfig([
     },
   },
 
+  // Motion (animations) : site public uniquement (ADR-0028), jamais chez le candidat
+  // ni dans l'espace recruteur. Règle distincte de celle du client de base ci-dessus.
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/components/vitrine/**"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["motion", "motion/*", "framer-motion"],
+              message:
+                "Motion ne s'utilise que dans src/components/vitrine (site public, ADR-0028).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // Fichiers de configuration JS : pas d'analyse des types.
   {
     files: ["**/*.mjs", "**/*.js"],
