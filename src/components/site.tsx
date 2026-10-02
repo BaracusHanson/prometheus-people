@@ -47,7 +47,7 @@ export function CarteForfait({ forfait, niveau = 3 }: { forfait: Forfait; niveau
           {f.prixHT} €
         </span>
         <span className="text-[15px] text-gris">
-          {essai ? `pour ${f.limite} candidats` : "HT par mois"}
+          {essai ? `pour ${f.limite} candidats` : "par mois"}
         </span>
       </p>
       <ul className="flex flex-col gap-2.5">

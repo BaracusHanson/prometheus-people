@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { CarteForfait, QuestionsSite } from "@/components/site";
+import { MENTION_TVA } from "@/lib/contact";
 import { FORFAITS } from "@/modules/candidats/forfaits";
 
 // Tarifs (maquette P3). Les prix et les quotas viennent de forfaits.ts ; les règles de
@@ -8,7 +9,7 @@ import { FORFAITS } from "@/modules/candidats/forfaits";
 
 export const metadata: Metadata = {
   title: "Tarifs · Prometheus People",
-  description: `Essai gratuit avec ${FORFAITS.essai.limite} candidats, puis forfait Agence à ${FORFAITS.agence.prixHT} € HT par mois ou Agence+ à ${FORFAITS.agence_plus.prixHT} € HT par mois, sans engagement.`,
+  description: `Essai gratuit avec ${FORFAITS.essai.limite} candidats, puis forfait Agence à ${FORFAITS.agence.prixHT} € par mois ou Agence+ à ${FORFAITS.agence_plus.prixHT} € par mois, sans engagement.`,
 };
 
 const QUESTIONS = [
@@ -42,6 +43,7 @@ export default function Tarifs() {
         <CarteForfait forfait="essai" niveau={2} />
         <CarteForfait forfait="agence" niveau={2} />
         <CarteForfait forfait="agence_plus" niveau={2} />
+        <p className="text-sm text-gris md:col-span-3">{MENTION_TVA}.</p>
       </div>
       <section className="flex max-w-[1180px] flex-col gap-3.5 rounded-bloc border border-bordure bg-white p-6 md:px-8 md:py-7">
         <h2 className="text-[26px] font-extrabold font-stretch-[80%]">
