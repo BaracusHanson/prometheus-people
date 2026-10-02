@@ -57,6 +57,8 @@ La commande `pnpm test:e2e` (Playwright) arrive avec l'étape qui l'introduit. N
 
 ## Interface (ADR-0020)
 
+**Tout travail d'interface (page, composant, maquette, revue d'écran) commence par le skill `ui-ux-pro-max`.** Ses recommandations s'appliquent dans le cadre des règles ci-dessous : en cas de désaccord, nos jetons, shadcn/ui et l'ADR-0020 l'emportent.
+
 1. **Réutiliser avant de créer.** Composants shadcn/ui dans `src/components/ui` (base Radix, `pnpm dlx shadcn@latest add <nom>`), cadres de page dans `src/components/cadres.tsx`. On ne réécrit pas un composant que shadcn fournit ; on adapte la copie du dépôt.
 2. **Uniquement nos jetons** (`src/app/globals.css`) : aucune couleur en dur, aucune police ajoutée, pas de mode sombre en v1. Une nouvelle couleur passe par l'ADR-0020.
 3. **Chaque page suit la maquette validée** (lien dans l'ADR-0020). Tableau de bord et analyses tiennent sans défilement à partir de 1536 × 740.
