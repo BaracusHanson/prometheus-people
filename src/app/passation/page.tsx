@@ -72,6 +72,7 @@ export default async function PagePassation({
             faites={faites}
             total={total}
             suite={lienPage(aReprendre)}
+            valableJusquau={passation.valableJusquau}
           />
         )}
       </CadreCandidat>

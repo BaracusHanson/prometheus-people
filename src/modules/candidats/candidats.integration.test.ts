@@ -115,6 +115,9 @@ describe.skipIf(!process.env.DATABASE_URL)("candidats et liens (intégration)", 
       const passation = await lirePassation(ctxCandidat!);
       expect(passation?.nom).toBe("Candidat 3");
       expect(passation?.agence).toBe(ids.orgA);
+      // Écran de reprise (C4) : la session ouverte est valable encore quelques jours.
+      expect(passation?.valableJusquau).toBeInstanceOf(Date);
+      expect(passation!.valableJusquau!.getTime()).toBeGreaterThan(Date.now());
     });
 
     it("ouvrir le lien (aperçu) ne le consomme pas, même plusieurs fois", async () => {

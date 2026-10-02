@@ -99,6 +99,8 @@ export interface Passation {
   // Adresse RGPD de l'agence (Paramètres), ou null.
   contact: string | null;
   statut: string;
+  // Fin de validité de la session en cours (écran de reprise C4), ou null.
+  valableJusquau: Date | null;
 }
 
 // Informations affichées au candidat. Ne prend que son propre ContexteCandidat.
@@ -110,6 +112,10 @@ export async function lirePassation(ctx: ContexteCandidat): Promise<Passation | 
       agence: organization.name,
       contact: parametresAgence.emailContact,
       statut: candidat.statut,
+      valableJusquau: sql<Date | null>`(select max(s.expire_le) from "session_candidat" s
+        where s.candidat_id = "candidat"."id" and s.revoque_le is null and s.expire_le > now())`.mapWith(
+        (v: string | null) => (v ? new Date(v) : null),
+      ),
     })
     .from(candidat)
     .innerJoin(organization, eq(organization.id, candidat.organizationId))
