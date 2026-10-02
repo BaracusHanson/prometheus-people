@@ -236,13 +236,14 @@ export function CadreApplication({
 // Site public (maquettes P1 à P5) : en-tête avec navigation, pied de page sombre.
 export const LIENS_SITE = [
   { href: "/#comment", libelle: "Comment ça marche" },
+  { href: "/#methode", libelle: "La méthode" },
   { href: "/tarifs", libelle: "Tarifs" },
   { href: "/confidentialite", libelle: "Sécurité et données" },
 ] as const;
 
 export function EnTeteSite() {
   return (
-    <header className="flex h-16 shrink-0 items-center gap-9 border-b border-trait bg-white px-4 md:h-[76px] md:px-8 xl:px-16">
+    <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-9 border-b border-trait bg-white px-4 md:h-[72px] md:px-8 xl:px-16">
       <Logo />
       <NavigationSite liens={LIENS_SITE} />
       <div className="ml-auto flex items-center gap-6">
@@ -266,6 +267,7 @@ const PIED_SITE = [
     titre: "Produit",
     liens: [
       { href: "/#comment", libelle: "Comment ça marche" },
+      { href: "/#methode", libelle: "La méthode" },
       { href: "/tarifs", libelle: "Tarifs" },
       { href: LIEN_DEMO, libelle: "Réserver une démo" },
     ],
@@ -289,7 +291,7 @@ const PIED_SITE = [
 
 export function PiedSite() {
   return (
-    <footer className="grid gap-8 bg-encre px-4 py-10 text-sm text-gris-clair md:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] md:px-8 xl:px-16">
+    <footer className="grid gap-8 border-t border-encre-2 bg-encre px-4 py-10 text-sm text-gris-clair md:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] md:px-8 xl:px-16">
       <div className="flex flex-col gap-2.5">
         <span className="text-lg font-extrabold font-stretch-[85%] text-white">
           Prometheus People

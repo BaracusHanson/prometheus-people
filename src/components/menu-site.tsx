@@ -28,7 +28,7 @@ export function NavigationSite({ liens }: { liens: readonly LienSite[] }) {
           key={lien.href}
           href={lien.href}
           aria-current={lien.href === chemin ? "page" : undefined}
-          className="flex min-h-11 items-center font-semibold text-encre no-underline decoration-2 underline-offset-[6px] hover:underline aria-[current=page]:font-extrabold aria-[current=page]:underline"
+          className="relative flex min-h-11 items-center font-semibold text-encre no-underline after:absolute after:inset-x-0 after:bottom-2 after:block after:h-0.5 after:origin-left after:scale-x-0 after:bg-encre after:transition-transform after:duration-200 after:ease-out hover:after:scale-x-100 aria-[current=page]:font-extrabold aria-[current=page]:after:scale-x-100"
         >
           {lien.libelle}
         </Link>

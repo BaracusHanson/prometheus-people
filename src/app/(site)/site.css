@@ -1,0 +1,324 @@
+/*
+ * Mouvement du site public. Une règle : chaque animation montre une transformation du
+ * produit (invitation → réponses → mesures → profil), jamais une décoration.
+ * Uniquement transform et opacity ; tout s'arrête sur l'état final si l'utilisateur a
+ * demandé moins d'animations. Couleurs : seulement les jetons de globals.css (ADR-0020).
+ */
+
+.site {
+  --ease-sortie: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duree-micro: 160ms;
+  --duree-ui: 300ms;
+  --duree-scene: 640ms;
+}
+
+/* Compteurs : le chiffre est interpolé par le navigateur, sans JavaScript. Le vrai chiffre
+   est toujours écrit en texte pour les lecteurs d'écran (sr-only). */
+@property --compte {
+  syntax: "<integer>";
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes pp-monter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes pp-allumer {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes pp-remplir {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* Le point est posé à son rang ; il part du milieu de l'échelle (50e rang). Unités de
+   conteneur : le décalage dépend de la largeur de l'échelle, pas de celle du point. */
+@keyframes pp-glisser {
+  from {
+    transform: translateX(calc((50 - var(--rang)) * 1cqw));
+  }
+}
+
+@keyframes pp-compter {
+  from {
+    --compte: var(--depart, 0);
+  }
+}
+
+@keyframes pp-balayer {
+  0% {
+    opacity: 1;
+    transform: translateY(-100%);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
+
+.pp-compteur {
+  --compte: var(--cible, 0);
+  counter-reset: compte var(--compte);
+}
+.pp-compteur::after {
+  content: counter(compte) var(--suffixe, "");
+}
+
+/* ---------- Héros : le profil se calcule au chargement (sans attendre le JavaScript) ---- */
+
+.pp-construit {
+  animation: pp-monter var(--duree-scene) var(--ease-sortie) both;
+  animation-delay: var(--retard, 0ms);
+}
+.pp-construit-allume {
+  animation: pp-allumer var(--duree-ui) var(--ease-sortie) both;
+  animation-delay: var(--retard, 0ms);
+}
+.pp-construit-barre {
+  transform-origin: left;
+  animation: pp-remplir 900ms var(--ease-standard) both;
+  animation-delay: var(--retard, 0ms);
+}
+.pp-construit-rail {
+  animation: pp-glisser 760ms var(--ease-sortie) both;
+  animation-delay: var(--retard, 0ms);
+}
+.pp-construit-compteur {
+  animation: pp-compter 760ms var(--ease-sortie) both;
+  animation-delay: var(--retard, 0ms);
+}
+
+/* Sur téléphone, le profil du héros est sous la ligne de flottaison : sa construction
+   attend qu'il arrive à l'écran (Scene), au lieu de se jouer sans spectateur. */
+[data-etat="attente"]
+  :is(
+    .pp-construit,
+    .pp-construit-allume,
+    .pp-construit-barre,
+    .pp-construit-rail,
+    .pp-construit-compteur
+  ) {
+  animation-name: none;
+}
+
+/* ---------- Scènes déclenchées au défilement (composant Scene) --------------------------
+   Rendu serveur : état final. Le client ne repasse en « attente » que les scènes encore
+   sous la ligne de flottaison, puis les joue une seule fois quand elles entrent. */
+
+[data-etat] .pp-entree {
+  transition:
+    opacity var(--duree-scene) var(--ease-sortie),
+    transform var(--duree-scene) var(--ease-sortie);
+  transition-delay: var(--retard, 0ms);
+}
+[data-etat="attente"] .pp-entree {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+[data-etat] .pp-rail {
+  transition: transform 820ms var(--ease-sortie);
+  transition-delay: var(--retard, 0ms);
+}
+[data-etat="attente"] .pp-rail {
+  transform: translateX(calc((50 - var(--rang)) * 1cqw));
+}
+
+[data-etat] .pp-barre {
+  transform-origin: left;
+  transition: transform 520ms var(--ease-standard);
+  transition-delay: var(--retard, 0ms);
+}
+[data-etat="attente"] .pp-barre {
+  transform: scaleX(0);
+}
+
+[data-etat] .pp-trace {
+  stroke-dasharray: 1;
+  transition: stroke-dashoffset 700ms var(--ease-standard);
+  transition-delay: var(--retard, 0ms);
+}
+[data-etat="attente"] .pp-trace {
+  stroke-dashoffset: 1;
+}
+
+[data-etat="visible"] .pp-compteur-scene {
+  animation: pp-compter 1100ms var(--ease-sortie) both;
+  animation-delay: var(--retard, 0ms);
+}
+[data-etat="attente"] .pp-compteur-scene {
+  --compte: var(--depart, 0);
+}
+
+/* Lecture du CV : une ligne parcourt le document, ce qu'il ne dit pas apparaît à côté. */
+.pp-balayage {
+  opacity: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 55%,
+    color-mix(in oklch, var(--color-bleu-pale) 80%, transparent)
+  );
+  border-bottom: 2px solid var(--color-bleu);
+}
+[data-etat="visible"] .pp-balayage {
+  animation: pp-balayer 1200ms var(--ease-standard) both;
+}
+
+/* ---------- Le parcours : une seule fiche qui change d'état ---------------------------- */
+
+.pp-couche {
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition:
+    opacity var(--duree-ui) var(--ease-standard),
+    transform var(--duree-ui) var(--ease-sortie);
+}
+[data-etape="0"] .pp-couche[data-pour~="0"],
+[data-etape="1"] .pp-couche[data-pour~="1"],
+[data-etape="2"] .pp-couche[data-pour~="2"],
+[data-etape="3"] .pp-couche[data-pour~="3"] {
+  opacity: 1;
+  transform: none;
+  transition-delay: 160ms;
+}
+/* Avant la première étape (téléphone, avant l'arrivée à l'écran) : rien d'envoyé. */
+[data-etape="-1"] .pp-couche[data-pour~="0"] {
+  opacity: 1;
+  transform: none;
+}
+[data-etape="-1"] .pp-apres-envoi,
+[data-etape="-1"] .pp-couche.pp-apres-envoi {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.pp-apres-envoi {
+  transition:
+    opacity var(--duree-ui) var(--ease-standard),
+    transform var(--duree-ui) var(--ease-sortie);
+  transition-delay: 420ms;
+}
+
+.pp-point {
+  fill: var(--color-bleu);
+  stroke: var(--color-bleu);
+  stroke-width: 0;
+  transform: translate(calc(var(--gx) * 1px), calc(var(--gy) * 1px)) scale(0);
+  transition:
+    transform 760ms var(--ease-sortie),
+    fill var(--duree-ui) var(--ease-standard),
+    opacity var(--duree-ui) var(--ease-standard);
+  transition-delay: calc(var(--i) * 3ms);
+}
+.pp-point[data-controle="true"] {
+  fill: var(--color-vert);
+  stroke: var(--color-vert);
+}
+[data-etape="1"] .pp-point {
+  transform: translate(calc(var(--gx) * 1px), calc(var(--gy) * 1px)) scale(1);
+}
+[data-etape="1"] .pp-point[data-repondu="false"] {
+  fill: var(--card);
+  stroke: var(--color-champ);
+  stroke-width: 1.5px;
+}
+[data-etape="2"] .pp-point {
+  transform: translate(calc(var(--lx) * 1px), calc(var(--ly) * 1px)) scale(1);
+}
+[data-etape="3"] .pp-point {
+  transform: translate(calc(var(--px) * 1px), calc(var(--py) * 1px)) scale(1);
+}
+[data-etape="3"] .pp-point[data-controle="true"] {
+  opacity: 0;
+}
+
+.pp-onglet {
+  transition: color var(--duree-ui) var(--ease-standard);
+}
+.pp-onglet::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--color-bleu);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duree-ui) var(--ease-sortie);
+}
+.pp-onglet[data-actif="true"]::after {
+  transform: scaleX(1);
+}
+
+/* Les textes du récit : celui qui pilote la fiche est net, les autres s'effacent un peu. */
+@media (min-width: 64rem) {
+  .pp-pas {
+    transition: opacity var(--duree-ui) var(--ease-standard);
+  }
+  .pp-pas[data-actif="false"] {
+    opacity: 0.38;
+  }
+}
+
+/* ---------- Micro-interactions --------------------------------------------------------- */
+
+.site [data-slot="button"] {
+  transition:
+    translate var(--duree-micro) var(--ease-sortie),
+    background-color var(--duree-micro) var(--ease-standard),
+    color var(--duree-micro) var(--ease-standard);
+}
+.site [data-slot="button"]:hover:not(:active) {
+  translate: 0 -1px;
+}
+
+.pp-carte {
+  transition:
+    translate var(--duree-ui) var(--ease-sortie),
+    border-color var(--duree-ui) var(--ease-standard);
+}
+.pp-carte:hover {
+  translate: 0 -2px;
+  border-color: var(--color-champ);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site *,
+  .site *::before,
+  .site *::after {
+    transition-delay: 0s !important;
+    animation-delay: 0s !important;
+  }
+  .site [data-slot="button"]:hover:not(:active),
+  .pp-carte:hover {
+    translate: none;
+  }
+  .pp-balayage {
+    display: none;
+  }
+}
+
+/* Ancres du site (« Comment ça marche », « La méthode ») : défilement doux, sous l'en-tête. */
+html:has(.site) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.site) {
+    scroll-behavior: auto;
+  }
+}

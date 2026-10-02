@@ -1,7 +1,7 @@
-import { CheckIcon } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { Scene } from "@/components/site-mouvement";
 import {
   Accordion,
   AccordionContent,
@@ -9,63 +9,159 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { FORFAITS, type Forfait } from "@/modules/candidats/forfaits";
+import { CLES_FORFAIT, FORFAITS, type Forfait } from "@/modules/candidats/forfaits";
 import { LIEN_DEMO } from "@/lib/contact";
 
-// Blocs partagés par les pages du site public (accueil, tarifs) : maquettes P1 à P3.
+// Blocs partagés par les pages du site public (accueil, tarifs).
 
-const AVANTAGES_PAYANTS = [
-  "Recruteurs illimités",
-  "Analyses et journal d’audit",
-  "Sans engagement, résiliable chaque mois",
-  "Activation sous 24 h ouvrées",
-];
+// Les sections de l'accueil sont des chapitres numérotés d'un même récit.
+export function EnTeteSection({
+  numero,
+  surtitre,
+  id,
+  titre,
+  children,
+  sombre = false,
+}: {
+  numero?: string;
+  surtitre: string;
+  id?: string;
+  titre: ReactNode;
+  children?: ReactNode;
+  sombre?: boolean;
+}) {
+  return (
+    <div className="flex flex-col gap-5">
+      <p className="flex items-center gap-3 text-[13px] font-bold tracking-[0.08em] uppercase">
+        {numero && (
+          <>
+            <span className={`chiffres ${sombre ? "text-bleu-clair" : "text-bleu"}`}>{numero}</span>
+            <span
+              aria-hidden="true"
+              className={`block h-px w-10 ${sombre ? "bg-encre-2" : "bg-bordure"}`}
+            />
+          </>
+        )}
+        <span className={sombre ? "text-gris-clair" : "text-gris"}>{surtitre}</span>
+      </p>
+      <TitreSection id={id}>{titre}</TitreSection>
+      {children && (
+        <p
+          className={`max-w-[600px] text-lg leading-relaxed ${
+            sombre ? "text-gris-clair" : "text-gris-fonce"
+          }`}
+        >
+          {children}
+        </p>
+      )}
+    </div>
+  );
+}
 
-const AVANTAGES: Record<Forfait, string[]> = {
-  essai: ["Toutes les fonctions", "Sans carte bancaire", "Sans limite de durée"],
-  agence: [`${FORFAITS.agence.limite} candidats par mois`, ...AVANTAGES_PAYANTS],
-  agence_plus: [`${FORFAITS.agence_plus.limite} candidats par mois`, ...AVANTAGES_PAYANTS],
+// Titre de section du site : grand, étroit, gras.
+export function TitreSection({ id, children }: { id?: string; children: ReactNode }) {
+  return (
+    <h2
+      id={id}
+      className="max-w-[880px] scroll-mt-24 text-[38px] leading-[1] font-extrabold font-stretch-[68%] tracking-[-0.01em] text-balance md:text-[56px]"
+    >
+      {children}
+    </h2>
+  );
+}
+
+const INCLUS: Record<Forfait, string> = {
+  essai: "Toutes les fonctions, sans carte bancaire, sans limite de durée",
+  agence: "Recruteurs illimités, analyses, journal d’audit",
+  agence_plus: "Recruteurs illimités, analyses, journal d’audit",
 };
 
-// Les prix et les quotas viennent de la grille de l'application (forfaits.ts), seule source.
-// Le titre est un h3 sous une section titrée (accueil), un h2 directement sous le h1 (tarifs).
-export function CarteForfait({ forfait, niveau = 3 }: { forfait: Forfait; niveau?: 2 | 3 }) {
+const VOLUME_MAX = FORFAITS.agence_plus.limite;
+
+function prixParCandidat(forfait: Forfait): string {
   const f = FORFAITS[forfait];
+  if (f.prixHT === 0) return "Gratuit";
+  return `${(f.prixHT / f.limite).toFixed(2).replace(".", ",")} €`;
+}
+
+// Grille des forfaits, lue comme un tableau de mesures : le volume est une barre sur la
+// même échelle, le prix par candidat est calculé. Prix et quotas viennent de forfaits.ts.
+export function GrilleForfaits({ niveau = 3 }: { niveau?: 2 | 3 }) {
   const Titre = niveau === 2 ? "h2" : "h3";
-  const essai = forfait === "essai";
   return (
-    <div
-      className={`flex flex-col gap-4 rounded-bloc bg-white p-6 md:p-7 ${
-        forfait === "agence" ? "border-2 border-bleu" : "border border-bordure"
-      }`}
-    >
-      <Titre className="text-[22px] font-extrabold font-stretch-[85%]">
-        {essai ? f.libelle : `Forfait ${f.libelle}`}
-      </Titre>
-      <p className="flex flex-wrap items-baseline gap-2">
-        <span className="text-5xl leading-none font-extrabold font-stretch-[70%]">
-          {f.prixHT} €
-        </span>
-        <span className="text-[15px] text-gris">
-          {essai ? `pour ${f.limite} candidats` : "par mois"}
-        </span>
+    <Scene className="flex flex-col">
+      <div
+        aria-hidden="true"
+        className="grid grid-cols-[200px_minmax(0,1fr)_150px_150px_200px] gap-8 border-b-2 border-encre pb-3 text-[12px] font-bold tracking-[0.08em] text-gris uppercase max-lg:hidden"
+      >
+        <span>Forfait</span>
+        <span>Candidats</span>
+        <span>Prix</span>
+        <span>Par candidat</span>
+        <span />
+      </div>
+      {CLES_FORFAIT.map((cle, i) => {
+        const f = FORFAITS[cle];
+        const essai = cle === "essai";
+        return (
+          <div
+            key={cle}
+            className="grid gap-x-8 gap-y-4 border-b border-bordure py-6 max-lg:grid-cols-2 lg:grid-cols-[200px_minmax(0,1fr)_150px_150px_200px] lg:items-center"
+          >
+            <div className="flex flex-col gap-1 max-lg:col-span-2">
+              <Titre className="text-[24px] leading-tight font-extrabold font-stretch-[80%]">
+                {essai ? f.libelle : `Forfait ${f.libelle}`}
+              </Titre>
+              <p className="text-[14px] leading-snug text-gris">{INCLUS[cle]}</p>
+            </div>
+            <div className="flex flex-col gap-2 max-lg:col-span-2">
+              <span className="relative block h-2 rounded-full bg-trait">
+                <span
+                  className="pp-barre absolute inset-y-0 left-0 block rounded-full bg-bleu"
+                  style={{
+                    width: `${(f.limite / VOLUME_MAX) * 100}%`,
+                    ["--retard" as string]: `${150 + i * 160}ms`,
+                  }}
+                />
+              </span>
+              <span className="text-[15px]">
+                <strong className="chiffres font-extrabold">{f.limite} candidats</strong>{" "}
+                {essai ? "au total" : "par mois"}
+              </span>
+            </div>
+            <p className="flex flex-col">
+              <span className="chiffres text-[44px] leading-none font-extrabold font-stretch-[65%]">
+                {f.prixHT} €
+              </span>
+              <span className="text-[14px] text-gris">{essai ? "pour commencer" : "par mois"}</span>
+            </p>
+            <p className="flex flex-col">
+              <span className="chiffres text-[28px] leading-none font-extrabold font-stretch-[70%] text-bleu">
+                {prixParCandidat(cle)}
+              </span>
+              <span className="text-[14px] text-gris">
+                {essai ? "pendant l’essai" : `par candidat si les ${f.limite} sont utilisés`}
+              </span>
+            </p>
+            <Button
+              asChild
+              size="lg"
+              variant={essai ? "outline" : "default"}
+              className="max-lg:col-span-2 lg:justify-self-end"
+            >
+              {essai ? (
+                <Link href="/connexion">Créer mon agence</Link>
+              ) : (
+                <a href={LIEN_DEMO}>Réserver une démo</a>
+              )}
+            </Button>
+          </div>
+        );
+      })}
+      <p className="pt-4 text-[14px] text-gris">
+        Forfaits payants : sans engagement, résiliables chaque mois, activés sous 24 h ouvrées.
       </p>
-      <ul className="flex flex-col gap-2.5">
-        {AVANTAGES[forfait].map((avantage) => (
-          <li key={avantage} className="flex gap-2.5 leading-snug">
-            <CheckIcon className="mt-0.5 size-5 shrink-0 text-bleu" aria-hidden="true" />
-            {avantage}
-          </li>
-        ))}
-      </ul>
-      <Button asChild size="lg" variant={essai ? "outline" : "default"} className="mt-auto">
-        {essai ? (
-          <Link href="/connexion">Créer mon agence</Link>
-        ) : (
-          <a href={LIEN_DEMO}>Réserver une démo</a>
-        )}
-      </Button>
-    </div>
+    </Scene>
   );
 }
 
@@ -74,26 +170,14 @@ export function QuestionsSite({ questions }: { questions: { q: string; r: ReactN
     <Accordion type="multiple">
       {questions.map(({ q, r }) => (
         <AccordionItem key={q} value={q} className="border-b border-bordure not-last:border-b">
-          <AccordionTrigger className="min-h-11 items-center py-4 text-lg font-extrabold hover:no-underline md:text-[19px]">
+          <AccordionTrigger className="min-h-11 items-center py-5 text-lg font-extrabold hover:text-bleu hover:no-underline md:text-[20px]">
             {q}
           </AccordionTrigger>
-          <AccordionContent className="max-w-[760px] pb-5 text-base leading-relaxed">
+          <AccordionContent className="max-w-[760px] pb-6 text-[17px] leading-relaxed text-gris-fonce">
             {r}
           </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>
-  );
-}
-
-// Titre de section du site : grand, étroit, gras (maquette P1).
-export function TitreSection({ id, children }: { id?: string; children: ReactNode }) {
-  return (
-    <h2
-      id={id}
-      className="max-w-[900px] scroll-mt-6 text-[34px] leading-[1.05] font-extrabold font-stretch-[72%] text-balance md:text-[46px]"
-    >
-      {children}
-    </h2>
   );
 }

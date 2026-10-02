@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { CarteForfait, QuestionsSite } from "@/components/site";
+import { GrilleForfaits, QuestionsSite } from "@/components/site";
 import { MENTION_TVA } from "@/lib/contact";
 import { FORFAITS } from "@/modules/candidats/forfaits";
 
@@ -31,7 +31,8 @@ export default function Tarifs() {
   return (
     <div className="flex flex-1 flex-col gap-10 bg-fond px-4 pt-10 pb-14 md:gap-12 md:px-8 md:pt-18 md:pb-20 xl:px-16">
       <div className="flex max-w-[820px] flex-col gap-3.5">
-        <h1 className="text-[44px] leading-none font-extrabold font-stretch-[68%] text-balance md:text-[64px]">
+        <p className="text-[13px] font-bold tracking-[0.08em] text-gris uppercase">Tarifs</p>
+        <h1 className="text-[48px] leading-[0.95] font-extrabold font-stretch-[62%] tracking-[-0.015em] text-balance md:text-[80px]">
           Un prix simple, sans engagement.
         </h1>
         <p className="text-lg leading-normal md:text-xl">
@@ -39,13 +40,11 @@ export default function Tarifs() {
           a fait ses preuves dans votre agence.
         </p>
       </div>
-      <div className="grid max-w-[1180px] gap-6 md:grid-cols-3">
-        <CarteForfait forfait="essai" niveau={2} />
-        <CarteForfait forfait="agence" niveau={2} />
-        <CarteForfait forfait="agence_plus" niveau={2} />
-        <p className="text-sm text-gris md:col-span-3">{MENTION_TVA}.</p>
+      <div className="flex max-w-[1280px] flex-col gap-3 rounded-bloc border border-bordure bg-white px-5 pt-6 pb-5 md:px-8 md:pt-8">
+        <GrilleForfaits niveau={2} />
+        <p className="text-sm text-gris">{MENTION_TVA}.</p>
       </div>
-      <section className="flex max-w-[1180px] flex-col gap-3.5 rounded-bloc border border-bordure bg-white p-6 md:px-8 md:py-7">
+      <section className="flex max-w-[1280px] flex-col gap-3.5 rounded-bloc border border-bordure bg-white p-6 md:px-8 md:py-7">
         <h2 className="text-[26px] font-extrabold font-stretch-[80%]">
           Ce qui compte comme un candidat
         </h2>
@@ -55,7 +54,7 @@ export default function Tarifs() {
           zéro le 1er de chaque mois et les candidats non utilisés ne sont pas reportés.
         </p>
       </section>
-      <section aria-labelledby="questions-tarifs" className="flex max-w-[1180px] flex-col gap-2">
+      <section aria-labelledby="questions-tarifs" className="flex max-w-[1280px] flex-col gap-2">
         <h2 id="questions-tarifs" className="sr-only">
           Questions sur les tarifs
         </h2>
