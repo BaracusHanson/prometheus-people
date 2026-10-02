@@ -136,7 +136,7 @@ export async function invitationsRestantes(ctx: Contexte): Promise<number> {
 // Statut affiché : « expiré » quand le test n'est pas terminé et qu'aucun lien ni
 // aucune session n'est encore utilisable. Colonnes qualifiées en toutes lettres : dans
 // une sous-requête, Drizzle écrirait « "id" », qui désignerait la table de la sous-requête.
-const statutAffiche = sql<StatutAffiche>`case
+export const statutAffiche = sql<StatutAffiche>`case
   when "candidat"."statut" = 'termine' then 'termine'
   when exists (
     select 1 from "jeton_candidat" j

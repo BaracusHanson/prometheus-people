@@ -17,10 +17,13 @@ export function BoutonRelance({
   id,
   nom,
   apercu = false,
+  plein = false,
 }: {
   id: string;
   nom: string;
   apercu?: boolean;
+  // Bouton plein et compact (maquette TableauV2, liste « À relancer »).
+  plein?: boolean;
 }) {
   const [etat, action, enCours] = useActionState(relancerCandidat, ETAT_INITIAL);
 
@@ -34,13 +37,20 @@ export function BoutonRelance({
       <input type="hidden" name="id" value={id} />
       <Button
         type="submit"
-        variant="ghost"
+        variant={plein ? "default" : "ghost"}
+        size={plein ? "sm" : "default"}
         disabled={enCours || apercu}
         aria-label={`Relancer ${nom}`}
-        className="max-sm:size-11 max-sm:px-0"
+        className={
+          plein ? "bg-encre px-3 hover:bg-encre-2 max-md:h-11 xl:h-8" : "max-sm:size-11 max-sm:px-0"
+        }
       >
-        <RotateCwIcon aria-hidden="true" className={enCours ? "animate-spin" : undefined} />
-        <span className="max-sm:sr-only">{enCours ? "Envoi…" : "Relancer"}</span>
+        {plein ? null : (
+          <RotateCwIcon aria-hidden="true" className={enCours ? "animate-spin" : undefined} />
+        )}
+        <span className={plein ? undefined : "max-sm:sr-only"}>
+          {enCours ? "Envoi…" : "Relancer"}
+        </span>
       </Button>
     </form>
   );

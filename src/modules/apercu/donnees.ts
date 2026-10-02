@@ -9,6 +9,7 @@ import type { LigneJournal } from "@/modules/journal/queries";
 import { CONTROLES } from "@/modules/questionnaire/pages";
 import { SEUIL_SERIE_IDENTIQUE, type Vigilance } from "@/modules/questionnaire/qualite";
 import type { Resultats } from "@/modules/questionnaire/resultats";
+import { libelleVigilance, type LigneParcours, type ProfilRecent } from "@/modules/tableau/calculs";
 import {
   FACETTES_MESUREES,
   traitDe,
@@ -23,6 +24,7 @@ import {
 // personne réelle.
 
 export interface CandidatFictif extends CandidatListe {
+  informationLueLe: Date | null;
   commenceLe: Date | null;
   resultats: Resultats | null;
 }
@@ -226,9 +228,18 @@ export function candidatsFictifs(maintenant = new Date()): CandidatFictif[] {
             ? 0.5 + i * 1.4 + alea()
             : 8 + i * 1.3 + alea();
     const invite = new Date(t0 - jours * JOUR);
+    // Un lien expiré sur deux avait été ouvert et commencé : c'est un abandon.
+    const abandon = statut === "expire" && i % 20 === 9;
     const commenceLe =
-      statut === "termine" || statut === "en_cours"
+      statut === "termine" || statut === "en_cours" || abandon
         ? new Date(invite.getTime() + (0.1 + alea()) * JOUR)
+        : null;
+    // Lien ouvert (information lue) juste avant le début ; un invité récent sur deux
+    // a ouvert son lien sans commencer.
+    const informationLueLe = commenceLe
+      ? new Date(commenceLe.getTime() - 2 * 60_000)
+      : statut === "invite" && i % 20 === 16
+        ? new Date(invite.getTime() + 0.2 * JOUR)
         : null;
     const termine = statut === "termine" && commenceLe;
     const termineLe = termine ? new Date(commenceLe.getTime() + (12 + alea() * 14) * 60_000) : null;
@@ -251,6 +262,7 @@ export function candidatsFictifs(maintenant = new Date()): CandidatFictif[] {
       statut,
       inviteLe: invite,
       termineLe,
+      informationLueLe,
       commenceLe,
       resultats: termine ? resultatsFictifs(alea, vigilance) : null,
     };
@@ -339,4 +351,35 @@ export function journalFictif(maintenant = new Date()): LigneJournal[] {
         : [lu];
     })
     .sort((a, b) => b.quand.getTime() - a.quand.getTime());
+}
+
+// Tableau de bord (ADR-0027) : mêmes formes que les requêtes de src/modules/tableau.
+export function parcoursFictif(maintenant = new Date()): LigneParcours[] {
+  return candidatsFictifs(maintenant).map(
+    ({ id, nom, typePoste, statut, inviteLe, informationLueLe, commenceLe, termineLe }) => ({
+      id,
+      nom,
+      typePoste,
+      statut,
+      inviteLe,
+      informationLueLe,
+      commenceLe,
+      termineLe,
+    }),
+  );
+}
+
+export function profilsRecentsFictifs(limite = 4, maintenant = new Date()): ProfilRecent[] {
+  return candidatsFictifs(maintenant)
+    .filter((c) => c.resultats && c.termineLe)
+    .sort((a, b) => b.termineLe!.getTime() - a.termineLe!.getTime())
+    .slice(0, limite)
+    .map((c) => ({
+      id: c.id,
+      nom: c.nom,
+      typePoste: c.typePoste,
+      termineLe: c.termineLe!,
+      rangs: rangs(c.resultats!),
+      vigilance: libelleVigilance(c.resultats!),
+    }));
 }

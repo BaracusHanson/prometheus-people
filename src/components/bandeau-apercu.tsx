@@ -14,18 +14,19 @@ export function BandeauApercu() {
   return (
     <div
       role="status"
-      className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-bloc bg-ambre-pale px-4 py-2.5 text-ambre-fonce print:hidden"
+      className="mb-5 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 rounded-bloc bg-ambre-pale px-4 py-2 xl:mb-3 xl:py-1 text-ambre-fonce print:hidden"
     >
       <EyeIcon className="size-5 shrink-0" aria-hidden="true" />
-      <p className="flex-1 text-[15px]">
+      <p className="flex-1 text-[15px] xl:text-sm">
         <strong>Aperçu avec des données fictives.</strong> Vos vrais candidats sont masqués et les
         actions sur les candidats sont désactivées.
       </p>
       <Button
         variant="outline"
+        size="sm"
         disabled={enCours}
         onClick={() => demarrer(() => basculerApercu(false))}
-        className="border-ambre-fonce text-ambre-fonce hover:bg-white"
+        className="border-ambre-fonce text-ambre-fonce hover:bg-white max-md:h-11"
       >
         {enCours ? "Retour…" : "Revenir à mes données"}
       </Button>
