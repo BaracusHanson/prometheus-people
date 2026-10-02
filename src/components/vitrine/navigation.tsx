@@ -1,24 +1,41 @@
 "use client";
 
-import { m } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState, type CSSProperties } from "react";
 
 import { LIENS_VITRINE } from "./liens";
-import { DUREE, EASE_SORTIE } from "./mouvement";
 
-// Navigation de l'en-tête, sur ordinateur : un repère glisse sous le lien survolé ; la page
-// courante garde un trait de braise.
+// Navigation de l'en-tête, sur ordinateur : un repère glisse d'un lien survolé à l'autre ;
+// la page courante garde un trait de braise. Sans Motion (CSS seul) : l'en-tête est chargé
+// avec le cadre du site, que Next peut aussi charger hors du site public (ADR-0028).
 export function NavigationVitrine() {
   const chemin = usePathname();
-  const [survol, setSurvol] = useState<string | null>(null);
+  const nav = useRef<HTMLElement>(null);
+  const [repere, setRepere] = useState<{ x: number; largeur: number } | null>(null);
+
+  function survoler(lien: HTMLElement) {
+    setRepere({ x: lien.offsetLeft, largeur: lien.offsetWidth });
+  }
+
+  const style: CSSProperties = {
+    transform: `translateX(${repere?.x ?? 0}px)`,
+    width: repere?.largeur ?? 0,
+    opacity: repere ? 1 : 0,
+  };
+
   return (
     <nav
+      ref={nav}
       aria-label="Navigation du site"
-      className="hidden grow gap-1 lg:flex"
-      onPointerLeave={() => setSurvol(null)}
+      className="relative hidden grow gap-1 lg:flex"
+      onPointerLeave={() => setRepere(null)}
     >
+      <span
+        aria-hidden="true"
+        style={style}
+        className="absolute inset-y-1.5 left-0 block rounded-controle bg-ivoire-2 transition-[transform,width,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+      />
       {LIENS_VITRINE.map((lien) => {
         const courant = lien.href === chemin;
         return (
@@ -26,17 +43,11 @@ export function NavigationVitrine() {
             key={lien.href}
             href={lien.href}
             aria-current={courant ? "page" : undefined}
-            onPointerEnter={() => setSurvol(lien.href)}
-            onFocus={() => setSurvol(lien.href)}
+            onPointerEnter={(e) => survoler(e.currentTarget)}
+            onFocus={(e) => survoler(e.currentTarget)}
+            onBlur={() => setRepere(null)}
             className="relative flex min-h-11 items-center px-3 text-[15px] font-semibold text-encre no-underline"
           >
-            {survol === lien.href && (
-              <m.span
-                layoutId="survol-navigation"
-                className="absolute inset-x-0 inset-y-1.5 block rounded-controle bg-ivoire-2"
-                transition={{ duration: DUREE.ui, ease: EASE_SORTIE }}
-              />
-            )}
             {courant && <span className="absolute inset-x-3 bottom-1.5 block h-0.5 bg-braise" />}
             <span className="relative">{lien.libelle}</span>
           </Link>

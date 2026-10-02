@@ -103,9 +103,10 @@ export default defineConfig([
                 "!@/components/vitrine/planche",
                 "!@/components/vitrine/liens",
                 "!@/components/vitrine/menu",
+                "!@/components/vitrine/navigation",
               ],
               message:
-                "Composant animé du site public : il chargerait Motion sur cette page (ADR-0028). Utiliser habillage.tsx.",
+                "Composant animé du site public : il chargerait Motion sur cette page (ADR-0028). Utiliser habillage.tsx (cadre sans Motion).",
             },
           ],
         },

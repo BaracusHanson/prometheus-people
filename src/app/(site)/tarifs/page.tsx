@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { FournisseurMouvement } from "@/components/vitrine/mouvement";
 import { Planche, TYPO } from "@/components/vitrine/planche";
 import { GrilleForfaits } from "@/components/vitrine/prix";
 import { Questions } from "@/components/vitrine/questions";
@@ -31,7 +32,7 @@ const QUESTIONS = [
 
 export default function Tarifs() {
   return (
-    <>
+    <FournisseurMouvement>
       <Planche interieur="pt-14 pb-16 md:pt-20 md:pb-20">
         <p className={`mb-6 text-gris ${TYPO.legende}`}>Tarifs</p>
         <h1 className={`mb-6 max-w-[900px] ${TYPO.display}`}>
@@ -65,6 +66,6 @@ export default function Tarifs() {
           </section>
         </div>
       </Planche>
-    </>
+    </FournisseurMouvement>
   );
 }

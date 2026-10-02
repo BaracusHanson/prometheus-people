@@ -18,6 +18,7 @@ import {
   TYPO,
 } from "@/components/vitrine/planche";
 import { GrilleForfaits } from "@/components/vitrine/prix";
+import { FournisseurMouvement } from "@/components/vitrine/mouvement";
 import { Questions } from "@/components/vitrine/questions";
 import { LIEN_DEMO, MENTION_TVA } from "@/lib/contact";
 import { FORFAITS } from "@/modules/candidats/forfaits";
@@ -104,7 +105,7 @@ export default function Accueil() {
   const questions = PAGES.map((page) => page.find((l) => !l.controle)!.texte);
 
   return (
-    <>
+    <FournisseurMouvement>
       {/* ——— Héros : une fenêtre de l'application, la fiche se calcule ——— */}
       <section className="relative">
         <div className="relative mx-auto max-w-[1312px] px-5 pt-12 pb-14 md:border-x md:border-ligne md:px-12 md:pt-20 md:pb-20">
@@ -328,6 +329,6 @@ export default function Accueil() {
           <ProfilFinal />
         </div>
       </Planche>
-    </>
+    </FournisseurMouvement>
   );
 }

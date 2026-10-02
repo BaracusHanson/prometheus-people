@@ -7,33 +7,19 @@ import { LIEN_CONTACT, LIEN_DEMO } from "@/lib/contact";
 
 import { LIENS_VITRINE } from "./liens";
 import { MenuVitrine } from "./menu";
+import { NavigationVitrine } from "./navigation";
 import { BOUTON_ACCENT } from "./planche";
 
-// Habillage du site public sans Motion : en-tête, pied de page, et cadre statique de la
-// page 404 (présente dans l'arbre de toutes les routes, y compris celles du candidat).
+// Cadre du site public : en-tête, pied de page. Sans Motion, volontairement : Next charge
+// aussi ce cadre (layout du groupe (site), page 404) hors du site public, jusque sur les
+// pages du candidat. Les animations vivent dans les pages qui les montrent (ADR-0028).
 
-function NavigationStatique() {
-  return (
-    <nav aria-label="Navigation du site" className="hidden grow gap-1 lg:flex">
-      {LIENS_VITRINE.map((lien) => (
-        <Link
-          key={lien.href}
-          href={lien.href}
-          className="flex min-h-11 items-center rounded-controle px-3 text-[15px] font-semibold text-encre no-underline hover:bg-ivoire-2"
-        >
-          {lien.libelle}
-        </Link>
-      ))}
-    </nav>
-  );
-}
-
-export function EnTeteVitrine({ navigation }: { navigation?: ReactNode }) {
+export function EnTeteVitrine() {
   return (
     <header className="sticky top-0 z-40 border-b border-ligne bg-ivoire">
       <div className="mx-auto flex h-16 max-w-[1312px] items-center gap-6 px-5 md:h-[72px] md:border-x md:border-ligne md:px-12">
         <Logo />
-        {navigation ?? <NavigationStatique />}
+        <NavigationVitrine />
         <div className="ml-auto flex items-center gap-3">
           <Link
             href="/connexion"
@@ -115,7 +101,7 @@ export function PiedVitrine() {
   );
 }
 
-export function CadreStatique({ children }: { children: ReactNode }) {
+export function CadreVitrine({ children }: { children: ReactNode }) {
   return (
     <div className="site flex min-h-dvh flex-col bg-ivoire text-encre">
       <EnTeteVitrine />
