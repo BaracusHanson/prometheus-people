@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChartColumnIcon,
   LayoutDashboardIcon,
   LogOutIcon,
   SettingsIcon,
@@ -27,11 +28,11 @@ import { seDeconnecter } from "@/modules/connexion/actions";
 
 type Entree = { href: string; libelle: string; icone: LucideIcon; adminSeulement?: boolean };
 
-// Entrées de la navigation principale. N'affiche que les pages qui existent : Analyses
-// arrive avec sa page (maquette AnalysesV2).
+// Entrées de la navigation principale (maquette v2).
 const NAVIGATION: Entree[] = [
   { href: "/espace", libelle: "Tableau de bord", icone: LayoutDashboardIcon },
   { href: "/candidats", libelle: "Candidats", icone: UsersIcon },
+  { href: "/analyses", libelle: "Analyses", icone: ChartColumnIcon },
   { href: "/equipe", libelle: "Équipe", icone: UsersRoundIcon },
   { href: "/parametres", libelle: "Paramètres", icone: SettingsIcon, adminSeulement: true },
 ];

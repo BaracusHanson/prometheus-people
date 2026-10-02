@@ -15,7 +15,8 @@ import {
   aRelancer,
   chiffresCles,
   completion,
-  estPeriode,
+  lirePeriode,
+  PERIODES_TABLEAU,
   ilYA,
   parcours,
   type Completion,
@@ -60,7 +61,7 @@ export default async function PageTableauDeBord({
   if (lignes.length === 0) return <PremiersPas admin={ctx.role === "admin"} />;
 
   const demande = (await searchParams).periode;
-  const periode = estPeriode(demande) ? demande : "30j";
+  const periode = lirePeriode(demande, PERIODES_TABLEAU, "30j");
   const maintenant = new Date();
   const relances = aRelancer(lignes, maintenant);
   const flux = parcours(lignes, periode, maintenant);

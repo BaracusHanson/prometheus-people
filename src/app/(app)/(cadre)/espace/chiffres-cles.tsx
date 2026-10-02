@@ -1,7 +1,7 @@
 import type { ChiffreCle, Periode } from "@/modules/tableau/calculs";
-import { PERIODES } from "@/modules/tableau/calculs";
+import { LIBELLES_PERIODE, PERIODES_TABLEAU } from "@/modules/tableau/calculs";
 
-import { ChoixPeriode } from "./choix-periode";
+import { ChoixPeriode } from "@/components/choix-periode";
 
 // Mini-courbe décorative : le chiffre et la phrase d'écart portent le sens.
 function Courbe({ points }: { points: number[] }) {
@@ -32,7 +32,7 @@ function Courbe({ points }: { points: number[] }) {
 export function ChiffresCles({ chiffres, periode }: { chiffres: ChiffreCle[]; periode: Periode }) {
   return (
     <section
-      aria-label={`Chiffres clés, ${PERIODES[periode].toLowerCase()} comparés à la période précédente`}
+      aria-label={`Chiffres clés, ${LIBELLES_PERIODE[periode].toLowerCase()} comparés à la période précédente`}
       className="grid shrink-0 grid-cols-2 rounded-bloc border border-bordure bg-white sm:grid-cols-3 xl:grid-cols-[repeat(6,minmax(0,1fr))_170px]"
     >
       {chiffres.map((c) => (
@@ -57,7 +57,7 @@ export function ChiffresCles({ chiffres, periode }: { chiffres: ChiffreCle[]; pe
         </div>
       ))}
       <div className="flex flex-col justify-center px-4 py-3">
-        <ChoixPeriode periode={periode} />
+        <ChoixPeriode periode={periode} permises={PERIODES_TABLEAU} action="/espace" />
       </div>
     </section>
   );

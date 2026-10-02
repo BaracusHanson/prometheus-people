@@ -5,6 +5,7 @@ import type {
   StatutAffiche,
 } from "@/modules/candidats/queries";
 import type { TypePoste } from "@/modules/candidats/schemas";
+import type { LigneAnalyse } from "@/modules/analyses/calculs";
 import type { LigneJournal } from "@/modules/journal/queries";
 import { CONTROLES } from "@/modules/questionnaire/pages";
 import { SEUIL_SERIE_IDENTIQUE, type Vigilance } from "@/modules/questionnaire/qualite";
@@ -245,9 +246,9 @@ export function candidatsFictifs(maintenant = new Date()): CandidatFictif[] {
     const termineLe = termine ? new Date(commenceLe.getTime() + (12 + alea() * 14) * 60_000) : null;
 
     let vigilance: Vigilance | null = null;
-    if (termine && i % 11 === 4)
+    if (termine && i % 23 === 4)
       vigilance = { type: "serie-identique", longueur: SEUIL_SERIE_IDENTIQUE + 3 };
-    if (termine && i % 13 === 8) {
+    if (termine && i % 29 === 8) {
       vigilance = { type: "controle-attention-echoue", echecs: 1, total: CONTROLES.length };
     }
 
@@ -382,4 +383,17 @@ export function profilsRecentsFictifs(limite = 4, maintenant = new Date()): Prof
       rangs: rangs(c.resultats!),
       vigilance: libelleVigilance(c.resultats!),
     }));
+}
+
+// Page Analyses (ADR-0027) : sans nom, comme la vraie requête.
+export function analysesFictives(maintenant = new Date()): LigneAnalyse[] {
+  return candidatsFictifs(maintenant).map((c) => ({
+    typePoste: c.typePoste,
+    statut: c.statut,
+    inviteLe: c.inviteLe,
+    commenceLe: c.commenceLe,
+    termineLe: c.termineLe,
+    rangs: c.resultats ? rangs(c.resultats) : null,
+    vigilance: (c.resultats?.vigilances.length ?? 0) > 0,
+  }));
 }
