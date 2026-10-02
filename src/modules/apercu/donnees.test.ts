@@ -81,9 +81,20 @@ describe("données fictives du mode aperçu", () => {
     expect(candidats.some((c) => c.resultats && c.resultats.vigilances.length > 0)).toBe(true);
   });
 
-  it("n'envoient au tableau que les champs de la liste", () => {
+  it("n'envoient au tableau que les champs de la liste, sans les résultats", () => {
     expect(Object.keys(listeFictive(MAINTENANT)[0]!).sort()).toEqual(
-      ["email", "id", "inviteLe", "nom", "statut", "termineLe", "typePoste"].sort(),
+      [
+        "email",
+        "id",
+        "inviteLe",
+        "invitePar",
+        "nom",
+        "reponses",
+        "statut",
+        "termineLe",
+        "typePoste",
+        "vigilance",
+      ].sort(),
     );
   });
 

@@ -60,3 +60,15 @@ export function pageAReprendre(repondues: ReadonlySet<number>): number | null {
   const index = PAGES.findIndex((page) => page.some((l) => !repondues.has(l.numero)));
   return index === -1 ? null : index;
 }
+
+// Page où en est un candidat d'après son seul nombre de réponses (page Candidats :
+// « Page 9 sur 15 »). Les pages se remplissent dans l'ordre, la valeur des réponses
+// n'est pas lue (ADR-0022).
+export function pageAtteinte(nombreReponses: number): number {
+  let cumul = 0;
+  for (const [i, page] of PAGES.entries()) {
+    cumul += page.length;
+    if (nombreReponses < cumul) return i + 1;
+  }
+  return PAGES.length;
+}

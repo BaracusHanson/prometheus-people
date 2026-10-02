@@ -1,10 +1,8 @@
 import { UserPlusIcon } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { EnTetePage } from "@/components/cadres";
 import { BoutonInviter } from "@/components/invitation-candidat";
-import { STATUTS } from "@/components/statut-candidat";
 import {
   Empty,
   EmptyContent,
@@ -15,14 +13,14 @@ import {
 } from "@/components/ui/empty";
 import { listeFictive } from "@/modules/apercu/donnees";
 import { lireApercu } from "@/modules/apercu/etat";
-import { listerCandidats, type StatutAffiche } from "@/modules/candidats/queries";
+import { listerCandidatsDetail, type StatutAffiche } from "@/modules/candidats/queries";
 import { exigerContexte } from "@/server/authz";
 
 import { TableauCandidats } from "./tableau-candidats";
 
 export const metadata: Metadata = { title: "Candidats — Prometheus People" };
 
-const FILTRES: (StatutAffiche | "tous")[] = ["tous", "invite", "en_cours", "termine", "expire"];
+import { FILTRES } from "./filtres";
 
 // Liste des candidats de l'agence (ADR-0021, maquette Candidats). Le filtre par statut
 // passe par l'adresse (sans JavaScript, partageable) ; la recherche par nom, elle,
@@ -35,7 +33,7 @@ export default async function PageCandidats({
 }) {
   const ctx = await exigerContexte();
   const apercu = await lireApercu();
-  const candidats = apercu ? listeFictive() : await listerCandidats(ctx);
+  const candidats = apercu ? listeFictive() : await listerCandidatsDetail(ctx);
   const { statut } = await searchParams;
   const filtre = FILTRES.find((f) => f === statut) ?? "tous";
   const visibles = filtre === "tous" ? candidats : candidats.filter((c) => c.statut === filtre);
@@ -43,7 +41,7 @@ export default async function PageCandidats({
     f === "tous" ? candidats.length : candidats.filter((c) => c.statut === f).length;
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-3.5 xl:min-h-0 xl:flex-1">
       <EnTetePage
         titre="Candidats"
         precision={`${candidats.length} au total`}
@@ -71,22 +69,9 @@ export default async function PageCandidats({
           candidats={visibles}
           admin={ctx.role === "admin"}
           apercu={apercu}
-          statut={filtre === "tous" ? null : STATUTS[filtre].libelle}
-          filtres={
-            <nav aria-label="Filtrer par statut" className="flex flex-wrap gap-2">
-              {FILTRES.map((f) => (
-                <Link
-                  key={f}
-                  href={f === "tous" ? "/candidats" : `/candidats?statut=${f}`}
-                  aria-current={f === filtre ? "page" : undefined}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-full border-[1.5px] border-bordure bg-white px-4 text-sm font-semibold text-encre no-underline transition-colors hover:border-encre aria-[current=page]:border-encre aria-[current=page]:bg-encre aria-[current=page]:text-white"
-                >
-                  {f === "tous" ? "Tous" : STATUTS[f].libelle}
-                  <span className="chiffres text-[13px] font-normal opacity-75">{compte(f)}</span>
-                </Link>
-              ))}
-            </nav>
-          }
+          maintenant={new Date().getTime()}
+          filtre={filtre}
+          comptes={Object.fromEntries(FILTRES.map((f) => [f, compte(f)]))}
         />
       )}
     </div>

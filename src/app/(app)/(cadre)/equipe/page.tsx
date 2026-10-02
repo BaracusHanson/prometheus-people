@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { listerMembres, obtenirAgence } from "@/modules/agences/queries";
+import { compterInvitesParMembre } from "@/modules/candidats/queries";
 import { annulerInvitation } from "@/modules/invitations/actions";
 import { listerInvitationsEnAttente } from "@/modules/invitations/queries";
 import { lireSession } from "@/server/auth/session";
@@ -42,21 +43,21 @@ const formatDate = new Intl.DateTimeFormat("fr-FR", {
 export default async function PageEquipe() {
   const ctx = await exigerContexte();
   const estAdmin = ctx.role === "admin";
-  const [session, agence, membres, invitations] = await Promise.all([
+  const [session, agence, membres, invitations, invites] = await Promise.all([
     lireSession(),
     obtenirAgence(ctx),
     listerMembres(ctx),
     estAdmin ? listerInvitationsEnAttente(ctx) : [],
+    compterInvitesParMembre(ctx),
   ]);
   const moi = session?.user.email;
 
   return (
-    <div className="flex flex-col gap-6">
-      <EnTetePage titre="Équipe" precision={agence?.nom} />
-
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <div className="flex min-w-0 flex-col gap-5">
-          <Card>
+    <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
+      <div className="flex min-w-0 flex-col gap-4">
+        <EnTetePage titre="Équipe" precision={agence?.nom} />
+        <div className="flex min-w-0 flex-col gap-4">
+          <Card className="gap-2 py-3.5">
             <CardHeader>
               <CardTitle asChild>
                 <h2>Membres</h2>
@@ -66,9 +67,13 @@ export default async function PageEquipe() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Membre</TableHead>
+                    <TableHead className="pl-0">Membre</TableHead>
                     <TableHead>Rôle</TableHead>
                     <TableHead className="hidden sm:table-cell">Membre depuis</TableHead>
+                    <TableHead className="hidden md:table-cell">Candidats invités</TableHead>
+                    <TableHead>
+                      <span className="sr-only">Remarque</span>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -76,17 +81,10 @@ export default async function PageEquipe() {
                     // Better Auth remplit parfois le nom avec l'adresse : on ne la répète pas.
                     const nom = m.nom && m.nom !== m.email ? m.nom : null;
                     return (
-                      <TableRow key={m.email}>
-                        <TableCell className="max-w-0 min-w-48">
+                      <TableRow key={m.email} className="h-[54px]">
+                        <TableCell className="max-w-0 min-w-48 pl-0">
                           <span className="flex flex-col">
-                            <span className="truncate font-bold">
-                              {nom ?? m.email}
-                              {m.email === moi ? (
-                                <span className="ml-2 text-[13px] font-normal text-gris">
-                                  (vous)
-                                </span>
-                              ) : null}
-                            </span>
+                            <span className="truncate font-bold">{nom ?? m.email}</span>
                             {nom ? (
                               <span className="truncate text-[13px] text-gris">{m.email}</span>
                             ) : null}
@@ -100,6 +98,12 @@ export default async function PageEquipe() {
                         <TableCell className="hidden text-gris sm:table-cell">
                           {formatMois.format(m.depuis)}
                         </TableCell>
+                        <TableCell className="chiffres hidden md:table-cell">
+                          {invites.get(m.email) ?? 0}
+                        </TableCell>
+                        <TableCell className="text-right text-[13px] text-gris">
+                          {m.email === moi ? "C'est vous" : null}
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -109,7 +113,7 @@ export default async function PageEquipe() {
           </Card>
 
           {estAdmin && (
-            <Card>
+            <Card className="gap-2 py-3.5">
               <CardHeader>
                 <CardTitle asChild>
                   <h2>Invitations en attente</h2>
@@ -154,31 +158,31 @@ export default async function PageEquipe() {
             </Card>
           )}
         </div>
-
-        {estAdmin ? (
-          <div className="flex flex-col gap-3">
-            <Card>
-              <CardHeader>
-                <CardTitle asChild>
-                  <h2>Inviter un membre</h2>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <FormulaireMembre />
-              </CardContent>
-            </Card>
-            <p className="px-1 text-[13px] leading-relaxed text-gris">
-              Une personne ne peut appartenir qu&apos;à une seule agence. L&apos;invitation est
-              valable 7 jours ; elle n&apos;est acceptée qu&apos;avec l&apos;adresse invitée.
-            </p>
-          </div>
-        ) : (
-          <p className="text-[15px] leading-relaxed text-gris">
-            Pour ajouter un membre ou changer un rôle, adressez-vous à un administrateur de
-            l&apos;agence.
-          </p>
-        )}
       </div>
+
+      {estAdmin ? (
+        <div className="flex flex-col gap-3 xl:pt-[52px]">
+          <Card className="gap-2 py-3.5">
+            <CardHeader>
+              <CardTitle asChild>
+                <h2>Inviter un membre</h2>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <FormulaireMembre />
+            </CardContent>
+          </Card>
+          <p className="px-1 text-[13px] leading-relaxed text-gris">
+            Une personne ne peut appartenir qu&apos;à une seule agence. L&apos;invitation est
+            valable 7 jours ; elle n&apos;est acceptée qu&apos;avec l&apos;adresse invitée.
+          </p>
+        </div>
+      ) : (
+        <p className="text-[15px] leading-relaxed text-gris xl:pt-[52px]">
+          Pour ajouter un membre ou changer un rôle, adressez-vous à un administrateur de
+          l&apos;agence.
+        </p>
+      )}
     </div>
   );
 }

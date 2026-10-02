@@ -1,4 +1,5 @@
 import type {
+  CandidatLigne,
   CandidatListe,
   ProfilCompare,
   Rapport,
@@ -270,11 +271,13 @@ export function candidatsFictifs(maintenant = new Date()): CandidatFictif[] {
   }).sort((a, b) => b.inviteLe.getTime() - a.inviteLe.getTime());
 }
 
+const INVITE_PAR = ["Claire", "Julien", "Nadia"];
+
 // Version « liste » : seulement ce que la page Candidats et le tableau de bord affichent
 // (le tableau est un composant client : on ne lui envoie pas les résultats).
-export function listeFictive(maintenant = new Date()): CandidatListe[] {
+export function listeFictive(maintenant = new Date()): CandidatLigne[] {
   return candidatsFictifs(maintenant).map(
-    ({ id, nom, email, typePoste, statut, inviteLe, termineLe }) => ({
+    ({ id, nom, email, typePoste, statut, inviteLe, termineLe, resultats }, i) => ({
       id,
       nom,
       email,
@@ -282,6 +285,10 @@ export function listeFictive(maintenant = new Date()): CandidatListe[] {
       statut,
       inviteLe,
       termineLe,
+      invitePar: INVITE_PAR[i % INVITE_PAR.length]!,
+      // Un questionnaire en cours a reçu une partie des réponses ; terminé : toutes.
+      reponses: statut === "en_cours" ? 20 + ((i * 17) % 80) : statut === "termine" ? 118 : 0,
+      vigilance: resultats?.vigilances[0]?.type ?? null,
     }),
   );
 }
