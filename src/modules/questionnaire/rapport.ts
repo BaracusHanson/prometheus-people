@@ -2,15 +2,13 @@ import { CONTROLES } from "./pages";
 import { SEUIL_SERIE_IDENTIQUE } from "./qualite";
 import { LIBELLES_NIVEAUX, LIBELLES_TRAITS, niveau, ORDRE_TRAITS } from "./libelles";
 import type { Resultats } from "./resultats";
+import { ordinal } from "./ordinal";
 import type { Trait } from "./structure";
 
 // Phrases de synthèse du rapport : chaque graphique porte sa conclusion écrite
 // (ADR-0020). Aucun classement, aucune recommandation : on décrit, le recruteur juge.
 
-// « 1er », « 2e », « 58e ».
-export function ordinal(rang: number): string {
-  return rang === 1 ? "1er" : `${rang}e`;
-}
+export { ordinal } from "./ordinal";
 
 export function syntheseProfil(resultats: Resultats): string {
   const marques = ORDRE_TRAITS.filter((t) => niveau(resultats.traits[t].rang) !== "moyen");

@@ -10,6 +10,7 @@ export function BarreRang({
   petite = false,
   cerclee = false,
   anime,
+  accent = false,
 }: {
   rang: number;
   petite?: boolean;
@@ -18,6 +19,8 @@ export function BarreRang({
   cerclee?: boolean;
   // Retard (ms) : le point glisse du 50e rang jusqu'au sien à l'ouverture (anime.css).
   anime?: number;
+  // Point de référence (le candidat A d'une comparaison) : braise au lieu d'encre.
+  accent?: boolean;
 }) {
   const taille = petite
     ? "size-3 -ml-1.5"
@@ -38,7 +41,7 @@ export function BarreRang({
       />
       <span className="absolute inset-x-0 top-1/2 block h-0.5 -translate-y-1/2 bg-bordure" />
       <span
-        className={`absolute block rounded-full bg-encre ${cerclee && !petite ? "" : "top-0"} ${taille} ${anime !== undefined ? "anime-rang" : ""}`}
+        className={`absolute block rounded-full ${accent ? "bg-braise" : "bg-encre"} ${cerclee && !petite ? "" : "top-0"} ${taille} ${anime !== undefined ? "anime-rang" : ""}`}
         style={{
           left: `${rang}%`,
           ...(anime !== undefined ? { "--rang": rang, "--retard": `${anime}ms` } : {}),

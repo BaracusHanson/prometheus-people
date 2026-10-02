@@ -186,6 +186,14 @@ function resultatsFictifs(alea: () => number, vigilance: Vigilance | null): Resu
       return [f, { score: score(rang), rang }];
     }),
   ) as Record<FacetteMesuree, { score: number; rang: number }>;
+  // Un candidat sur deux environ a une sous-dimension nettement à l'écart de son trait,
+  // pour que l'aperçu montre les points à creuser (modules/questionnaire/points.ts).
+  if (alea() < 0.5) {
+    const f = FACETTES_MESUREES[Math.floor(alea() * FACETTES_MESUREES.length)]!;
+    const rangTrait = traits[traitDe(f)].rang;
+    const rang = borne(rangTrait >= 50 ? rangTrait - 45 : rangTrait + 45);
+    facettes[f] = { score: score(rang), rang };
+  }
   const serie =
     vigilance?.type === "serie-identique" ? vigilance.longueur : 2 + Math.floor(alea() * 4);
   return {
