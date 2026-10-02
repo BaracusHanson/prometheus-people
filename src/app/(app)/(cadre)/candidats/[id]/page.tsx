@@ -88,11 +88,17 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
       />
 
       <Tabs defaultValue="profil" className="print:hidden">
-        <TabsList variant="line" className="h-12 border-b border-bordure">
-          <TabsTrigger value="profil" className="px-4 text-base">
+        <TabsList variant="line" className="h-12 w-full justify-start border-b border-bordure">
+          <TabsTrigger
+            value="profil"
+            className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
+          >
             Profil
           </TabsTrigger>
-          <TabsTrigger value="qualite" className="px-4 text-base">
+          <TabsTrigger
+            value="qualite"
+            className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
+          >
             Qualité des réponses
           </TabsTrigger>
         </TabsList>
