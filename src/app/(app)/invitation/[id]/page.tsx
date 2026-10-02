@@ -5,7 +5,9 @@ import { headers } from "next/headers";
 
 import { EcranCentre, TitreEcran } from "@/components/cadres";
 import { Alert } from "@/components/ui/alert";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { initiales } from "@/lib/initiales";
 import { seDeconnecter } from "@/modules/connexion/actions";
 import { accepterInvitation } from "@/modules/invitations/actions";
 import { cheminInvitation, idInvitationSchema } from "@/modules/invitations/schemas";
@@ -14,8 +16,6 @@ import { lireSession } from "@/server/auth/session";
 import { contexteCourant } from "@/server/authz";
 
 export const metadata: Metadata = { title: "Invitation — Prometheus People" };
-
-const LIBELLES_ROLE: Record<string, string> = { admin: "administrateur", member: "recruteur" };
 
 // Page ouverte depuis l'email d'invitation. Better Auth ne montre l'invitation qu'à la
 // personne connectée avec l'adresse invitée, et vérifiée (ADR-0018).
@@ -74,17 +74,32 @@ export default async function PageInvitation({
 
   return (
     <EcranCentre>
-      <div className="flex flex-col gap-2">
-        <span className="text-sm font-bold text-gris">Invitation</span>
-        <TitreEcran>Rejoindre {invitation.organizationName}</TitreEcran>
+      <div className="flex items-center gap-3.5">
+        <Avatar className="size-12 rounded-controle" aria-hidden="true">
+          <AvatarFallback className="rounded-controle bg-encre text-[15px] font-extrabold text-white">
+            {initiales(invitation.organizationName, invitation.organizationName)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-sm font-bold text-gris">Invitation</span>
+          <TitreEcran>Rejoindre {invitation.organizationName}</TitreEcran>
+        </div>
       </div>
       <p className="leading-relaxed">
-        {invitation.inviterEmail} vous invite à rejoindre l&apos;agence en tant que{" "}
-        <strong>{LIBELLES_ROLE[invitation.role] ?? "recruteur"}</strong> :{" "}
-        {invitation.role === "admin"
-          ? "vous gérerez aussi l'équipe, le forfait et les paramètres."
-          : "vous pourrez inviter des candidats et lire leurs profils."}
+        <span className="break-all">{invitation.inviterEmail}</span> vous invite à rejoindre
+        l&apos;agence.
       </p>
+      <div className="flex flex-col gap-1 rounded-controle border border-braise bg-braise-pale/50 px-4 py-3">
+        <span className="text-[13px] font-bold text-gris">Votre rôle</span>
+        <span className="font-extrabold">
+          {invitation.role === "admin" ? "Administrateur" : "Recruteur"}
+        </span>
+        <span className="text-sm leading-relaxed">
+          {invitation.role === "admin"
+            ? "Vous inviterez des candidats, lirez leurs profils, et gérerez aussi l'équipe, le forfait et les paramètres."
+            : "Vous inviterez des candidats et lirez leurs profils."}
+        </span>
+      </div>
       <form action={accepterInvitation}>
         <input type="hidden" name="id" value={id} />
         <Button type="submit" className="w-full">

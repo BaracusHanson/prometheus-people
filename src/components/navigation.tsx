@@ -15,6 +15,7 @@ import { usePathname } from "next/navigation";
 import { useTransition } from "react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { initiales } from "@/lib/initiales";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -88,10 +89,6 @@ export function NavigationPrincipale({
   );
 }
 
-function initiales(email: string): string {
-  return email.slice(0, 2).toUpperCase();
-}
-
 // Menu du compte : qui est connecté, et la déconnexion (accessible de partout).
 export function MenuCompte({
   compte,
@@ -112,7 +109,7 @@ export function MenuCompte({
       >
         <Avatar className="size-9 after:border-transparent">
           <AvatarFallback className="bg-encre text-[13px] font-extrabold text-white">
-            {initiales(compte)}
+            {initiales(null, compte)}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
