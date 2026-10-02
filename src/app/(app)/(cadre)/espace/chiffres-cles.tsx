@@ -1,8 +1,7 @@
 import type { ChiffreCle, Periode } from "@/modules/tableau/calculs";
-import { LIBELLES_PERIODE, PERIODES_TABLEAU } from "@/modules/tableau/calculs";
+import { LIBELLES_PERIODE } from "@/modules/tableau/calculs";
 
 import { ValeurAnimee } from "@/components/anime/mouvement";
-import { ChoixPeriode } from "@/components/choix-periode";
 
 // Mini-courbe décorative : le chiffre et la phrase d'écart portent le sens. Elle se trace à
 // l'ouverture, puis le dernier point s'allume (anime.css).
@@ -37,7 +36,7 @@ export function ChiffresCles({ chiffres, periode }: { chiffres: ChiffreCle[]; pe
   return (
     <section
       aria-label={`Chiffres clés, ${LIBELLES_PERIODE[periode].toLowerCase()} comparés à la période précédente`}
-      className="grid shrink-0 grid-cols-2 rounded-bloc border border-bordure bg-white sm:grid-cols-3 xl:grid-cols-[repeat(6,minmax(0,1fr))_170px]"
+      className="grid shrink-0 grid-cols-2 rounded-bloc border border-bordure bg-white sm:grid-cols-3 xl:grid-cols-6"
     >
       {chiffres.map((c) => (
         <div
@@ -61,9 +60,6 @@ export function ChiffresCles({ chiffres, periode }: { chiffres: ChiffreCle[]; pe
           </span>
         </div>
       ))}
-      <div className="flex flex-col justify-center px-4 py-3">
-        <ChoixPeriode periode={periode} permises={PERIODES_TABLEAU} action="/espace" />
-      </div>
     </section>
   );
 }

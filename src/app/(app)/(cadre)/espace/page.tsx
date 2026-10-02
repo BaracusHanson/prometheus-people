@@ -6,6 +6,8 @@ import { BarreRang } from "@/components/barre-rang";
 import { Anneau } from "@/components/anime/anneau";
 import { DiagrammeParcours } from "@/components/anime/diagramme-parcours";
 import { FournisseurAnime } from "@/components/anime/mouvement";
+import { EnTetePage } from "@/components/cadres";
+import { ChoixPeriode } from "@/components/choix-periode";
 import { BoutonInviter } from "@/components/invitation-candidat";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -71,7 +73,19 @@ export default async function PageTableauDeBord({
   return (
     <FournisseurAnime>
       <div className="flex flex-col gap-3.5 xl:min-h-0 xl:flex-1">
-        <h1 className="sr-only">Tableau de bord</h1>
+        <EnTetePage
+          titre="Tableau de bord"
+          actions={
+            <div className="w-56">
+              <ChoixPeriode
+                periode={periode}
+                permises={PERIODES_TABLEAU}
+                action="/espace"
+                disposition="ligne"
+              />
+            </div>
+          }
+        />
         <ChiffresCles chiffres={chiffresCles(lignes, periode, maintenant)} periode={periode} />
 
         <div className="grid gap-3.5 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] xl:grid-rows-[minmax(0,1fr)_auto]">
@@ -108,10 +122,12 @@ export default async function PageTableauDeBord({
                 </p>
               ) : (
                 <ul className="flex min-h-0 flex-col overflow-y-auto">
-                  {relances.slice(0, 3).map((c) => (
+                  {relances.slice(0, 3).map((c, i) => (
                     <li
                       key={c.id}
-                      className="flex items-center justify-between gap-2.5 border-t border-trait py-1.5 xl:py-1"
+                      className={`flex items-center justify-between gap-2.5 border-t border-trait py-1.5 xl:py-1 ${
+                        i === 2 ? "xl:hidden" : ""
+                      }`}
                     >
                       <span className="flex min-w-0 flex-col">
                         <span className="truncate text-sm font-bold">{c.nom}</span>
@@ -128,9 +144,16 @@ export default async function PageTableauDeBord({
                   ))}
                 </ul>
               )}
+              {/* Sur grand écran, deux relances tiennent sans rogner la carte : le lien
+                  compte les autres selon ce qui est affiché. */}
               {relances.length > 3 ? (
-                <Link href="/candidats" className="mt-auto text-[13px] font-bold">
+                <Link href="/candidats" className="mt-auto text-[13px] font-bold xl:hidden">
                   Et {relances.length - 3} autre{relances.length - 3 > 1 ? "s" : ""}
+                </Link>
+              ) : null}
+              {relances.length > 2 ? (
+                <Link href="/candidats" className="mt-auto hidden text-[13px] font-bold xl:inline">
+                  Et {relances.length - 2} autre{relances.length - 2 > 1 ? "s" : ""}
                 </Link>
               ) : null}
             </section>
@@ -276,123 +299,131 @@ function Activite({ evenements, maintenant }: { evenements: Evenement[]; mainten
 // apparaîtra. L'administrateur peut afficher des données fictives (ADR-0027).
 function PremiersPas({ admin }: { admin: boolean }) {
   return (
-    <div className="grid gap-5 xl:min-h-0 xl:flex-1 xl:grid-cols-[520px_minmax(0,1fr)]">
-      <section className="flex flex-col gap-5 rounded-bloc border border-bordure bg-white p-6 md:px-8 md:py-7">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="text-[34px] leading-[1.05] font-extrabold font-stretch-75%">
-            Votre agence est prête.
-          </h1>
-          <p className="text-gris">
-            Trois étapes pour recevoir votre premier profil. Comptez 15 à 20 minutes pour le
-            candidat, 2 pour vous.
-          </p>
-        </div>
-        <ol className="flex flex-col gap-3">
-          <li className="flex items-start gap-3.5">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-vert text-white">
-              <CheckIcon className="size-4" strokeWidth={3} aria-hidden="true" />
-            </span>
-            <span className="flex flex-col gap-0.5">
-              <span className="font-extrabold text-gris line-through">Créer votre agence</span>
-              <span className="text-[13px] text-gris">Fait.</span>
-            </span>
-          </li>
-          <li className="flex items-start gap-3.5">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-[2.5px] border-braise font-extrabold text-braise-fonce">
-              2
-            </span>
-            <span className="flex flex-col items-start gap-1.5">
-              <span className="font-extrabold">Inviter votre premier candidat</span>
-              <span className="text-[13px] text-gris">
-                Il reçoit un lien et passe le questionnaire sur son téléphone, sans créer de compte.
-              </span>
-              <BoutonInviter className="mt-1" />
-            </span>
-          </li>
-          <li className="flex items-start gap-3.5">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-champ font-extrabold text-gris">
-              3
-            </span>
-            <span className="flex flex-col gap-0.5">
-              <span className="font-extrabold">Ajouter vos recruteurs</span>
-              <span className="text-[13px] text-gris">
-                Facultatif. Ils verront les mêmes candidats que vous.{" "}
-                {admin ? <Link href="/equipe">Inviter un membre</Link> : null}
-              </span>
-            </span>
-          </li>
-        </ol>
-        {admin ? (
-          <div className="mt-auto flex flex-col items-start gap-2 rounded-bloc bg-ivoire-2 px-4 py-3.5 text-encre">
-            <span className="text-[15px] font-extrabold">
-              Envie de voir un tableau de bord rempli ?
-            </span>
-            <span className="text-sm">
-              Affichez 40 candidats fictifs : tous les écrans se remplissent, rien n&apos;est
-              enregistré.
-            </span>
-            <BoutonDemonstration />
+    <>
+      <EnTetePage titre="Tableau de bord" />
+      <div className="grid gap-5 xl:min-h-0 xl:flex-1 xl:grid-cols-[520px_minmax(0,1fr)]">
+        <section className="flex flex-col gap-5 rounded-bloc border border-bordure bg-white p-6 md:px-8 md:py-7">
+          <div className="flex flex-col gap-1.5">
+            <h2 className="text-[34px] leading-[1.05] font-extrabold font-stretch-75%">
+              Votre agence est prête.
+            </h2>
+            <p className="text-gris">
+              Trois étapes pour recevoir votre premier profil. Comptez 15 à 20 minutes pour le
+              candidat, 2 pour vous.
+            </p>
           </div>
-        ) : null}
-      </section>
+          <ol className="flex flex-col gap-3">
+            <li className="flex items-start gap-3.5">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-vert text-white">
+                <CheckIcon className="size-4" strokeWidth={3} aria-hidden="true" />
+              </span>
+              <span className="flex flex-col gap-0.5">
+                <span className="font-extrabold text-gris line-through">Créer votre agence</span>
+                <span className="text-[13px] text-gris">Fait.</span>
+              </span>
+            </li>
+            <li className="flex items-start gap-3.5">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-[2.5px] border-braise font-extrabold text-braise-fonce">
+                2
+              </span>
+              <span className="flex flex-col items-start gap-1.5">
+                <span className="font-extrabold">Inviter votre premier candidat</span>
+                <span className="text-[13px] text-gris">
+                  Il reçoit un lien et passe le questionnaire sur son téléphone, sans créer de
+                  compte.
+                </span>
+                <BoutonInviter className="mt-1" />
+              </span>
+            </li>
+            <li className="flex items-start gap-3.5">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-champ font-extrabold text-gris">
+                3
+              </span>
+              <span className="flex flex-col gap-0.5">
+                <span className="font-extrabold">Ajouter vos recruteurs</span>
+                <span className="text-[13px] text-gris">
+                  Facultatif. Ils verront les mêmes candidats que vous.{" "}
+                  {admin ? <Link href="/equipe">Inviter un membre</Link> : null}
+                </span>
+              </span>
+            </li>
+          </ol>
+          {admin ? (
+            <div className="mt-auto flex flex-col items-start gap-2 rounded-bloc bg-ivoire-2 px-4 py-3.5 text-encre">
+              <span className="text-[15px] font-extrabold">
+                Envie de voir un tableau de bord rempli ?
+              </span>
+              <span className="text-sm">
+                Affichez 40 candidats fictifs : tous les écrans se remplissent, rien n&apos;est
+                enregistré.
+              </span>
+              <BoutonDemonstration />
+            </div>
+          ) : null}
+        </section>
 
-      <section
-        aria-label="Aperçu du tableau de bord"
-        className="relative hidden min-h-96 overflow-hidden rounded-bloc border border-bordure bg-white md:block"
-      >
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 grid grid-cols-3 grid-rows-[80px_minmax(0,1fr)_minmax(0,1fr)] gap-3.5 p-5 opacity-50"
+        <section
+          aria-label="Aperçu du tableau de bord"
+          className="relative hidden min-h-96 overflow-hidden rounded-bloc border border-bordure bg-white md:block"
         >
-          <div className="col-span-3 grid grid-cols-6 gap-2.5">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <span
-                key={i}
-                className="flex flex-col justify-center gap-1.5 rounded-controle border border-bordure px-3"
-              >
-                <span className="h-4.5 w-1/2 rounded-sm bg-bordure" />
-                <span className="h-2 w-3/4 rounded-sm bg-trait" />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 grid grid-cols-3 grid-rows-[80px_minmax(0,1fr)_minmax(0,1fr)] gap-3.5 p-5 opacity-50"
+          >
+            <div className="col-span-3 grid grid-cols-6 gap-2.5">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <span
+                  key={i}
+                  className="flex flex-col justify-center gap-1.5 rounded-controle border border-bordure px-3"
+                >
+                  <span className="h-4.5 w-1/2 rounded-sm bg-bordure" />
+                  <span className="h-2 w-3/4 rounded-sm bg-trait" />
+                </span>
+              ))}
+            </div>
+            <div className="col-span-2 flex flex-col justify-around rounded-controle border border-bordure p-4">
+              {[90, 75, 60, 45].map((w) => (
+                <span key={w} className="h-6 rounded-sm bg-bordure" style={{ width: `${w}%` }} />
+              ))}
+            </div>
+            <div className="flex items-center justify-center rounded-controle border border-bordure">
+              <span className="size-28 rounded-full border-[16px] border-bordure" />
+            </div>
+            <div className="col-span-2 grid grid-cols-4 gap-2.5 rounded-controle border border-bordure p-3.5">
+              {[0, 1, 2, 3].map((i) => (
+                <span
+                  key={i}
+                  className="flex flex-col justify-around rounded-controle border border-bordure p-2.5"
+                >
+                  {[70, 40, 55, 80, 35].map((w) => (
+                    <span
+                      key={w}
+                      className="h-2 rounded-sm bg-bordure"
+                      style={{ width: `${w}%` }}
+                    />
+                  ))}
+                </span>
+              ))}
+            </div>
+            <div className="flex flex-col justify-around rounded-controle border border-bordure p-3.5">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <span key={i} className="h-2.5 rounded-sm bg-trait" />
+              ))}
+            </div>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center p-6">
+            <div className="flex max-w-[420px] flex-col gap-2 rounded-bloc border border-bordure bg-white px-6 py-5 text-center shadow-md">
+              <span className="text-[19px] font-extrabold font-stretch-[85%]">
+                Vos graphiques apparaîtront ici
               </span>
-            ))}
-          </div>
-          <div className="col-span-2 flex flex-col justify-around rounded-controle border border-bordure p-4">
-            {[90, 75, 60, 45].map((w) => (
-              <span key={w} className="h-6 rounded-sm bg-bordure" style={{ width: `${w}%` }} />
-            ))}
-          </div>
-          <div className="flex items-center justify-center rounded-controle border border-bordure">
-            <span className="size-28 rounded-full border-[16px] border-bordure" />
-          </div>
-          <div className="col-span-2 grid grid-cols-4 gap-2.5 rounded-controle border border-bordure p-3.5">
-            {[0, 1, 2, 3].map((i) => (
-              <span
-                key={i}
-                className="flex flex-col justify-around rounded-controle border border-bordure p-2.5"
-              >
-                {[70, 40, 55, 80, 35].map((w) => (
-                  <span key={w} className="h-2 rounded-sm bg-bordure" style={{ width: `${w}%` }} />
-                ))}
+              <span className="text-sm leading-relaxed text-gris">
+                Dès le premier questionnaire terminé : parcours des candidats, taux de complétion,
+                profils reçus et activité.
               </span>
-            ))}
+            </div>
           </div>
-          <div className="flex flex-col justify-around rounded-controle border border-bordure p-3.5">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <span key={i} className="h-2.5 rounded-sm bg-trait" />
-            ))}
-          </div>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          <div className="flex max-w-[420px] flex-col gap-2 rounded-bloc border border-bordure bg-white px-6 py-5 text-center shadow-md">
-            <span className="text-[19px] font-extrabold font-stretch-[85%]">
-              Vos graphiques apparaîtront ici
-            </span>
-            <span className="text-sm leading-relaxed text-gris">
-              Dès le premier questionnaire terminé : parcours des candidats, taux de complétion,
-              profils reçus et activité.
-            </span>
-          </div>
-        </div>
-      </section>
-    </div>
+        </section>
+      </div>
+    </>
   );
 }

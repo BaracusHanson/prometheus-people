@@ -32,7 +32,7 @@ Jamais de rouge ni de vert pour qualifier un candidat : un trait bas n'est pas �
 
 **Mise en page**
 
-- Espace recruteur : **colonne de navigation à gauche** de 88 px (icône et libellé), qui ne coûte aucune hauteur ; sur mobile, barre de navigation en bas. La colonne porte aussi le bouton « Inviter un candidat » (action principale, un seul tiroir pour toute l'application), le compteur du forfait et le menu du compte (déconnexion). Ce cadre est rendu une fois par le layout du groupe de routes `(app)/(cadre)` ; chaque page revérifie quand même ses droits.
+- _(Modifié le 2026-10-03 par l'[ADR-0029](0029-cadre-colonne-claire-et-barre-du-haut.md) : colonne claire libellée de 220 px, repliable, et barre du haut contextuelle rendue par chaque page.)_ Espace recruteur : **colonne de navigation à gauche** de 88 px (icône et libellé), qui ne coûte aucune hauteur ; sur mobile, barre de navigation en bas. La colonne porte aussi le bouton « Inviter un candidat » (action principale, un seul tiroir pour toute l'application), le compteur du forfait et le menu du compte (déconnexion). Ce cadre est rendu une fois par le layout du groupe de routes `(app)/(cadre)` ; chaque page revérifie quand même ses droits.
 - Tailles de référence : mobile 390 px, tablette 834 px, **portable 1536 × 740** (1920 × 1080 à 125 %, moins le navigateur), grand écran 1920 px.
 - **Le tableau de bord et les analyses tiennent sans défilement à partir du portable.** Sur tablette et mobile, on défile, dans l'ordre : chiffres clés, relances, candidats, graphiques.
 - Parcours candidat pensé d'abord pour le téléphone : texte de 16 à 17 px, boutons de 52 px, une action par écran, nom de l'agence en tête.

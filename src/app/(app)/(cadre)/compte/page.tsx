@@ -15,21 +15,25 @@ export default async function PageCompte() {
   const existant = await aUnMotDePasse();
 
   return (
-    <div className="flex max-w-3xl flex-col gap-5">
+    <>
       <EnTetePage titre="Mon compte" precision={session.user.email} />
-      <Card>
-        <CardHeader>
-          <CardTitle>{existant ? "Changer de mot de passe" : "Choisir un mot de passe"}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <p className="max-w-2xl leading-relaxed">
-            {existant
-              ? "Changer de mot de passe déconnecte vos autres appareils. Un email vous prévient de chaque changement."
-              : "Avec un mot de passe, vous vous connectez sans ouvrir votre messagerie. Le lien reçu par email reste possible, notamment en cas d'oubli."}
-          </p>
-          <FormulaireMotDePasseCompte existant={existant} />
-        </CardContent>
-      </Card>
-    </div>
+      <div className="flex max-w-3xl flex-col gap-5">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {existant ? "Changer de mot de passe" : "Choisir un mot de passe"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="max-w-2xl leading-relaxed">
+              {existant
+                ? "Changer de mot de passe déconnecte vos autres appareils. Un email vous prévient de chaque changement."
+                : "Avec un mot de passe, vous vous connectez sans ouvrir votre messagerie. Le lien reçu par email reste possible, notamment en cas d'oubli."}
+            </p>
+            <FormulaireMotDePasseCompte existant={existant} />
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }

@@ -1,8 +1,9 @@
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 
-import { BandeauApercu } from "@/components/bandeau-apercu";
 import { CadreApplication } from "@/components/cadres";
 import { Toaster } from "@/components/ui/sonner";
+import { obtenirAgence } from "@/modules/agences/queries";
 import { lireApercu } from "@/modules/apercu/etat";
 import { FORFAITS, messageQuotaAtteint, phraseRestants } from "@/modules/candidats/forfaits";
 import { lireForfait } from "@/modules/candidats/queries";
@@ -18,10 +19,12 @@ const LIBELLES_ROLE = { admin: "Administrateur", recruteur: "Recruteur" } as con
 // cadre ne protège rien, il affiche seulement.
 export default async function LayoutCadre({ children }: { children: ReactNode }) {
   const ctx = await exigerContexte();
-  const [session, forfait, apercu] = await Promise.all([
+  const [session, forfait, apercu, agence, temoins] = await Promise.all([
     lireSession(),
     lireForfait(ctx),
     lireApercu(),
+    obtenirAgence(ctx),
+    cookies(),
   ]);
   const essai = FORFAITS[forfait.forfait].periode === "total";
 
@@ -30,6 +33,9 @@ export default async function LayoutCadre({ children }: { children: ReactNode })
       compte={session?.user.email ?? ""}
       role={LIBELLES_ROLE[ctx.role]}
       admin={ctx.role === "admin"}
+      agence={agence?.nom ?? ""}
+      apercu={apercu}
+      repliee={temoins.get("pp_colonne")?.value === "repliee"}
       forfait={{
         utilises: forfait.utilises,
         limite: forfait.limite,
@@ -39,7 +45,6 @@ export default async function LayoutCadre({ children }: { children: ReactNode })
         periode: essai ? "essai" : "ce mois",
       }}
     >
-      {apercu ? <BandeauApercu /> : null}
       {children}
       <Toaster />
     </CadreApplication>
