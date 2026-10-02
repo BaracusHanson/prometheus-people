@@ -28,8 +28,10 @@ const AVANTAGES: Record<Forfait, string[]> = {
 };
 
 // Les prix et les quotas viennent de la grille de l'application (forfaits.ts), seule source.
-export function CarteForfait({ forfait }: { forfait: Forfait }) {
+// Le titre est un h3 sous une section titrée (accueil), un h2 directement sous le h1 (tarifs).
+export function CarteForfait({ forfait, niveau = 3 }: { forfait: Forfait; niveau?: 2 | 3 }) {
   const f = FORFAITS[forfait];
+  const Titre = niveau === 2 ? "h2" : "h3";
   const essai = forfait === "essai";
   return (
     <div
@@ -37,9 +39,9 @@ export function CarteForfait({ forfait }: { forfait: Forfait }) {
         forfait === "agence" ? "border-2 border-bleu" : "border border-bordure"
       }`}
     >
-      <h3 className="text-[22px] font-extrabold font-stretch-[85%]">
+      <Titre className="text-[22px] font-extrabold font-stretch-[85%]">
         {essai ? f.libelle : `Forfait ${f.libelle}`}
-      </h3>
+      </Titre>
       <p className="flex flex-wrap items-baseline gap-2">
         <span className="text-5xl leading-none font-extrabold font-stretch-[70%]">
           {f.prixHT} €
