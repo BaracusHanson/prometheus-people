@@ -19,6 +19,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useMoinsAnimer } from "@/components/anime/mouvement";
 import type { CourbesFin, SemaineQualite } from "@/modules/analyses/calculs";
 import { SEUIL_VIGILANCE } from "@/modules/analyses/calculs";
 
@@ -33,6 +34,7 @@ const STYLES_SERIE = [
 ] as const;
 
 export function GraphiqueCourbesFin({ courbes }: { courbes: CourbesFin }) {
+  const moinsAnimer = useMoinsAnimer();
   const config = Object.fromEntries(
     courbes.postes.map((p, i) => [p.poste, { label: p.libelle, color: STYLES_SERIE[i]!.couleur }]),
   ) satisfies ChartConfig;
@@ -81,7 +83,8 @@ export function GraphiqueCourbesFin({ courbes }: { courbes: CourbesFin }) {
               strokeWidth={2.5}
               strokeDasharray={STYLES_SERIE[i]!.tirets}
               dot={false}
-              isAnimationActive={false}
+              isAnimationActive={!moinsAnimer}
+              animationDuration={800}
             />
           ))}
         </LineChart>
@@ -115,6 +118,7 @@ const CONFIG_QUALITE = {
 } satisfies ChartConfig;
 
 export function GraphiqueQualite({ semaines }: { semaines: SemaineQualite[] }) {
+  const moinsAnimer = useMoinsAnimer();
   // Une semaine sans questionnaire n'a ni barre ni chiffre ; une semaine à 0 % affiche « 0 ».
   const donnees = semaines.map((s) => ({
     ...s,
@@ -159,7 +163,8 @@ export function GraphiqueQualite({ semaines }: { semaines: SemaineQualite[] }) {
         <Bar
           dataKey="part"
           radius={[3, 3, 0, 0]}
-          isAnimationActive={false}
+          isAnimationActive={!moinsAnimer}
+          animationDuration={800}
           minPointSize={(_v, i) => (donnees[i]?.termines ? 2 : 0)}
         >
           <LabelList

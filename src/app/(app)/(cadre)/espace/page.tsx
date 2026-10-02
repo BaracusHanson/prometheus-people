@@ -3,6 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 import { BarreRang } from "@/components/barre-rang";
+import { Anneau } from "@/components/anime/anneau";
+import { DiagrammeParcours } from "@/components/anime/diagramme-parcours";
+import { FournisseurAnime } from "@/components/anime/mouvement";
 import { BoutonInviter } from "@/components/invitation-candidat";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,7 +32,6 @@ import { exigerContexte } from "@/server/authz";
 import { BoutonRelance } from "../candidats/bouton-relance";
 import { BoutonDemonstration } from "./bouton-demonstration";
 import { ChiffresCles } from "./chiffres-cles";
-import { DiagrammeParcours } from "./diagramme-parcours";
 
 export const metadata: Metadata = { title: "Tableau de bord — Prometheus People" };
 
@@ -67,84 +69,83 @@ export default async function PageTableauDeBord({
   const flux = parcours(lignes, periode, maintenant);
 
   return (
-    <div className="flex flex-col gap-3.5 xl:min-h-0 xl:flex-1">
-      <h1 className="sr-only">Tableau de bord</h1>
-      <ChiffresCles chiffres={chiffresCles(lignes, periode, maintenant)} periode={periode} />
+    <FournisseurAnime>
+      <div className="flex flex-col gap-3.5 xl:min-h-0 xl:flex-1">
+        <h1 className="sr-only">Tableau de bord</h1>
+        <ChiffresCles chiffres={chiffresCles(lignes, periode, maintenant)} periode={periode} />
 
-      <div className="grid gap-3.5 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] xl:grid-rows-[minmax(0,1fr)_auto]">
-        <section
-          aria-labelledby="titre-parcours"
-          className="flex min-h-64 flex-col gap-2 rounded-bloc border border-bordure bg-white px-[18px] py-3.5 xl:min-h-0"
-        >
-          <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-            <h2 id="titre-parcours" className={TITRE}>
-              Parcours des {flux.invites} candidats invités
-            </h2>
-            <span className="text-xs text-gris">en ambre : où on les perd</span>
-          </div>
-          <DiagrammeParcours parcours={flux} />
-          <p className="text-[13px] font-bold">{flux.conclusion}</p>
-        </section>
-
-        <div className="grid gap-3.5 sm:grid-cols-[210px_minmax(0,1fr)] xl:min-h-0">
-          <AnneauCompletion completion={completion(lignes, periode, maintenant)} />
+        <div className="grid gap-3.5 xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] xl:grid-rows-[minmax(0,1fr)_auto]">
           <section
-            aria-labelledby="titre-relances"
-            className="flex min-h-0 flex-col gap-1.5 overflow-hidden rounded-bloc border border-l-[5px] border-bordure border-l-ambre bg-white px-4 py-3.5"
+            aria-labelledby="titre-parcours"
+            className="flex min-h-64 flex-col gap-2 rounded-bloc border border-bordure bg-white px-[18px] py-3.5 xl:min-h-0"
           >
-            <h2 id="titre-relances" className={TITRE}>
-              À relancer
-            </h2>
-            <p className="text-[13px] text-gris">
-              Invités depuis plus de 48 h sans avoir commencé, ou lien expiré.
-            </p>
-            {relances.length === 0 ? (
-              <p className="mt-1 flex items-center gap-2 text-sm">
-                <CircleCheckIcon className="size-4 shrink-0 text-vert" aria-hidden="true" />
-                Personne à relancer pour l&apos;instant.
-              </p>
-            ) : (
-              <ul className="flex min-h-0 flex-col overflow-y-auto">
-                {relances.slice(0, 3).map((c) => (
-                  <li
-                    key={c.id}
-                    className="flex items-center justify-between gap-2.5 border-t border-trait py-1.5 xl:py-1"
-                  >
-                    <span className="flex min-w-0 flex-col">
-                      <span className="truncate text-sm font-bold">{c.nom}</span>
-                      <span className="truncate text-xs text-gris">
-                        {c.statut === "expire" ? (
-                          <span className="font-bold text-ambre-texte">lien expiré</span>
-                        ) : (
-                          <>invité {ilYA(c.inviteLe, maintenant)}</>
-                        )}
-                      </span>
-                    </span>
-                    <BoutonRelance id={c.id} nom={c.nom} apercu={apercu} plein />
-                  </li>
-                ))}
-              </ul>
-            )}
-            {relances.length > 3 ? (
-              <Link href="/candidats" className="mt-auto text-[13px] font-bold">
-                Et {relances.length - 3} autre{relances.length - 3 > 1 ? "s" : ""}
-              </Link>
-            ) : null}
+            <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+              <h2 id="titre-parcours" className={TITRE}>
+                Parcours des {flux.invites} candidats invités
+              </h2>
+              <span className="text-xs text-gris">en ambre : où on les perd</span>
+            </div>
+            <DiagrammeParcours parcours={flux} />
+            <p className="text-[13px] font-bold">{flux.conclusion}</p>
           </section>
-        </div>
 
-        <ProfilsRecents profils={profils} maintenant={maintenant} />
-        <Activite evenements={activite(lignes)} maintenant={maintenant} />
+          <div className="grid gap-3.5 sm:grid-cols-[210px_minmax(0,1fr)] xl:min-h-0">
+            <AnneauCompletion completion={completion(lignes, periode, maintenant)} />
+            <section
+              aria-labelledby="titre-relances"
+              className="flex min-h-0 flex-col gap-1.5 overflow-hidden rounded-bloc border border-l-[5px] border-bordure border-l-ambre bg-white px-4 py-3.5"
+            >
+              <h2 id="titre-relances" className={TITRE}>
+                À relancer
+              </h2>
+              <p className="text-[13px] text-gris">
+                Invités depuis plus de 48 h sans avoir commencé, ou lien expiré.
+              </p>
+              {relances.length === 0 ? (
+                <p className="mt-1 flex items-center gap-2 text-sm">
+                  <CircleCheckIcon className="size-4 shrink-0 text-vert" aria-hidden="true" />
+                  Personne à relancer pour l&apos;instant.
+                </p>
+              ) : (
+                <ul className="flex min-h-0 flex-col overflow-y-auto">
+                  {relances.slice(0, 3).map((c) => (
+                    <li
+                      key={c.id}
+                      className="flex items-center justify-between gap-2.5 border-t border-trait py-1.5 xl:py-1"
+                    >
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-bold">{c.nom}</span>
+                        <span className="truncate text-xs text-gris">
+                          {c.statut === "expire" ? (
+                            <span className="font-bold text-ambre-texte">lien expiré</span>
+                          ) : (
+                            <>invité {ilYA(c.inviteLe, maintenant)}</>
+                          )}
+                        </span>
+                      </span>
+                      <BoutonRelance id={c.id} nom={c.nom} apercu={apercu} plein />
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {relances.length > 3 ? (
+                <Link href="/candidats" className="mt-auto text-[13px] font-bold">
+                  Et {relances.length - 3} autre{relances.length - 3 > 1 ? "s" : ""}
+                </Link>
+              ) : null}
+            </section>
+          </div>
+
+          <ProfilsRecents profils={profils} maintenant={maintenant} />
+          <Activite evenements={activite(lignes)} maintenant={maintenant} />
+        </div>
       </div>
-    </div>
+    </FournisseurAnime>
   );
 }
 
 // Anneau de complétion : la part écrite au centre, l'écart écrit dessous.
 function AnneauCompletion({ completion: c }: { completion: Completion }) {
-  const rayon = 56;
-  const circonference = 2 * Math.PI * rayon;
-  const part = (c.pourcentage ?? 0) / 100;
   return (
     <section
       aria-labelledby="titre-completion"
@@ -153,33 +154,7 @@ function AnneauCompletion({ completion: c }: { completion: Completion }) {
       <h2 id="titre-completion" className={`${TITRE} self-start`}>
         Complétion
       </h2>
-      <div className="relative size-[140px] shrink-0">
-        <svg viewBox="0 0 140 140" className="size-full -rotate-90" aria-hidden="true">
-          <circle
-            cx="70"
-            cy="70"
-            r={rayon}
-            fill="none"
-            stroke="var(--color-ivoire-2)"
-            strokeWidth="14"
-          />
-          <circle
-            cx="70"
-            cy="70"
-            r={rayon}
-            fill="none"
-            stroke="var(--color-encre)"
-            strokeWidth="14"
-            strokeDasharray={`${part * circonference} ${circonference}`}
-          />
-        </svg>
-        <span className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="chiffres text-[34px] leading-none font-extrabold font-stretch-[70%]">
-            {c.pourcentage === null ? "—" : `${c.pourcentage} %`}
-          </span>
-          <span className="text-xs text-gris">des tests commencés</span>
-        </span>
-      </div>
+      <Anneau pourcentage={c.pourcentage} />
       <p className="text-center text-[13px] text-gris">{c.ecart}</p>
     </section>
   );
@@ -227,7 +202,7 @@ function ProfilsRecents({ profils, maintenant }: { profils: ProfilRecent[]; main
                           {COURT[t]}
                         </abbr>
                       </dt>
-                      <BarreRang rang={p.rangs[t]} petite />
+                      <BarreRang rang={p.rangs[t]} petite anime={ORDRE_TRAITS.indexOf(t) * 60} />
                       <dd className="chiffres text-right font-bold">
                         {p.rangs[t]}
                         <span className="sr-only">e rang</span>

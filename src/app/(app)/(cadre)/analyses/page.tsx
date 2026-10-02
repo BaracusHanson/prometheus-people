@@ -1,6 +1,8 @@
 import { UsersIcon } from "lucide-react";
 import type { Metadata } from "next";
 
+import { FournisseurAnime } from "@/components/anime/mouvement";
+import { NuageRangs } from "@/components/anime/nuage-rangs";
 import { ChoixPeriode } from "@/components/choix-periode";
 import {
   carteChaleur,
@@ -19,7 +21,6 @@ import { analysesFictives } from "@/modules/apercu/donnees";
 import { lireApercu } from "@/modules/apercu/etat";
 import { TYPES_POSTE, type TypePoste } from "@/modules/candidats/schemas";
 import { LIBELLES_TRAITS } from "@/modules/questionnaire/libelles";
-import { ZONE_MOYENNE } from "@/modules/questionnaire/libelles";
 import {
   LIBELLES_PERIODE,
   lirePeriode,
@@ -62,73 +63,75 @@ export default async function PageAnalyses({
   const qualite = qualiteParSemaine(lignes, periode, maintenant);
 
   return (
-    <div className="flex flex-col gap-3.5 xl:min-h-0 xl:flex-1">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-3xl leading-tight font-extrabold font-stretch-75%">
-          Analyses{" "}
-          <span className="text-sm font-semibold text-gris font-stretch-100%">
-            {LIBELLES_PERIODE[periode].toLowerCase()}, {invites} candidat{invites > 1 ? "s" : ""}{" "}
-            invité{invites > 1 ? "s" : ""}
-            {apercu ? ", données fictives" : ""}
-          </span>
-        </h1>
-        <div className="w-72">
-          <ChoixPeriode
-            periode={periode}
-            permises={PERIODES_ANALYSES}
-            action="/analyses"
-            disposition="ligne"
-          />
+    <FournisseurAnime>
+      <div className="flex flex-col gap-3.5 xl:min-h-0 xl:flex-1">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h1 className="text-3xl leading-tight font-extrabold font-stretch-75%">
+            Analyses{" "}
+            <span className="text-sm font-semibold text-gris font-stretch-100%">
+              {LIBELLES_PERIODE[periode].toLowerCase()}, {invites} candidat{invites > 1 ? "s" : ""}{" "}
+              invité{invites > 1 ? "s" : ""}
+              {apercu ? ", données fictives" : ""}
+            </span>
+          </h1>
+          <div className="w-72">
+            <ChoixPeriode
+              periode={periode}
+              permises={PERIODES_ANALYSES}
+              action="/analyses"
+              disposition="ligne"
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-3.5 lg:grid-cols-3 xl:min-h-0 xl:flex-1 xl:grid-rows-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <section aria-labelledby="titre-chaleur" className={CARTE}>
+            <h2 id="titre-chaleur" className={TITRE}>
+              Quand les candidats passent le questionnaire
+            </h2>
+            <GrilleChaleur carte={carteChaleur(lignes, periode, maintenant)} />
+          </section>
+
+          <section aria-labelledby="titre-courbes" className={CARTE}>
+            <h2 id="titre-courbes" className={TITRE}>
+              Combien ont terminé, et quand
+            </h2>
+            {courbes.postes.length > 0 ? <GraphiqueCourbesFin courbes={courbes} /> : null}
+            <p className="text-[13px] leading-snug">{courbes.conclusion}</p>
+          </section>
+
+          <section aria-labelledby="titre-qualite" className={CARTE}>
+            <div className="flex items-baseline justify-between gap-2">
+              <h2 id="titre-qualite" className={TITRE}>
+                Qualité des réponses
+              </h2>
+              <span className="text-xs text-gris">par semaine</span>
+            </div>
+            {qualite.moyenne !== null ? <GraphiqueQualite semaines={qualite.semaines} /> : null}
+            <p className="text-[13px] leading-snug">
+              {qualite.conclusion} Semaines au-delà de 10 % en ambre.
+            </p>
+          </section>
+
+          <section aria-labelledby="titre-profils" className={`${CARTE} lg:col-span-3`}>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 id="titre-profils" className={TITRE}>
+                Profils de vos candidats par poste{" "}
+                <span className="text-xs font-semibold text-gris font-stretch-100%">
+                  un point par candidat
+                </span>
+              </h2>
+              {poste ? <ChoixPoste poste={poste} postes={postes} periode={periode} /> : null}
+            </div>
+            {poste ? (
+              <Repartition repartition={repartition(lignes, poste, periode, maintenant)} />
+            ) : (
+              <p className="text-sm text-gris">Aucun questionnaire terminé sur la période.</p>
+            )}
+          </section>
         </div>
       </div>
-
-      <div className="grid gap-3.5 lg:grid-cols-3 xl:min-h-0 xl:flex-1 xl:grid-rows-[minmax(0,1.2fr)_minmax(0,1fr)]">
-        <section aria-labelledby="titre-chaleur" className={CARTE}>
-          <h2 id="titre-chaleur" className={TITRE}>
-            Quand les candidats passent le questionnaire
-          </h2>
-          <GrilleChaleur carte={carteChaleur(lignes, periode, maintenant)} />
-        </section>
-
-        <section aria-labelledby="titre-courbes" className={CARTE}>
-          <h2 id="titre-courbes" className={TITRE}>
-            Combien ont terminé, et quand
-          </h2>
-          {courbes.postes.length > 0 ? <GraphiqueCourbesFin courbes={courbes} /> : null}
-          <p className="text-[13px] leading-snug">{courbes.conclusion}</p>
-        </section>
-
-        <section aria-labelledby="titre-qualite" className={CARTE}>
-          <div className="flex items-baseline justify-between gap-2">
-            <h2 id="titre-qualite" className={TITRE}>
-              Qualité des réponses
-            </h2>
-            <span className="text-xs text-gris">par semaine</span>
-          </div>
-          {qualite.moyenne !== null ? <GraphiqueQualite semaines={qualite.semaines} /> : null}
-          <p className="text-[13px] leading-snug">
-            {qualite.conclusion} Semaines au-delà de 10 % en ambre.
-          </p>
-        </section>
-
-        <section aria-labelledby="titre-profils" className={`${CARTE} lg:col-span-3`}>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 id="titre-profils" className={TITRE}>
-              Profils de vos candidats par poste{" "}
-              <span className="text-xs font-semibold text-gris font-stretch-100%">
-                un point par candidat
-              </span>
-            </h2>
-            {poste ? <ChoixPoste poste={poste} postes={postes} periode={periode} /> : null}
-          </div>
-          {poste ? (
-            <Repartition repartition={repartition(lignes, poste, periode, maintenant)} />
-          ) : (
-            <p className="text-sm text-gris">Aucun questionnaire terminé sur la période.</p>
-          )}
-        </section>
-      </div>
-    </div>
+    </FournisseurAnime>
   );
 }
 
@@ -220,30 +223,7 @@ function Repartition({ repartition: r }: { repartition: RepartitionPoste }) {
             <span className="text-[15px] font-extrabold" aria-hidden="true">
               {LIBELLES_TRAITS[t.trait].nom}
             </span>
-            <span
-              className="relative block h-7 max-md:order-last max-md:col-span-2 xl:h-6"
-              aria-hidden="true"
-            >
-              <span
-                className="absolute inset-y-0 block bg-ivoire-2"
-                style={{
-                  left: `${ZONE_MOYENNE.debut}%`,
-                  width: `${ZONE_MOYENNE.fin - ZONE_MOYENNE.debut}%`,
-                }}
-              />
-              <span className="absolute inset-x-0 top-1/2 block h-px bg-champ" />
-              {t.rangs.map((rang, i) => (
-                <span
-                  key={i}
-                  className="absolute block size-2.5 -translate-x-1/2 rounded-full border border-white bg-encre/70"
-                  style={{ left: `${rang}%`, top: `${4 + ((i * 37) % 5) * 4}px` }}
-                />
-              ))}
-              <span
-                className="absolute inset-y-0 block w-[3px] -translate-x-1/2 bg-encre"
-                style={{ left: `${t.mediane}%` }}
-              />
-            </span>
+            <NuageRangs rangs={t.rangs} mediane={t.mediane} />
             <span className="text-sm text-gris" aria-hidden="true">
               médiane <strong className="text-encre">{t.mediane}</strong>
             </span>

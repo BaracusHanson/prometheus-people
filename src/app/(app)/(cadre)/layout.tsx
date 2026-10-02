@@ -9,6 +9,8 @@ import { lireForfait } from "@/modules/candidats/queries";
 import { lireSession } from "@/server/auth/session";
 import { exigerContexte } from "@/server/authz";
 
+import "./anime.css";
+
 const LIBELLES_ROLE = { admin: "Administrateur", recruteur: "Recruteur" } as const;
 
 // Cadre commun des pages de l'espace agence : la navigation reste en place d'une page

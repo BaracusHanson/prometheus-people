@@ -1,0 +1,83 @@
+/*
+ * Apparitions de l'espace recruteur (ADR-0028). En CSS, jouées dès le premier affichage :
+ * les données ne dépendent jamais du JavaScript et ne font jamais attendre. Uniquement
+ * transform, opacity et le tracé des traits ; courtes (0,9 s au plus) ; état final
+ * immédiat si l'utilisateur a demandé moins d'animations.
+ */
+
+/* Un rang glisse du 50e rang jusqu'au sien (la piste porte container-type: inline-size). */
+@keyframes anime-rang {
+  from {
+    transform: translateX(calc((50 - var(--rang)) * 1cqw));
+  }
+}
+.anime-rang {
+  animation: anime-rang 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--retard, 0ms);
+}
+
+/* Un trait se dessine (pathLength = 1). */
+@keyframes anime-trace {
+  from {
+    stroke-dashoffset: 1;
+  }
+}
+.anime-trace {
+  stroke-dasharray: 1;
+  animation: anime-trace 900ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* Le dernier point d'une mini-courbe s'allume quand le tracé l'atteint. */
+@keyframes anime-pop {
+  from {
+    transform: scale(0);
+  }
+}
+.anime-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: anime-pop 260ms cubic-bezier(0.22, 1, 0.36, 1) 820ms both;
+}
+
+/* L'anneau de complétion se trace depuis zéro. */
+@keyframes anime-anneau {
+  from {
+    stroke-dasharray: 0 400;
+  }
+}
+.anime-anneau {
+  animation: anime-anneau 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Le parcours se lit de gauche à droite : chaque colonne apparaît après la précédente. */
+@keyframes anime-apparaitre {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes anime-grandir {
+  from {
+    transform: scaleY(0);
+  }
+}
+.anime-flux {
+  animation: anime-apparaitre 450ms ease-out both;
+  animation-delay: var(--retard, 0ms);
+}
+.anime-noeud {
+  transform-box: fill-box;
+  transform-origin: top;
+  animation: anime-grandir 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: var(--retard, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anime-rang,
+  .anime-trace,
+  .anime-pop,
+  .anime-anneau,
+  .anime-flux,
+  .anime-noeud {
+    animation: none;
+  }
+}

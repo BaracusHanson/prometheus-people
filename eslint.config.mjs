@@ -60,7 +60,7 @@ export default defineConfig([
   // ni dans l'espace recruteur. Règle distincte de celle du client de base ci-dessus.
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/components/vitrine/**"],
+    ignores: ["src/components/vitrine/**", "src/components/anime/**"],
     rules: {
       "@typescript-eslint/no-restricted-imports": [
         "error",
@@ -69,7 +69,7 @@ export default defineConfig([
             {
               group: ["motion", "motion/*", "framer-motion"],
               message:
-                "Motion ne s'utilise que dans src/components/vitrine (site public, ADR-0028).",
+                "Motion ne s'utilise que dans src/components/vitrine (site public) et src/components/anime (espace recruteur), ADR-0028.",
             },
           ],
         },
@@ -77,15 +77,10 @@ export default defineConfig([
     },
   },
 
-  // Pages hors du site public (candidat, recruteur, connexion, 404 globale présente dans
-  // l'arbre de toutes les routes) : ni Motion, ni composant animé du site (ADR-0028).
+  // Espace recruteur : Motion par src/components/anime seulement, jamais les composants
+  // animés du site public (ADR-0028).
   {
-    files: [
-      "src/app/not-found.tsx",
-      "src/app/passation/**",
-      "src/app/(app)/**",
-      "src/app/(public)/**",
-    ],
+    files: ["src/app/(app)/**"],
     rules: {
       "@typescript-eslint/no-restricted-imports": [
         "error",
@@ -107,6 +102,43 @@ export default defineConfig([
               ],
               message:
                 "Composant animé du site public : il chargerait Motion sur cette page (ADR-0028). Utiliser habillage.tsx (cadre sans Motion).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
+  // Pages du candidat, connexion et 404 globale (présente dans l'arbre de toutes les
+  // routes) : jamais de Motion, ni par le site public ni par l'espace recruteur (ADR-0028).
+  {
+    files: ["src/app/not-found.tsx", "src/app/passation/**", "src/app/(public)/**"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["motion", "motion/*", "framer-motion"],
+              message:
+                "Motion ne s'utilise que dans src/components/vitrine (site public, ADR-0028).",
+            },
+            {
+              group: [
+                "@/components/vitrine/*",
+                "!@/components/vitrine/habillage",
+                "!@/components/vitrine/planche",
+                "!@/components/vitrine/liens",
+                "!@/components/vitrine/menu",
+                "!@/components/vitrine/navigation",
+              ],
+              message:
+                "Composant animé du site public : il chargerait Motion sur cette page (ADR-0028). Utiliser habillage.tsx (cadre sans Motion).",
+            },
+            {
+              group: ["@/components/anime/*"],
+              message:
+                "Composant animé de l'espace recruteur : jamais chez le candidat, à la connexion ni sur la 404 (ADR-0028).",
             },
           ],
         },
