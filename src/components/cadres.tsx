@@ -216,7 +216,9 @@ export function CadreApplication({
           <MenuCompte compte={compte} role={role} cote="bottom" />
         </header>
 
-        <main className="min-w-0 flex-1 px-4 pt-5 pb-28 md:px-8 md:pt-6 md:pb-8 print:p-0">
+        {/* Sur grand écran, la zone de contenu fait la hauteur de la fenêtre : le tableau de
+            bord peut ainsi tenir sans défilement (ADR-0020) ; les autres pages défilent dedans. */}
+        <main className="min-w-0 flex-1 px-4 pt-5 pb-28 md:px-8 md:pt-6 md:pb-8 xl:flex xl:h-dvh xl:flex-col xl:overflow-y-auto xl:pt-4 xl:pb-4 print:block print:h-auto print:overflow-visible print:p-0">
           {children}
         </main>
 
