@@ -13,6 +13,7 @@ import {
   journalAudit,
   quotaAgence,
   sessionCandidat,
+  user,
 } from "@/server/db/schema";
 import { empreinteJeton, genererJeton } from "@/server/jetons";
 
@@ -165,6 +166,56 @@ export async function listerCandidats(ctx: Contexte): Promise<CandidatListe[]> {
     .where(eq(candidat.organizationId, ctx.orgId))
     .orderBy(desc(candidat.inviteLe));
   return lignes.map((l) => ({ ...l, typePoste: l.typePoste as TypePoste }));
+}
+
+export type TypeVigilance = "serie-identique" | "controle-attention-echoue";
+
+// Ligne de la page Candidats (maquette Candidats) : qui a invité, combien de réponses
+// pour un questionnaire en cours (un comptage, jamais les valeurs, ADR-0022) et le
+// premier point de vigilance d'un profil terminé.
+export interface CandidatLigne extends CandidatListe {
+  invitePar: string | null;
+  reponses: number;
+  vigilance: TypeVigilance | null;
+}
+
+export async function listerCandidatsDetail(ctx: Contexte): Promise<CandidatLigne[]> {
+  const lignes = await getDb()
+    .select({
+      ...colonnes,
+      inviteParNom: user.name,
+      inviteParEmail: user.email,
+      reponses: sql<number>`(select count(*)::int from "reponse_candidat" r where r.candidat_id = "candidat"."id")`,
+      vigilance: sql<TypeVigilance | null>`${candidat.resultats}->'vigilances'->0->>'type'`,
+    })
+    .from(candidat)
+    .leftJoin(user, eq(user.id, candidat.invitePar))
+    .where(eq(candidat.organizationId, ctx.orgId))
+    .orderBy(desc(candidat.inviteLe));
+  return lignes.map(({ inviteParNom, inviteParEmail, ...l }) => ({
+    ...l,
+    typePoste: l.typePoste as TypePoste,
+    invitePar: nomCourt(inviteParNom, inviteParEmail),
+  }));
+}
+
+// Prénom du recruteur pour une colonne étroite : le premier mot du nom, ou le début de
+// l'adresse quand Better Auth a mis l'adresse comme nom.
+export function nomCourt(nom: string | null, email: string | null): string | null {
+  if (!nom && !email) return null;
+  if (nom && nom !== email) return nom.split(" ")[0]!;
+  return email!.split("@")[0]!;
+}
+
+// Nombre de candidats invités par chaque membre de l'agence (page Équipe), par adresse.
+export async function compterInvitesParMembre(ctx: Contexte): Promise<Map<string, number>> {
+  const lignes = await getDb()
+    .select({ email: user.email, nombre: sql<number>`count(*)::int` })
+    .from(candidat)
+    .innerJoin(user, eq(user.id, candidat.invitePar))
+    .where(eq(candidat.organizationId, ctx.orgId))
+    .groupBy(user.email);
+  return new Map(lignes.map((l) => [l.email, l.nombre]));
 }
 
 export async function obtenirCandidat(ctx: Contexte, id: string): Promise<CandidatListe | null> {
