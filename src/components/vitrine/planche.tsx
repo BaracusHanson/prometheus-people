@@ -19,7 +19,8 @@ export const BOUTON_ACCENT =
 export const BOUTON_CONTOUR =
   "border-[1.5px] border-encre bg-transparent font-bold text-encre hover:bg-ivoire-2";
 
-function Croix({ cote, sombre }: { cote: "gauche" | "droite"; sombre: boolean }) {
+// Croix de repère au croisement de deux filets (aussi sur les écrans centrés, cadres.tsx).
+export function Croix({ cote, sombre }: { cote: "gauche" | "droite"; sombre: boolean }) {
   return (
     <span
       aria-hidden="true"

@@ -31,11 +31,11 @@ export function emailLienMagique(a: string, url: string, dureeMinutes: number): 
 
   const html = `<!doctype html>
 <html lang="fr">
-  <body style="font-family: system-ui, sans-serif; color: #1f2937; line-height: 1.5;">
+  <body style="font-family: system-ui, sans-serif; color: #1b2230; line-height: 1.5;">
     <p>Bonjour,</p>
     <p>Voici votre lien de connexion à Prometheus People :</p>
-    <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 10px 16px; background: #1f2937; color: #ffffff; text-decoration: none; border-radius: 6px;">Me connecter</a></p>
-    <p style="font-size: 14px; color: #4b5563;">Ce lien est valable ${dureeMinutes} minutes et ne peut servir qu'une seule fois.<br>
+    <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 12px 20px; background: #c2410c; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700;">Me connecter</a></p>
+    <p style="font-size: 14px; color: #505a6b;">Ce lien est valable ${dureeMinutes} minutes et ne peut servir qu'une seule fois.<br>
     Si vous n'avez pas demandé à vous connecter, ignorez simplement cet email.</p>
   </body>
 </html>`;
@@ -68,12 +68,12 @@ export function emailInvitation(
 
   const html = `<!doctype html>
 <html lang="fr">
-  <body style="font-family: system-ui, sans-serif; color: #1f2937; line-height: 1.5;">
+  <body style="font-family: system-ui, sans-serif; color: #1b2230; line-height: 1.5;">
     <p>Bonjour,</p>
     <p>Vous êtes invité à rejoindre l'agence « ${echapperHtml(agence)} » sur Prometheus People, ${role}.</p>
     <p>Pour accepter, ouvrez ce lien puis connectez-vous avec cette adresse email :</p>
-    <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 10px 16px; background: #1f2937; color: #ffffff; text-decoration: none; border-radius: 6px;">Voir l'invitation</a></p>
-    <p style="font-size: 14px; color: #4b5563;">Cette invitation est valable ${dureeJours} jours.<br>
+    <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 12px 20px; background: #c2410c; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700;">Voir l'invitation</a></p>
+    <p style="font-size: 14px; color: #505a6b;">Cette invitation est valable ${dureeJours} jours.<br>
     Si vous ne connaissez pas cette agence, ignorez simplement cet email.</p>
   </body>
 </html>`;
@@ -114,7 +114,7 @@ export function emailInvitationCandidat(
     <p>Bonjour ${echapperHtml(nom)},</p>
     <p>L'agence « ${echapperHtml(agence)} » vous propose un questionnaire de personnalité avant votre entretien pour le poste de ${echapperHtml(poste.toLowerCase())}.</p>
     <p>Comptez 15 à 20 minutes, sur votre téléphone ou votre ordinateur. Il n'y a pas de bonne ou de mauvaise réponse, et vous verrez votre profil à la fin.</p>
-    <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 12px 20px; background: #2344a8; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700;">Commencer le questionnaire</a></p>
+    <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 12px 20px; background: #c2410c; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700;">Commencer le questionnaire</a></p>
     <p style="font-size: 14px; color: #505a6b;">Ce lien est valable jusqu'au ${limite}. Il ne fonctionne qu'une fois : vous pourrez ensuite faire une pause et reprendre sur le même appareil. Ne le transférez à personne.</p>
   </body>
 </html>`;
@@ -139,7 +139,7 @@ export function emailMotDePasseModifie(a: string, urlConnexion: string): Email {
 
   const html = `<!doctype html>
 <html lang="fr">
-  <body style="font-family: system-ui, sans-serif; color: #1f2937; line-height: 1.5;">
+  <body style="font-family: system-ui, sans-serif; color: #1b2230; line-height: 1.5;">
     <p>Bonjour,</p>
     <p>Le mot de passe de votre compte Prometheus People vient d'être choisi ou modifié.</p>
     <p>Si c'est vous, il n'y a rien à faire.</p>

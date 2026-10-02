@@ -16,7 +16,7 @@ export default async function PageNouvelleAgence() {
 
   return (
     <EcranCentre>
-      <TitreEcran>Créer mon agence</TitreEcran>
+      <TitreEcran surtitre="Bienvenue">Créer mon agence</TitreEcran>
       <p className="leading-relaxed">
         Vous en serez l&apos;administrateur et pourrez inviter vos recruteurs. Votre essai de{" "}
         {FORFAITS.essai.limite} candidats commence aussitôt.
