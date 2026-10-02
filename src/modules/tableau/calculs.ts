@@ -35,15 +35,25 @@ export function libelleVigilance(resultats: Resultats): string | null {
   return v.type === "serie-identique" ? "Réponses en série" : "Contrôle d'attention manqué";
 }
 
-export const PERIODES = {
+export const LIBELLES_PERIODE = {
   "7j": "7 derniers jours",
   "30j": "30 derniers jours",
+  "3m": "3 derniers mois",
   annee: "Cette année",
 } as const;
-export type Periode = keyof typeof PERIODES;
+export type Periode = keyof typeof LIBELLES_PERIODE;
 
-export function estPeriode(valeur: unknown): valeur is Periode {
-  return typeof valeur === "string" && valeur in PERIODES;
+// Périodes proposées par chaque page (maquettes TableauV2 et AnalysesV2).
+export const PERIODES_TABLEAU: readonly Periode[] = ["7j", "30j", "annee"];
+export const PERIODES_ANALYSES: readonly Periode[] = ["30j", "3m", "annee"];
+
+// Période lue dans l'adresse : seulement une des valeurs permises, sinon la valeur par défaut.
+export function lirePeriode(
+  valeur: unknown,
+  permises: readonly Periode[],
+  defaut: Periode,
+): Periode {
+  return permises.find((p) => p === valeur) ?? defaut;
 }
 
 const JOUR = 86_400_000;
@@ -66,7 +76,7 @@ export function bornesPeriode(periode: Periode, maintenant: Date): Bornes {
     const debutPrecedent = new Date(Date.UTC(maintenant.getUTCFullYear() - 1, 0, 1));
     return { debut, fin, debutPrecedent };
   }
-  const jours = periode === "7j" ? 7 : 30;
+  const jours = { "7j": 7, "30j": 30, "3m": 90 }[periode];
   return {
     debut: new Date(fin.getTime() - jours * JOUR),
     fin,
