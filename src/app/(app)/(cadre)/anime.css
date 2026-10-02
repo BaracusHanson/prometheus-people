@@ -71,7 +71,19 @@
   animation-delay: var(--retard, 0ms);
 }
 
+/* Une section qui change (onglet des paramètres) entre sans à-coup. */
+@keyframes anime-entree {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.anime-entree {
+  animation: anime-entree 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .anime-entree,
   .anime-rang,
   .anime-trace,
   .anime-pop,

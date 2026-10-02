@@ -1,5 +1,18 @@
+import {
+  Building2Icon,
+  EyeIcon,
+  FlaskConicalIcon,
+  GaugeIcon,
+  HourglassIcon,
+  PrinterIcon,
+  ReceiptTextIcon,
+  ScrollTextIcon,
+  Trash2Icon,
+  type LucideIcon,
+} from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Fragment } from "react";
 
 import { EnTetePage } from "@/components/cadres";
 import { Badge } from "@/components/ui/badge";
@@ -20,38 +33,69 @@ import { CLES_FORFAIT, FORFAITS, phraseRestants } from "@/modules/candidats/forf
 import { lireForfait } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
 import { compterAuDela, lireConservation, lireEmailContact } from "@/modules/parametres/queries";
+import { DUREES_CONSERVATION, type DureeConservation } from "@/modules/parametres/schemas";
 import { exigerContexte, type Contexte } from "@/server/authz";
 
-import { FormulaireConservation } from "./formulaire-conservation";
+import { FormulaireConservation, type EffetDuree } from "./formulaire-conservation";
 import { FormulaireContact } from "./formulaire-contact";
 import { InterrupteurApercu } from "./interrupteur-apercu";
 
 export const metadata: Metadata = { title: "Paramètres — Prometheus People" };
 
 const SECTIONS = [
-  { cle: "agence", libelle: "Agence" },
-  { cle: "conservation", libelle: "Conservation des données" },
-  { cle: "forfait", libelle: "Forfait" },
-  { cle: "journal", libelle: "Journal d'audit" },
-  { cle: "apercu", libelle: "Données fictives" },
+  { cle: "agence", libelle: "Agence", icone: Building2Icon },
+  { cle: "conservation", libelle: "Conservation des données", icone: HourglassIcon },
+  { cle: "forfait", libelle: "Forfait", icone: GaugeIcon },
+  { cle: "journal", libelle: "Journal d'audit", icone: ScrollTextIcon },
+  { cle: "apercu", libelle: "Données fictives", icone: FlaskConicalIcon },
 ] as const;
 type Section = (typeof SECTIONS)[number]["cle"];
 
-const ACTIONS: Record<ActionJournal, string> = {
-  consultation: "A consulté le rapport",
-  impression: "A imprimé le rapport",
-  suppression: "A supprimé les données",
-  purge: "Suppression automatique",
-  forfait: "Forfait modifié par Prometheus People",
+const ACTIONS: Record<ActionJournal, { libelle: string; icone: LucideIcon }> = {
+  consultation: { libelle: "A consulté le rapport", icone: EyeIcon },
+  impression: { libelle: "A imprimé le rapport", icone: PrinterIcon },
+  suppression: { libelle: "A supprimé les données", icone: Trash2Icon },
+  purge: { libelle: "Suppression automatique", icone: HourglassIcon },
+  forfait: { libelle: "Forfait modifié par Prometheus People", icone: ReceiptTextIcon },
 };
 
-const formatQuand = new Intl.DateTimeFormat("fr-FR", {
-  day: "numeric",
-  month: "short",
+const formatHeure = new Intl.DateTimeFormat("fr-FR", {
   hour: "2-digit",
   minute: "2-digit",
   timeZone: "Europe/Paris",
 });
+const formatJour = new Intl.DateTimeFormat("fr-FR", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  timeZone: "Europe/Paris",
+});
+const formatCleJour = new Intl.DateTimeFormat("fr-CA", { timeZone: "Europe/Paris" });
+const formatDateLongue = new Intl.DateTimeFormat("fr-FR", {
+  dateStyle: "long",
+  timeZone: "Europe/Paris",
+});
+
+// Le journal se lit par jour : « Aujourd'hui », « Hier », puis la date écrite.
+function libelleJour(quand: Date, maintenant: Date): string {
+  const cle = formatCleJour.format(quand);
+  if (cle === formatCleJour.format(maintenant)) return "Aujourd'hui";
+  if (cle === formatCleJour.format(new Date(maintenant.getTime() - 86_400_000))) return "Hier";
+  const jour = formatJour.format(quand);
+  return jour.charAt(0).toUpperCase() + jour.slice(1);
+}
+
+// Regroupe les lignes (de la plus récente à la plus ancienne) par jour.
+function parJour<T extends { quand: Date }>(lignes: readonly T[], maintenant: Date) {
+  const groupes: { jour: string; lignes: T[] }[] = [];
+  for (const ligne of lignes) {
+    const jour = libelleJour(ligne.quand, maintenant);
+    const dernier = groupes.at(-1);
+    if (dernier?.jour === jour) dernier.lignes.push(ligne);
+    else groupes.push({ jour, lignes: [ligne] });
+  }
+  return groupes;
+}
 
 const CARTE = "flex flex-col gap-3.5 rounded-bloc border border-bordure bg-white px-5 py-5 md:px-6";
 const TITRE = "text-[19px] font-extrabold font-stretch-[85%]";
@@ -80,23 +124,24 @@ export default async function PageParametres({
   return (
     <>
       <EnTetePage titre="Paramètres" />
-      <div className="grid max-w-[1170px] gap-4 md:grid-cols-[240px_minmax(0,900px)] md:gap-6">
+      <div className="grid max-w-[1190px] gap-4 md:grid-cols-[264px_minmax(0,900px)] md:gap-6">
         <nav
           aria-label="Sections des paramètres"
           className="-mx-4 flex gap-1 overflow-x-auto px-4 md:mx-0 md:flex-col md:overflow-visible md:px-0"
         >
-          {SECTIONS.map((s) => (
+          {SECTIONS.map(({ icone: Icone, ...s }) => (
             <Link
               key={s.cle}
               href={`/parametres?section=${s.cle}`}
               aria-current={s.cle === section ? "page" : undefined}
-              className="flex min-h-11 shrink-0 items-center rounded-controle border-b-[3px] border-transparent px-3.5 text-[15px] font-semibold whitespace-nowrap text-encre no-underline transition-colors hover:bg-white md:rounded-l-none md:border-b-0 md:border-l-4 aria-[current=page]:border-braise aria-[current=page]:bg-white aria-[current=page]:font-extrabold aria-[current=page]:text-encre"
+              className="flex min-h-11 shrink-0 items-center gap-2.5 rounded-controle border-b-[3px] border-transparent px-3.5 text-[15px] font-semibold whitespace-nowrap text-encre no-underline transition-colors hover:bg-white md:rounded-l-none md:border-b-0 md:border-l-4 aria-[current=page]:border-braise aria-[current=page]:bg-white aria-[current=page]:font-extrabold aria-[current=page]:text-encre"
             >
+              <Icone aria-hidden="true" className="size-[18px] shrink-0 text-gris" />
               {s.libelle}
             </Link>
           ))}
         </nav>
-        <div className="flex min-w-0 flex-col gap-4">
+        <div key={section} className="anime-entree flex min-w-0 flex-col gap-4">
           {section === "agence" ? <Agence ctx={ctx} /> : null}
           {section === "conservation" ? <Conservation ctx={ctx} /> : null}
           {section === "forfait" ? <Forfait ctx={ctx} /> : null}
@@ -106,14 +151,6 @@ export default async function PageParametres({
       </div>
     </>
   );
-}
-
-function phraseAuDela(nombre: number, mois: number): string {
-  if (nombre === 0) return `Aucun candidat ne dépasse aujourd'hui ${mois} mois.`;
-  if (nombre === 1) {
-    return `1 candidat dépasse aujourd'hui ${mois} mois : il sera supprimé à la prochaine suppression automatique.`;
-  }
-  return `${nombre} candidats dépassent aujourd'hui ${mois} mois : ils seront supprimés à la prochaine suppression automatique.`;
 }
 
 async function Agence({ ctx }: { ctx: Contexte }) {
@@ -156,7 +193,15 @@ async function Agence({ ctx }: { ctx: Contexte }) {
 
 async function Conservation({ ctx }: { ctx: Contexte }) {
   const mois = await lireConservation(ctx);
-  const auDela = await compterAuDela(ctx, mois);
+  const auDela = await Promise.all(DUREES_CONSERVATION.map((m) => compterAuDela(ctx, m)));
+  const maintenant = new Date();
+  const effets = Object.fromEntries(
+    DUREES_CONSERVATION.map((m, i) => {
+      const suppression = new Date(maintenant);
+      suppression.setMonth(suppression.getMonth() + m);
+      return [m, { suppressionLe: formatDateLongue.format(suppression), auDela: auDela[i]! }];
+    }),
+  ) as Record<DureeConservation, EffetDuree>;
 
   return (
     <section className={CARTE} aria-labelledby="titre-conservation">
@@ -167,10 +212,7 @@ async function Conservation({ ctx }: { ctx: Contexte }) {
         Les données des candidats sont supprimées automatiquement à la fin de la durée choisie. Ce
         sont des données personnelles sensibles : ne les gardez pas plus longtemps que nécessaire.
       </p>
-      <FormulaireConservation actuelle={mois} />
-      <p className="max-w-2xl rounded-controle bg-trait px-3.5 py-3 text-sm">
-        {phraseAuDela(auDela, mois)}
-      </p>
+      <FormulaireConservation actuelle={mois} effets={effets} />
     </section>
   );
 }
@@ -204,33 +246,29 @@ async function Forfait({ ctx }: { ctx: Contexte }) {
         className="max-w-md"
       />
       <p className="text-sm text-gris">{phraseRestants(etat)}</p>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Formule</TableHead>
-            <TableHead>Candidats</TableHead>
-            <TableHead className="text-right">Prix</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {CLES_FORFAIT.map((f) => (
-            <TableRow key={f} className={f === etat.forfait ? "bg-braise-pale/60 font-bold" : ""}>
-              <TableCell>
-                <span className="flex items-center gap-2">
-                  {FORFAITS[f].libelle}
-                  {f === etat.forfait ? <Badge variant="info">Votre forfait</Badge> : null}
-                </span>
-              </TableCell>
-              <TableCell>
-                {FORFAITS[f].limite} {FORFAITS[f].periode === "total" ? "au total" : "par mois"}
-              </TableCell>
-              <TableCell className="chiffres text-right">
+      <ul className="grid gap-2.5 sm:grid-cols-3">
+        {CLES_FORFAIT.map((f) => {
+          const actuel = f === etat.forfait;
+          return (
+            <li
+              key={f}
+              className={`flex flex-col gap-1 rounded-controle border px-4 py-3.5 ${actuel ? "border-braise bg-braise-pale/50" : "border-bordure"}`}
+            >
+              <span className="flex flex-wrap items-center gap-2 font-bold">
+                {FORFAITS[f].libelle}
+                {actuel ? <Badge variant="info">Votre forfait</Badge> : null}
+              </span>
+              <span className="chiffres text-2xl font-extrabold font-stretch-[80%]">
                 {FORFAITS[f].prixHT === 0 ? "Gratuit" : `${FORFAITS[f].prixHT} € / mois`}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+              </span>
+              <span className="text-sm text-gris">
+                {FORFAITS[f].limite} candidats{" "}
+                {FORFAITS[f].periode === "total" ? "au total" : "par mois"}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
       <p className="text-sm">
         Pour changer de forfait, contactez Prometheus People : le nouveau forfait est activé dans
         les 24 heures ouvrées après le paiement.
@@ -241,6 +279,7 @@ async function Forfait({ ctx }: { ctx: Contexte }) {
 
 async function Journal({ ctx }: { ctx: Contexte }) {
   const lignes = (await lireApercu()) ? journalFictif() : ((await listerJournal(ctx)) ?? []);
+  const maintenant = new Date();
 
   return (
     <section className={CARTE} aria-labelledby="titre-journal">
@@ -256,29 +295,53 @@ async function Journal({ ctx }: { ctx: Contexte }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Quand</TableHead>
+              <TableHead>Heure</TableHead>
               <TableHead>Qui</TableHead>
               <TableHead>Action</TableHead>
               <TableHead>Candidat</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {lignes.map((l, i) => (
-              <TableRow key={i}>
-                <TableCell className="text-gris tabular-nums">
-                  {formatQuand.format(l.quand)}
-                </TableCell>
-                <TableCell className="font-bold">
-                  {l.qui ??
-                    (l.action === "purge" || l.action === "forfait"
-                      ? "Système"
-                      : "Compte supprimé")}
-                </TableCell>
-                <TableCell>{ACTIONS[l.action]}</TableCell>
-                <TableCell className={l.candidat ? "" : "text-gris"}>
-                  {l.action === "forfait" ? "—" : (l.candidat ?? "Candidat supprimé")}
-                </TableCell>
-              </TableRow>
+            {parJour(lignes, maintenant).map((groupe) => (
+              <Fragment key={groupe.jour}>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead
+                    colSpan={4}
+                    scope="colgroup"
+                    className="h-9 bg-ivoire text-[13px] font-extrabold text-encre"
+                  >
+                    {groupe.jour}
+                  </TableHead>
+                </TableRow>
+                {groupe.lignes.map((l, i) => {
+                  const { libelle, icone: Icone } = ACTIONS[l.action];
+                  return (
+                    <TableRow key={i}>
+                      <TableCell className="text-gris tabular-nums">
+                        {formatHeure.format(l.quand)}
+                      </TableCell>
+                      <TableCell className="font-bold">
+                        {l.qui ??
+                          (l.action === "purge" || l.action === "forfait"
+                            ? "Système"
+                            : "Compte supprimé")}
+                      </TableCell>
+                      <TableCell>
+                        <span className="flex items-center gap-2">
+                          <Icone
+                            aria-hidden="true"
+                            className={`size-4 shrink-0 ${l.action === "suppression" ? "text-rouge" : "text-gris"}`}
+                          />
+                          {libelle}
+                        </span>
+                      </TableCell>
+                      <TableCell className={l.candidat ? "" : "text-gris"}>
+                        {l.action === "forfait" ? "—" : (l.candidat ?? "Candidat supprimé")}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </Fragment>
             ))}
           </TableBody>
         </Table>
