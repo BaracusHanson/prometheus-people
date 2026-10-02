@@ -4,7 +4,7 @@ import Link from "next/link";
 import { BarreRang } from "@/components/barre-rang";
 import { CarteForfait, QuestionsSite, TitreSection } from "@/components/site";
 import { Button } from "@/components/ui/button";
-import { LIEN_DEMO } from "@/lib/contact";
+import { LIEN_DEMO, MENTION_TVA } from "@/lib/contact";
 
 // Accueil du site public (maquettes P1 ordinateur, P2 téléphone). Tout ce qui ressemble à
 // un résultat est fictif et annoncé comme tel.
@@ -204,6 +204,7 @@ export default function Accueil() {
           <CarteForfait forfait="essai" />
           <CarteForfait forfait="agence" />
           <CarteForfait forfait="agence_plus" />
+          <p className="text-sm text-gris md:col-span-3">{MENTION_TVA}.</p>
         </div>
       </section>
 

@@ -100,6 +100,9 @@ jobs:
       url: https://prometheus-people.com
     steps:
       - uses: actions/checkout@v4
+      # Pas de production tant qu'un passage des textes légaux reste à compléter (crochets).
+      - name: Textes légaux complets
+        run: node scripts/verifier-textes-legaux.mjs
       - name: Déployer
         uses: ./.github/actions/deploy-vps
         with:

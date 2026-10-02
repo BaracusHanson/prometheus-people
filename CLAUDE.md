@@ -32,6 +32,8 @@ Next.js (App Router, `standalone`) · Tailwind CSS v4 · TypeScript strict · Dr
 
 **Connexion** (ADR-0016, ADR-0026) : Better Auth, lien magique, et mot de passe facultatif choisi dans « Mon compte » (jamais d'inscription par mot de passe ; la connexion par mot de passe passe par la route `/api/auth/sign-in/email`, seule à appliquer la limite d'essais). En local sans `RESEND_API_KEY`, le lien s'affiche dans le terminal. La configuration Better Auth est dans `src/server/auth/options.ts` (source unique) ; `src/server/db/auth-schema.ts` est généré, ne jamais le modifier à la main.
 
+**Textes légaux** : mentions, confidentialité, CGV et sous-traitance sont dans `src/modules/site/textes-legaux.ts`. Tout passage entre crochets est un trou à remplir : il est surligné sur le site et **bloque le déploiement en production** (`scripts/verifier-textes-legaux.mjs`) tant qu'il en reste.
+
 **Build sans variables** : la CI construit l'application **sans aucune variable d'environnement**, alors qu'un build local charge `.env.local` et masque les erreurs. Un module ne lit donc jamais l'environnement à l'import (`getEnv()`, `getDb()`, `getAuth()` sont paresseux), et une page qui dépend de la requête lit `headers()` **avant** tout accès à l'environnement. Pour reproduire la CI : cloner le dépôt dans un dossier temporaire (sans `.env.local`) et lancer le build.
 
 **gitleaks** : aucune valeur d'exemple ou de test ne doit ressembler à un secret (laisser vide, ou `"test".repeat(12)`). `.gitleaksignore` ne contient que des détections précises vérifiées, jamais de règle générale.

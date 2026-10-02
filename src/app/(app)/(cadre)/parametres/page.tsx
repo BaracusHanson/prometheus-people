@@ -215,7 +215,7 @@ async function Forfait({ ctx }: { ctx: Contexte }) {
           <TableRow>
             <TableHead>Formule</TableHead>
             <TableHead>Candidats</TableHead>
-            <TableHead className="text-right">Prix HT</TableHead>
+            <TableHead className="text-right">Prix</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
