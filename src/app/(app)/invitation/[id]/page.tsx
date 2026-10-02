@@ -80,9 +80,8 @@ export default async function PageInvitation({
             {initiales(invitation.organizationName, invitation.organizationName)}
           </AvatarFallback>
         </Avatar>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-sm font-bold text-gris">Invitation</span>
-          <TitreEcran>Rejoindre {invitation.organizationName}</TitreEcran>
+        <div className="min-w-0">
+          <TitreEcran surtitre="Invitation">Rejoindre {invitation.organizationName}</TitreEcran>
         </div>
       </div>
       <p className="leading-relaxed">
