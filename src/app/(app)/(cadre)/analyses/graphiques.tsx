@@ -27,9 +27,9 @@ import { SEUIL_VIGILANCE } from "@/modules/analyses/calculs";
 // trait (plein, tirets, pointillés) et par son libellé écrit : jamais la couleur seule.
 
 const STYLES_SERIE = [
-  { couleur: "var(--color-bleu)", tirets: undefined },
-  { couleur: "var(--color-encre)", tirets: "7 4" },
-  { couleur: "var(--chart-4)", tirets: "2 4" },
+  { couleur: "var(--color-encre)", tirets: undefined },
+  { couleur: "var(--chart-4)", tirets: "7 4" },
+  { couleur: "var(--color-gris)", tirets: "2 4" },
 ] as const;
 
 export function GraphiqueCourbesFin({ courbes }: { courbes: CourbesFin }) {
@@ -111,7 +111,7 @@ export function GraphiqueCourbesFin({ courbes }: { courbes: CourbesFin }) {
 }
 
 const CONFIG_QUALITE = {
-  part: { label: "Avec un point de vigilance", color: "var(--color-bleu-clair)" },
+  part: { label: "Avec un point de vigilance", color: "var(--chart-3)" },
 } satisfies ChartConfig;
 
 export function GraphiqueQualite({ semaines }: { semaines: SemaineQualite[] }) {
@@ -172,7 +172,7 @@ export function GraphiqueQualite({ semaines }: { semaines: SemaineQualite[] }) {
           {donnees.map((s) => (
             <Cell
               key={s.libelle}
-              fill={s.part >= SEUIL_VIGILANCE ? "var(--color-ambre)" : "var(--color-bleu-clair)"}
+              fill={s.part >= SEUIL_VIGILANCE ? "var(--color-ambre)" : "var(--chart-3)"}
             />
           ))}
         </Bar>

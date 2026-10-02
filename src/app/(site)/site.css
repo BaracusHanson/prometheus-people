@@ -1,0 +1,35 @@
+/*
+ * Site public (ADR-0028). Les animations sont écrites avec Motion dans
+ * src/components/vitrine ; ce fichier ne garde que ce qui relève du CSS pur.
+ */
+
+/* Les points de mesure glissent avec transform : rien ne doit élargir la page. */
+.site {
+  overflow-x: clip;
+}
+
+/* Boutons : légère montée au survol, appui immédiat. */
+.site [data-slot="button"] {
+  transition:
+    translate 160ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 160ms ease,
+    color 160ms ease;
+}
+.site [data-slot="button"]:hover:not(:active) {
+  translate: 0 -1px;
+}
+
+/* Ancres (« Comment ça marche », « La méthode ») : défilement doux, sous l'en-tête. */
+html:has(.site) {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:has(.site) {
+    scroll-behavior: auto;
+  }
+  .site [data-slot="button"]:hover:not(:active) {
+    translate: none;
+  }
+}

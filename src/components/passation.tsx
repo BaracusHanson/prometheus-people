@@ -49,7 +49,7 @@ export function TitreCandidat({ children }: { children: ReactNode }) {
 function Puce({ icone, children }: { icone: ReactNode; children: ReactNode }) {
   return (
     <li className="flex items-start gap-3 text-[15px] leading-snug">
-      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-bleu-pale text-bleu">
+      <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-braise-pale text-braise-fonce">
         <svg
           width="18"
           height="18"
@@ -74,7 +74,7 @@ function ContactDroits({ agence, contact }: { agence: string; contact: string | 
   return contact ? (
     <>
       en écrivant à{" "}
-      <a href={`mailto:${contact}`} className="font-bold break-all text-bleu">
+      <a href={`mailto:${contact}`} className="font-bold break-all text-braise-fonce underline">
         {contact}
       </a>
     </>
@@ -195,7 +195,7 @@ export function Consigne({ libelles, suite }: { libelles: readonly string[]; sui
               key={libelle}
               className={
                 i === 3
-                  ? "flex min-h-14 items-center justify-center rounded-bloc border-[1.5px] border-bleu bg-bleu p-1 text-center text-xs leading-tight font-bold text-white"
+                  ? "flex min-h-14 items-center justify-center rounded-bloc border-[1.5px] border-encre bg-encre p-1 text-center text-xs leading-tight font-bold text-white"
                   : "flex min-h-14 items-center justify-center rounded-bloc border-[1.5px] border-bordure bg-white p-1 text-center text-xs leading-tight font-bold"
               }
             >
@@ -229,10 +229,10 @@ export function Progression({ faites, total }: { faites: number; total: number }
       aria-valuemin={0}
       aria-valuemax={total}
       aria-valuenow={faites}
-      className="relative block h-2.5 rounded-full bg-bleu-pale"
+      className="relative block h-2.5 rounded-full bg-ivoire-2"
     >
       <span
-        className="absolute inset-y-0 left-0 block rounded-full bg-bleu"
+        className="absolute inset-y-0 left-0 block rounded-full bg-braise"
         style={{ width: `${Math.round((faites / total) * 100)}%` }}
       />
     </span>
@@ -347,7 +347,7 @@ export function Fin({
             <div key={t} className="flex flex-col gap-1.5 border-t border-trait py-3">
               <div className="flex items-baseline justify-between gap-2">
                 <h3 className="text-base font-extrabold">{LIBELLES_TRAITS[t].nom}</h3>
-                <span className="shrink-0 text-right text-[13px] font-bold text-bleu-fonce">
+                <span className="shrink-0 text-right text-[13px] font-bold text-gris-fonce">
                   {LIBELLES_NIVEAUX[niveau(profil[t])].toLowerCase()}
                 </span>
               </div>

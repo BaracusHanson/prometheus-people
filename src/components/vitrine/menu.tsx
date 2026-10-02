@@ -2,7 +2,6 @@
 
 import { MenuIcon } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -16,60 +15,43 @@ import {
 } from "@/components/ui/sheet";
 import { LIEN_DEMO } from "@/lib/contact";
 
-type LienSite = { href: string; libelle: string };
+import { LIENS_VITRINE } from "./liens";
+import { BOUTON_ACCENT, BOUTON_CONTOUR } from "./planche";
 
-// Navigation de l'en-tête du site public, sur ordinateur ; la page courante est soulignée.
-export function NavigationSite({ liens }: { liens: readonly LienSite[] }) {
-  const chemin = usePathname();
-  return (
-    <nav aria-label="Navigation du site" className="hidden grow gap-7 md:flex">
-      {liens.map((lien) => (
-        <Link
-          key={lien.href}
-          href={lien.href}
-          aria-current={lien.href === chemin ? "page" : undefined}
-          className="flex min-h-11 items-center font-semibold text-encre no-underline decoration-2 underline-offset-[6px] hover:underline aria-[current=page]:font-extrabold aria-[current=page]:underline"
-        >
-          {lien.libelle}
-        </Link>
-      ))}
-    </nav>
-  );
-}
-
-// Menu du site public sur téléphone (maquette P2).
-export function MenuSite({ liens }: { liens: readonly LienSite[] }) {
+// Menu du site public sur téléphone et tablette. Sans Motion : il sert aussi à la page 404,
+// présente dans l'arbre de toutes les routes, y compris celles du candidat (ADR-0020).
+export function MenuVitrine() {
   const [ouvert, setOuvert] = useState(false);
   return (
     <Sheet open={ouvert} onOpenChange={setOuvert}>
       <SheetTrigger asChild>
-        <Button variant="secondary" size="icon" className="md:hidden">
+        <Button variant="ghost" size="icon" className="text-encre hover:bg-ivoire-2 lg:hidden">
           <MenuIcon className="size-6" aria-hidden="true" />
           <span className="sr-only">Ouvrir le menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="gap-6 bg-white p-6">
+      <SheetContent side="right" className="gap-6 bg-ivoire p-6">
         <SheetHeader className="p-0">
           <SheetTitle className="text-xl font-extrabold">Menu</SheetTitle>
           <SheetDescription className="sr-only">Navigation du site</SheetDescription>
         </SheetHeader>
         <nav aria-label="Navigation du site" className="flex flex-col">
-          {liens.map((lien) => (
+          {LIENS_VITRINE.map((lien) => (
             <Link
               key={lien.href}
               href={lien.href}
               onClick={() => setOuvert(false)}
-              className="flex min-h-11 items-center border-b border-trait text-lg font-semibold text-encre no-underline"
+              className="flex min-h-12 items-center border-b border-ligne text-lg font-semibold text-encre no-underline"
             >
               {lien.libelle}
             </Link>
           ))}
         </nav>
         <div className="flex flex-col gap-3">
-          <Button asChild size="lg">
+          <Button asChild size="lg" className={BOUTON_ACCENT}>
             <a href={LIEN_DEMO}>Réserver une démo</a>
           </Button>
-          <Button asChild size="lg" variant="outline">
+          <Button asChild size="lg" className={BOUTON_CONTOUR}>
             <Link href="/connexion">Se connecter</Link>
           </Button>
         </div>

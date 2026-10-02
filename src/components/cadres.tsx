@@ -3,10 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BoutonInviter, FournisseurInvitation } from "@/components/invitation-candidat";
-import { MenuSite, NavigationSite } from "@/components/menu-site";
 import { MenuCompte, NavigationPrincipale } from "@/components/navigation";
-import { Button } from "@/components/ui/button";
-import { LIEN_CONTACT, LIEN_DEMO } from "@/lib/contact";
 
 // Cadres de page (ADR-0020) : une carte centrée pour la connexion et les invitations,
 // le cadre de l'espace agence (colonne de navigation à gauche, barre en bas sur
@@ -80,7 +77,7 @@ export function EnTetePage({
       {retour ? (
         <Link
           href={retour.href}
-          className="-ml-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-controle px-1 text-sm font-bold text-bleu no-underline hover:text-bleu-fonce print:hidden"
+          className="-ml-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-controle px-1 text-sm font-bold text-braise-fonce no-underline hover:text-encre print:hidden"
         >
           <ArrowLeftIcon className="size-4" aria-hidden="true" />
           {retour.libelle}
@@ -136,7 +133,7 @@ function AnneauForfait({
             cy="20"
             r="17"
             fill="none"
-            stroke={part >= 1 ? "var(--color-ambre)" : "var(--color-bleu-clair)"}
+            stroke={part >= 1 ? "var(--color-ambre)" : "var(--color-braise)"}
             strokeWidth="4"
             strokeDasharray={`${part * circonference} ${circonference}`}
           />
@@ -179,14 +176,14 @@ export function CadreApplication({
         <aside className="sticky top-0 hidden h-dvh w-[88px] shrink-0 flex-col items-center gap-2 bg-encre px-0 py-4 text-white md:flex print:hidden">
           <Link
             href="/espace"
-            className="flex size-11 items-center justify-center rounded-bloc focus-visible:outline-bleu-clair"
+            className="flex size-11 items-center justify-center rounded-bloc focus-visible:outline-braise-pale"
           >
             <Flamme taille={30} />
             <span className="sr-only">Prometheus People, tableau de bord</span>
           </Link>
           <BoutonInviter
             size="icon"
-            className="my-2 size-13 rounded-[14px] hover:bg-bleu-clair hover:text-encre focus-visible:ring-bleu-clair [&_svg:not([class*='size-'])]:size-6"
+            className="my-2 size-13 rounded-[14px] hover:bg-braise-fonce focus-visible:ring-braise-pale [&_svg:not([class*='size-'])]:size-6"
           >
             <span className="sr-only">Inviter un candidat</span>
           </BoutonInviter>
@@ -213,7 +210,7 @@ export function CadreApplication({
             <span className="font-extrabold font-stretch-[85%]">Prometheus People</span>
           </Link>
           <span className="ml-auto" />
-          <BoutonInviter size="icon" className="hover:bg-bleu-clair hover:text-encre">
+          <BoutonInviter size="icon" className="hover:bg-braise-fonce">
             <span className="sr-only">Inviter un candidat</span>
           </BoutonInviter>
           <MenuCompte compte={compte} role={role} cote="bottom" />
@@ -230,98 +227,5 @@ export function CadreApplication({
         </div>
       </div>
     </FournisseurInvitation>
-  );
-}
-
-// Site public (maquettes P1 à P5) : en-tête avec navigation, pied de page sombre.
-export const LIENS_SITE = [
-  { href: "/#comment", libelle: "Comment ça marche" },
-  { href: "/tarifs", libelle: "Tarifs" },
-  { href: "/confidentialite", libelle: "Sécurité et données" },
-] as const;
-
-export function EnTeteSite() {
-  return (
-    <header className="flex h-16 shrink-0 items-center gap-9 border-b border-trait bg-white px-4 md:h-[76px] md:px-8 xl:px-16">
-      <Logo />
-      <NavigationSite liens={LIENS_SITE} />
-      <div className="ml-auto flex items-center gap-6">
-        <Link
-          href="/connexion"
-          className="hidden min-h-11 items-center font-bold text-bleu no-underline hover:underline md:flex"
-        >
-          Se connecter
-        </Link>
-        <Button asChild className="hidden text-[15px] font-extrabold md:inline-flex">
-          <a href={LIEN_DEMO}>Réserver une démo</a>
-        </Button>
-        <MenuSite liens={LIENS_SITE} />
-      </div>
-    </header>
-  );
-}
-
-const PIED_SITE = [
-  {
-    titre: "Produit",
-    liens: [
-      { href: "/#comment", libelle: "Comment ça marche" },
-      { href: "/tarifs", libelle: "Tarifs" },
-      { href: LIEN_DEMO, libelle: "Réserver une démo" },
-    ],
-  },
-  {
-    titre: "Données",
-    liens: [
-      { href: "/confidentialite", libelle: "Politique de confidentialité" },
-      { href: "/sous-traitance", libelle: "Sous-traitance RGPD" },
-    ],
-  },
-  {
-    titre: "Légal",
-    liens: [
-      { href: "/mentions-legales", libelle: "Mentions légales" },
-      { href: "/conditions-generales", libelle: "Conditions générales" },
-      { href: LIEN_CONTACT, libelle: "Contact" },
-    ],
-  },
-];
-
-export function PiedSite() {
-  return (
-    <footer className="grid gap-8 bg-encre px-4 py-10 text-sm text-gris-clair md:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))] md:px-8 xl:px-16">
-      <div className="flex flex-col gap-2.5">
-        <span className="text-lg font-extrabold font-stretch-[85%] text-white">
-          Prometheus People
-        </span>
-        <span className="max-w-[340px] leading-normal">
-          Le questionnaire de personnalité pour les agences d&apos;intérim.
-        </span>
-      </div>
-      {PIED_SITE.map((colonne) => (
-        <nav key={colonne.titre} aria-label={colonne.titre} className="flex flex-col">
-          <span className="mb-1 font-extrabold text-white">{colonne.titre}</span>
-          {colonne.liens.map((lien) =>
-            lien.href.startsWith("mailto:") ? (
-              <a
-                key={lien.libelle}
-                href={lien.href}
-                className="flex min-h-11 items-center text-gris-clair md:min-h-0 md:py-1"
-              >
-                {lien.libelle}
-              </a>
-            ) : (
-              <Link
-                key={lien.libelle}
-                href={lien.href}
-                className="flex min-h-11 items-center text-gris-clair md:min-h-0 md:py-1"
-              >
-                {lien.libelle}
-              </Link>
-            ),
-          )}
-        </nav>
-      ))}
-    </footer>
   );
 }

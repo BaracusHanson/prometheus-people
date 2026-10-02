@@ -41,7 +41,8 @@ function RadioGroupItem({
 }
 
 // Variante du dépôt (ADR-0020) : une case avec son libellé écrit dedans, pour les
-// échelles de réponse du questionnaire. Cible tactile de 56 px, choix en bleu plein.
+// échelles de réponse du questionnaire. Cible tactile de 56 px, choix à l'encre pleine : une
+// réponse n'est ni bonne ni mauvaise, elle ne prend pas la couleur d'accent (ADR-0028).
 function RadioGroupCase({
   className,
   children,
@@ -51,7 +52,7 @@ function RadioGroupCase({
     <RadioGroupPrimitive.Item
       data-slot="radio-group-case"
       className={cn(
-        "flex min-h-14 min-w-0 items-center justify-center rounded-bloc border-[1.5px] border-bordure bg-white px-0.5 py-1 text-center text-xs leading-tight font-bold text-encre transition-colors outline-none hover:border-bleu focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-checked:border-bleu data-checked:bg-bleu data-checked:text-white",
+        "flex min-h-14 min-w-0 items-center justify-center rounded-bloc border-[1.5px] border-bordure bg-white px-0.5 py-1 text-center text-xs leading-tight font-bold text-encre transition-colors outline-none hover:border-encre focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 data-checked:border-encre data-checked:bg-encre data-checked:text-white",
         className,
       )}
       {...props}

@@ -17,12 +17,12 @@ function Courbe({ points }: { points: number[] }) {
       <polyline
         points={coords.map(([x, y]) => `${x},${y}`).join(" ")}
         fill="none"
-        stroke="var(--color-bleu)"
+        stroke="var(--color-encre)"
         strokeWidth="1.8"
         strokeLinejoin="round"
         strokeLinecap="round"
       />
-      <circle cx={dx} cy={dy} r="2.8" fill="var(--color-bleu)" />
+      <circle cx={dx} cy={dy} r="2.8" fill="var(--color-braise)" />
     </svg>
   );
 }

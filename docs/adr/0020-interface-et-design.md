@@ -16,7 +16,7 @@ Jusqu'à l'étape 6, l'application n'avait aucun style. Avant l'invitation des c
 - **Graphiques** : ceux de shadcn/ui (Recharts) pour les courbes, barres et anneaux de **l'espace recruteur uniquement** ; SVG fait maison pour le rapport candidat, la carte de chaleur et le nuage de points ; `d3-sankey` pour **calculer** le diagramme de parcours, dessiné par nous. Aucun graphique en radar.
 - **Police** : Archivo, une seule famille, avec son axe de largeur (étroite pour les chiffres et les titres). Servie par `next/font` depuis notre domaine : le navigateur ne contacte jamais Google (RGPD).
 
-**Couleurs** : chaque couleur a un rôle, et une couleur absente des jetons n'existe pas.
+**Couleurs** : chaque couleur a un rôle, et une couleur absente des jetons n'existe pas. _(Modifié le 2026-10-02 par l'[ADR-0028](0028-site-public-accent-et-mouvement.md) : accent braise et fond ivoire à la place du bleu ; le tableau ci-dessous décrit l'état antérieur.)_
 
 | Jeton                                       | Rôle                                                   |
 | ------------------------------------------- | ------------------------------------------------------ |

@@ -1,15 +1,12 @@
 import type { ReactNode } from "react";
 
-import { EnTeteSite, PiedSite } from "@/components/cadres";
+import { CadreVitrine } from "@/components/vitrine/habillage";
 
-// Pages publiques du site (maquettes P1 à P4) : indexées, contrairement aux pages de
-// connexion, de l'espace agence et du candidat (ADR-0020).
+import "./site.css";
+
+// Pages publiques du site : indexées, contrairement aux pages de connexion, de l'espace
+// agence et du candidat (ADR-0020). Fond ivoire, accent braise (ADR-0028) ;
+// les animations Motion sont chargées par les pages qui en ont (accueil, tarifs).
 export default function LayoutSite({ children }: { children: ReactNode }) {
-  return (
-    <div className="flex min-h-dvh flex-col bg-white">
-      <EnTeteSite />
-      <main className="flex flex-1 flex-col">{children}</main>
-      <PiedSite />
-    </div>
-  );
+  return <CadreVitrine>{children}</CadreVitrine>;
 }

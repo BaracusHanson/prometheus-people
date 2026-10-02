@@ -160,7 +160,7 @@ function AnneauCompletion({ completion: c }: { completion: Completion }) {
             cy="70"
             r={rayon}
             fill="none"
-            stroke="var(--color-bleu-pale)"
+            stroke="var(--color-ivoire-2)"
             strokeWidth="14"
           />
           <circle
@@ -168,7 +168,7 @@ function AnneauCompletion({ completion: c }: { completion: Completion }) {
             cy="70"
             r={rayon}
             fill="none"
-            stroke="var(--color-bleu)"
+            stroke="var(--color-encre)"
             strokeWidth="14"
             strokeDasharray={`${part * circonference} ${circonference}`}
           />
@@ -258,8 +258,8 @@ function ProfilsRecents({ profils, maintenant }: { profils: ProfilRecent[]; main
 }
 
 const POINTS: Record<Evenement["genre"], string> = {
-  fin: "bg-bleu",
-  debut: "bg-bleu-clair",
+  fin: "bg-encre",
+  debut: "bg-chart-3",
   invitation: "bg-champ",
 };
 
@@ -323,7 +323,7 @@ function PremiersPas({ admin }: { admin: boolean }) {
             </span>
           </li>
           <li className="flex items-start gap-3.5">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-[2.5px] border-bleu font-extrabold text-bleu">
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full border-[2.5px] border-braise font-extrabold text-braise-fonce">
               2
             </span>
             <span className="flex flex-col items-start gap-1.5">
@@ -348,7 +348,7 @@ function PremiersPas({ admin }: { admin: boolean }) {
           </li>
         </ol>
         {admin ? (
-          <div className="mt-auto flex flex-col items-start gap-2 rounded-bloc bg-bleu-pale px-4 py-3.5 text-bleu-fonce">
+          <div className="mt-auto flex flex-col items-start gap-2 rounded-bloc bg-ivoire-2 px-4 py-3.5 text-encre">
             <span className="text-[15px] font-extrabold">
               Envie de voir un tableau de bord rempli ?
             </span>

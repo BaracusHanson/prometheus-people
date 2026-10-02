@@ -1,7 +1,7 @@
 "use client";
 
 // Interrupteur shadcn/ui adapté (ADR-0020) : 44 × 24 px, zone cliquable étendue à 44 px
-// de haut, éteint en gris « champ » (contraste 3:1), allumé en bleu.
+// de haut, éteint en gris « champ » (contraste 3:1), allumé en braise (couleur d'action, ADR-0028).
 
 import * as React from "react";
 import { cn } from "cn";

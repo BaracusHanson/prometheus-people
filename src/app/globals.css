@@ -3,18 +3,17 @@
 @import "shadcn/tailwind.css";
 
 /*
- * Jetons de design (ADR-0020). Chaque couleur a un rôle : une couleur absente d'ici
- * n'existe pas dans l'application. Classes générées : bg-bleu, text-encre, border-bordure…
+ * Jetons de design (ADR-0020, couleurs revues par l'ADR-0028). Chaque couleur a un rôle :
+ * une couleur absente d'ici n'existe pas. Classes générées : bg-braise, text-encre…
  */
 @theme {
   --font-sans: var(--font-archivo), system-ui, sans-serif;
 
-  --color-encre: #1b2230; /* texte, colonne de navigation — contraste 15:1 */
+  --color-encre: #1b2230; /* texte, données, colonne de navigation — contraste 15:1 */
   --color-encre-2: #313b52; /* élément actif sur fond encre */
-  --color-bleu: #2344a8; /* données, actions, liens : seule couleur « active » */
-  --color-bleu-fonce: #172f7a; /* survol, texte sur bleu pâle */
-  --color-bleu-clair: #8fa3de; /* données secondaires, jamais du texte */
-  --color-bleu-pale: #e3e9f8; /* zone moyenne, élément sélectionné */
+  --color-braise: #c2410c; /* actions, liens, élément actif, point sur lequel on attire l'œil */
+  --color-braise-fonce: #9a3412; /* survol, texte de lien (7:1 sur ivoire) */
+  --color-braise-pale: #fdeee4; /* élément sélectionné, mise en avant */
   --color-ambre: #d97706; /* attention seulement : relances, pertes, seuils */
   --color-ambre-texte: #92400e; /* texte d'attention */
   --color-ambre-pale: #fef3c7;
@@ -23,14 +22,19 @@
   --color-vert-pale: #e6f2ea;
   --color-rouge: #b42318; /* erreurs et suppressions uniquement */
   --color-rouge-pale: #fdecea;
-  --color-gris: #505a6b; /* texte secondaire — contraste 6,9:1 */
+  --color-gris: #505a6b; /* texte secondaire — contraste 6,5:1 sur ivoire */
   --color-gris-fonce: #3b4354; /* texte sur fond gris (badge « Expiré ») */
   --color-gris-clair: #c5cbd6; /* texte sur la colonne de navigation encre */
-  --color-bordure: #d8dce3;
-  --color-trait: #eceef2; /* séparateurs légers */
-  --color-champ: #9aa3b2; /* contour des champs de saisie (contraste 3:1) */
-  --color-fond: #f5f6f8;
+  --color-bordure: #ddd6ca;
+  --color-trait: #ece7de; /* séparateurs légers */
+  --color-champ: #8c8477; /* contour des champs de saisie (3,2:1 sur ivoire, 3,5:1 sur blanc) */
+  --color-fond: #f7f4ee; /* ivoire */
   --color-flamme: #f0b44c; /* logo uniquement */
+
+  /* Alias du site public (ADR-0028), mêmes valeurs que ci-dessus pour le fond. */
+  --color-ivoire: #f7f4ee;
+  --color-ivoire-2: #eee9df; /* bandeaux, zone moyenne, élément neutre sélectionné */
+  --color-ligne: #e3ddd2; /* trame et séparateurs sur ivoire */
 
   --radius-controle: 6px; /* boutons, champs */
   --radius-bloc: 8px; /* cartes, blocs */
@@ -46,7 +50,7 @@
 
   /* Focus visible au clavier, partout, de la même façon (WCAG 2.2). */
   :focus-visible {
-    outline: 3px solid var(--color-bleu);
+    outline: 3px solid var(--color-braise);
     outline-offset: 2px;
   }
 
@@ -124,31 +128,32 @@
   --card-foreground: var(--color-encre);
   --popover: #ffffff;
   --popover-foreground: var(--color-encre);
-  --primary: var(--color-bleu);
+  --primary: var(--color-braise);
   --primary-foreground: #ffffff;
-  --secondary: var(--color-bleu-pale);
-  --secondary-foreground: var(--color-bleu-fonce);
+  --secondary: var(--color-ivoire-2);
+  --secondary-foreground: var(--color-encre);
   --muted: var(--color-trait);
   --muted-foreground: var(--color-gris);
-  --accent: var(--color-bleu-pale);
-  --accent-foreground: var(--color-bleu-fonce);
+  --accent: var(--color-ivoire-2);
+  --accent-foreground: var(--color-encre);
   --destructive: var(--color-rouge);
   --border: var(--color-bordure);
   --input: var(--color-champ);
-  --ring: var(--color-bleu);
-  /* Échelle des graphiques, du plus faible au plus fort (ADR-0020). */
-  --chart-1: #e3e9f8;
-  --chart-2: #b5c3ec;
-  --chart-3: #8fa3de;
-  --chart-4: #4f6bc4;
-  --chart-5: #2344a8;
+  --ring: var(--color-braise);
+  /* Échelle des graphiques, du plus faible au plus fort : de l'ivoire à l'encre (ADR-0028).
+     La braise n'y figure pas : elle désigne le point à regarder, pas une quantité. */
+  --chart-1: #eee9df;
+  --chart-2: #d6cfc2;
+  --chart-3: #a9a39a;
+  --chart-4: #5f6573;
+  --chart-5: #1b2230;
   --radius: 0.375rem;
   --sidebar: var(--color-encre);
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: var(--color-bleu);
+  --sidebar-primary: var(--color-braise);
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: var(--color-encre-2);
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: var(--color-encre-2);
-  --sidebar-ring: var(--color-bleu-clair);
+  --sidebar-ring: var(--color-braise-pale);
 }
