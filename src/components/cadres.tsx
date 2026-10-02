@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { BasculeColonne, ElementsBarre, FournisseurCadre } from "@/components/cadre-contexte";
 import { BoutonInviter, FournisseurInvitation } from "@/components/invitation-candidat";
 import { MenuCompte, NavigationPrincipale } from "@/components/navigation";
+import { Croix, TYPO } from "@/components/vitrine/planche";
 
 // Cadres de page (ADR-0020, ADR-0029) : une carte centrée pour la connexion et les
 // invitations, le cadre de l'espace agence (colonne claire à gauche, repliable ; barre en
@@ -37,24 +38,70 @@ export function Logo() {
   );
 }
 
-export function EcranCentre({ children }: { children: ReactNode }) {
+// Écran centré (connexion, lien envoyé, création d'agence, invitation) : la trame du site
+// public (ADR-0028), sans Motion. Une colonne bordée de deux filets, marquée de deux croix
+// sous l'en-tête ; la carte au centre, une note facultative sous la carte, les liens
+// légaux en pied de page.
+export function EcranCentre({ children, note }: { children: ReactNode; note?: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col items-center px-4 py-10">
-      <div className="mb-8">
-        <Logo />
+    <div className="flex min-h-dvh flex-col bg-ivoire">
+      <header className="border-b border-ligne">
+        <div className="mx-auto flex h-16 max-w-[1312px] items-center justify-between gap-4 px-5 md:border-x md:border-ligne md:px-12">
+          <Logo />
+          <Link
+            href="/"
+            className="flex min-h-11 items-center text-sm font-semibold text-gris no-underline hover:text-braise-fonce"
+          >
+            Retour au site
+          </Link>
+        </div>
+      </header>
+      <div className="relative mx-auto flex w-full max-w-[1312px] flex-1 flex-col items-center gap-5 px-4 py-10 md:border-x md:border-ligne md:py-12">
+        <Croix cote="gauche" sombre={false} />
+        <Croix cote="droite" sombre={false} />
+        <main className="flex w-full max-w-[440px] flex-col gap-5 rounded-bloc border border-bordure bg-white p-6 shadow-xs sm:p-9">
+          {children}
+        </main>
+        {note ? (
+          <p className="max-w-[440px] px-2 text-center text-[13px] leading-relaxed text-gris">
+            {note}
+          </p>
+        ) : null}
       </div>
-      <main className="flex w-full max-w-[440px] flex-col gap-5 rounded-bloc border border-bordure bg-white p-6 shadow-xs sm:p-9">
-        {children}
-      </main>
+      <footer className="border-t border-ligne">
+        <div className="mx-auto flex max-w-[1312px] flex-wrap items-center justify-between gap-x-6 px-5 py-2 text-[13px] text-gris md:border-x md:border-ligne md:px-12">
+          <span>Prometheus People</span>
+          <nav aria-label="Informations légales" className="flex flex-wrap gap-x-5">
+            {LIENS_LEGAUX.map((lien) => (
+              <Link
+                key={lien.href}
+                href={lien.href}
+                className="flex min-h-11 items-center text-gris no-underline hover:text-braise-fonce"
+              >
+                {lien.libelle}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }
 
-export function TitreEcran({ children }: { children: ReactNode }) {
+const LIENS_LEGAUX = [
+  { href: "/confidentialite", libelle: "Confidentialité" },
+  { href: "/mentions-legales", libelle: "Mentions légales" },
+] as const;
+
+// Titre d'un écran centré, à l'échelle des titres du site ; le surtitre dit où l'on est.
+export function TitreEcran({ children, surtitre }: { children: ReactNode; surtitre?: string }) {
   return (
-    <h1 className="text-3xl leading-tight font-extrabold font-stretch-75% text-balance">
-      {children}
-    </h1>
+    <div className="flex flex-col gap-2.5">
+      {surtitre ? <p className={`${TYPO.legende} text-braise-fonce`}>{surtitre}</p> : null}
+      <h1 className="text-[34px] leading-[0.95] font-extrabold font-stretch-[66%] tracking-[-0.01em] text-balance sm:text-[40px]">
+        {children}
+      </h1>
+    </div>
   );
 }
 

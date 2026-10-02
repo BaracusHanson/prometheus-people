@@ -20,7 +20,7 @@ import type { Trait } from "@/modules/questionnaire/structure";
 export function CadreCandidat({ agence, children }: { agence?: string; children: ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="flex h-15 shrink-0 items-center border-b border-bordure bg-white px-5">
+      <header className="flex h-15 shrink-0 items-center border-b border-ligne bg-white px-5">
         {agence ? (
           <span className="flex flex-col">
             <span className="text-[17px] font-extrabold font-stretch-[85%]">{agence}</span>
@@ -38,9 +38,11 @@ export function CadreCandidat({ agence, children }: { agence?: string; children:
   );
 }
 
+// Titre des écrans du candidat, à l'échelle des titres du site (ADR-0028), un peu moins
+// serré que sur le site : il doit rester lisible sur un petit téléphone.
 export function TitreCandidat({ children }: { children: ReactNode }) {
   return (
-    <h1 className="text-[28px] leading-tight font-extrabold font-stretch-[80%] text-balance">
+    <h1 className="text-[32px] leading-[1.02] font-extrabold font-stretch-[70%] tracking-[-0.01em] text-balance">
       {children}
     </h1>
   );
@@ -105,7 +107,7 @@ export function InformationCandidat({
   return (
     <>
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl leading-tight font-extrabold font-stretch-[80%]">Bonjour {nom},</h1>
+        <TitreCandidat>Bonjour {nom},</TitreCandidat>
         <p className="text-base leading-relaxed">
           {agence} vous propose un questionnaire pour mieux connaître votre façon de travailler,
           avant votre entretien pour le poste de <strong>{poste.toLowerCase()}</strong>.

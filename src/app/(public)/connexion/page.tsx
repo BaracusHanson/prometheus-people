@@ -23,8 +23,15 @@ export default async function PageConnexion({
   if (await lireSession()) redirect(suite ?? "/espace");
 
   return (
-    <EcranCentre>
-      <TitreEcran>Connexion</TitreEcran>
+    <EcranCentre
+      note={
+        <>
+          Vous êtes candidat ? Vous n&apos;avez pas besoin de compte : ouvrez le lien personnel reçu
+          par email.
+        </>
+      }
+    >
+      <TitreEcran surtitre="Espace agence">Connexion</TitreEcran>
       {erreur === "lien" && (
         <Alert variant="attention">
           Ce lien de connexion a expiré ou a déjà été utilisé. Demandez-en un nouveau ci-dessous.

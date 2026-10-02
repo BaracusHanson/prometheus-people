@@ -1,4 +1,4 @@
-import { CadreCandidat } from "@/components/passation";
+import { CadreCandidat, TitreCandidat } from "@/components/passation";
 
 // Lien inconnu, expiré, révoqué ou déjà utilisé : même page, sans rien révéler (ADR-0021).
 export default function PageLienInvalide() {
@@ -21,9 +21,7 @@ export default function PageLienInvalide() {
             <path d="M12 7v5l3 2" />
           </svg>
         </span>
-        <h1 className="text-3xl leading-tight font-extrabold font-stretch-[80%]">
-          Ce lien n&apos;est plus valable
-        </h1>
+        <TitreCandidat>Ce lien n&apos;est plus valable</TitreCandidat>
         <p className="text-base leading-relaxed">
           Il a expiré, a déjà servi, ou il est incomplet. Pour votre sécurité, chaque lien ne
           fonctionne qu&apos;une fois et pendant 7 jours.

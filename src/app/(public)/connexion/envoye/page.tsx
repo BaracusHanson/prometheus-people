@@ -12,7 +12,7 @@ export default function PageLienEnvoye() {
       <span className="flex size-12 items-center justify-center rounded-full bg-braise-pale text-braise-fonce">
         <MailIcon className="size-6" aria-hidden="true" />
       </span>
-      <TitreEcran>Vérifiez votre boîte mail</TitreEcran>
+      <TitreEcran surtitre="Connexion">Vérifiez votre boîte mail</TitreEcran>
       <p className="leading-relaxed">
         Si l&apos;adresse est valide, un lien de connexion vient de vous être envoyé. Il est valable
         10 minutes et ne sert qu&apos;une seule fois.
