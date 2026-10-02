@@ -9,12 +9,15 @@ export function BarreRang({
   rang,
   petite = false,
   cerclee = false,
+  anime,
 }: {
   rang: number;
   petite?: boolean;
   // Point cerclé de blanc et d'encre : rapport du recruteur (maquette Retenue). Le profil
   // du candidat garde le point plein de sa maquette (C5).
   cerclee?: boolean;
+  // Retard (ms) : le point glisse du 50e rang jusqu'au sien à l'ouverture (anime.css).
+  anime?: number;
 }) {
   const taille = petite
     ? "size-3 -ml-1.5"
@@ -22,7 +25,10 @@ export function BarreRang({
       ? "size-[18px] -ml-[9px] -top-0.5 border-[3px] border-white ring-[1.5px] ring-encre"
       : "size-3.5 -ml-[7px]";
   return (
-    <span aria-hidden="true" className={`relative block ${petite ? "h-3" : "h-3.5"}`}>
+    <span
+      aria-hidden="true"
+      className={`relative block ${anime !== undefined ? "[container-type:inline-size]" : ""} ${petite ? "h-3" : "h-3.5"}`}
+    >
       <span
         className="absolute inset-y-0 block bg-ivoire-2"
         style={{
@@ -32,8 +38,11 @@ export function BarreRang({
       />
       <span className="absolute inset-x-0 top-1/2 block h-0.5 -translate-y-1/2 bg-bordure" />
       <span
-        className={`absolute block rounded-full bg-encre ${cerclee && !petite ? "" : "top-0"} ${taille}`}
-        style={{ left: `${rang}%` }}
+        className={`absolute block rounded-full bg-encre ${cerclee && !petite ? "" : "top-0"} ${taille} ${anime !== undefined ? "anime-rang" : ""}`}
+        style={{
+          left: `${rang}%`,
+          ...(anime !== undefined ? { "--rang": rang, "--retard": `${anime}ms` } : {}),
+        }}
       />
     </span>
   );

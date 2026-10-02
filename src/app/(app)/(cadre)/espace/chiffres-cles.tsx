@@ -1,9 +1,11 @@
 import type { ChiffreCle, Periode } from "@/modules/tableau/calculs";
 import { LIBELLES_PERIODE, PERIODES_TABLEAU } from "@/modules/tableau/calculs";
 
+import { ValeurAnimee } from "@/components/anime/mouvement";
 import { ChoixPeriode } from "@/components/choix-periode";
 
-// Mini-courbe décorative : le chiffre et la phrase d'écart portent le sens.
+// Mini-courbe décorative : le chiffre et la phrase d'écart portent le sens. Elle se trace à
+// l'ouverture, puis le dernier point s'allume (anime.css).
 function Courbe({ points }: { points: number[] }) {
   const max = Math.max(...points);
   const min = Math.min(...points);
@@ -21,8 +23,10 @@ function Courbe({ points }: { points: number[] }) {
         strokeWidth="1.8"
         strokeLinejoin="round"
         strokeLinecap="round"
+        pathLength={1}
+        className="anime-trace"
       />
-      <circle cx={dx} cy={dy} r="2.8" fill="var(--color-braise)" />
+      <circle cx={dx} cy={dy} r="2.8" fill="var(--color-braise)" className="anime-pop" />
     </svg>
   );
 }
@@ -42,9 +46,10 @@ export function ChiffresCles({ chiffres, periode }: { chiffres: ChiffreCle[]; pe
         >
           <div className="flex items-end justify-between gap-2">
             <span className="flex min-w-0 flex-col gap-0.5">
-              <span className="chiffres text-[32px] leading-none font-extrabold font-stretch-[70%]">
-                {c.valeur}
-              </span>
+              <ValeurAnimee
+                texte={c.valeur}
+                className="chiffres text-[32px] leading-none font-extrabold font-stretch-[70%]"
+              />
               <span className="text-sm font-bold whitespace-nowrap">{c.libelle}</span>
             </span>
             {c.courbe && c.courbe.some((v) => v > 0) ? <Courbe points={c.courbe} /> : null}

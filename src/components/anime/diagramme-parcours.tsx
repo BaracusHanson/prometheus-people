@@ -1,8 +1,15 @@
+"use client";
+
+import { AnimatePresence, m } from "motion/react";
+import { useState, type CSSProperties } from "react";
+
 import type { Etape, GenreEtape, Parcours } from "@/modules/tableau/calculs";
 
 // Diagramme en flux du parcours des candidats (maquette TableauV2), dessiné en SVG maison
 // (ADR-0020, ADR-0028) : encre = suite du parcours, gris = en attente, ambre = perte. Les nombres
 // sont écrits sur chaque étape et le tout est décrit en texte (jamais la couleur seule).
+// À l'ouverture, les flux apparaissent colonne après colonne (CSS, anime.css) ; au survol,
+// un flux s'isole et donne son nombre exact (Motion).
 
 const L = 1000; // largeur du repère
 const H = 210; // hauteur du repère
@@ -70,6 +77,10 @@ export function DiagrammeParcours({ parcours }: { parcours: Parcours }) {
     return {
       cle: `${f.de}-${f.vers}`,
       genre: t.genre,
+      colonne: s.colonne,
+      texte: `${s.libelle} → ${t.libelle} : ${f.nombre} candidat${f.nombre > 1 ? "s" : ""}`,
+      bulleX: (xm / L) * 100,
+      bulleY: (((sy + ty) / 2 + h / 2) / H) * 100,
       d: `M${x0},${sy} C${xm},${sy} ${xm},${ty} ${x1},${ty} L${x1},${ty + h} C${xm},${ty + h} ${xm},${sy + h} ${x0},${sy + h} Z`,
     };
   });
@@ -98,47 +109,82 @@ export function DiagrammeParcours({ parcours }: { parcours: Parcours }) {
     }
   }
 
+  const [survol, setSurvol] = useState<number | null>(null);
+  const actif = survol === null ? null : chemins[survol];
+
   return (
     <div
       role="img"
       aria-label={parcours.description}
       className="relative min-h-44 flex-1 xl:min-h-0"
     >
-      <svg
-        viewBox={`0 0 ${L} ${H}`}
-        preserveAspectRatio="none"
-        className="absolute inset-0 size-full overflow-visible"
-        aria-hidden="true"
-      >
-        {chemins.map((c) => (
-          <path
-            key={c.cle}
-            d={c.d}
-            fill={COULEURS[c.genre].flux}
-            fillOpacity={COULEURS[c.genre].opacite}
-          />
-        ))}
-        {[...places.values()].map((p) => (
-          <rect
-            key={p.cle}
-            x={X[p.colonne]}
-            y={p.y0}
-            width={LARGEUR_NOEUD}
-            height={p.y1 - p.y0}
-            fill={COULEURS[p.genre].noeud}
-          />
-        ))}
-      </svg>
-      {libelles.map((l) => (
-        <span
-          key={l.cle}
+      {/* Sur téléphone, le dessin laisse à droite la place des libellés de la dernière
+          colonne, écrits après elle. */}
+      <div className="absolute inset-y-0 left-0 w-full max-sm:w-[74%]">
+        <svg
+          viewBox={`0 0 ${L} ${H}`}
+          preserveAspectRatio="none"
+          className="absolute inset-0 size-full overflow-visible"
           aria-hidden="true"
-          className={`absolute rounded-sm bg-white/85 px-1.5 text-[13px] font-extrabold whitespace-nowrap ${COULEURS[l.genre].texte}`}
-          style={{ left: `${l.gauche}%`, top: `${l.haut}%` }}
+          onPointerLeave={() => setSurvol(null)}
         >
-          {l.texte}
-        </span>
-      ))}
+          {chemins.map((c, i) => (
+            <path
+              key={c.cle}
+              d={c.d}
+              fill={COULEURS[c.genre].flux}
+              fillOpacity={
+                survol === null
+                  ? COULEURS[c.genre].opacite
+                  : survol === i
+                    ? Math.min(1, COULEURS[c.genre].opacite * 2.6)
+                    : COULEURS[c.genre].opacite * 0.45
+              }
+              onPointerEnter={() => setSurvol(i)}
+              className="anime-flux transition-[fill-opacity] duration-150"
+              style={{ "--retard": `${c.colonne * 160}ms` } as CSSProperties}
+            />
+          ))}
+          {[...places.values()].map((p) => (
+            <rect
+              key={p.cle}
+              x={X[p.colonne]}
+              y={p.y0}
+              width={LARGEUR_NOEUD}
+              height={p.y1 - p.y0}
+              fill={COULEURS[p.genre].noeud}
+              className="anime-noeud"
+              style={{ "--retard": `${p.colonne * 160}ms` } as CSSProperties}
+            />
+          ))}
+        </svg>
+        <AnimatePresence>
+          {actif && (
+            <m.span
+              key={actif.cle}
+              aria-hidden="true"
+              className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-controle bg-encre px-2.5 py-1.5 text-[12px] font-bold whitespace-nowrap text-white"
+              style={{ left: `${actif.bulleX}%`, top: `${actif.bulleY}%` }}
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: -6 }}
+              exit={{ opacity: 0, y: 4 }}
+              transition={{ duration: 0.16 }}
+            >
+              {actif.texte}
+            </m.span>
+          )}
+        </AnimatePresence>
+        {libelles.map((l) => (
+          <span
+            key={l.cle}
+            aria-hidden="true"
+            className={`absolute rounded-sm bg-white/85 px-1.5 text-[13px] font-extrabold whitespace-nowrap ${COULEURS[l.genre].texte}`}
+            style={{ left: `${l.gauche}%`, top: `${l.haut}%` }}
+          >
+            {l.texte}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
