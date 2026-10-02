@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { BarreRang } from "@/components/barre-rang";
+import { Comparaison } from "@/components/anime/comparaison";
 import { EnTetePage } from "@/components/cadres";
 import { NoteMethode } from "@/components/rapport";
 import { comparaisonFictive } from "@/modules/apercu/donnees";
@@ -10,8 +9,7 @@ import { lireApercu } from "@/modules/apercu/etat";
 import { lireComparaison } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
 import { noterLecture } from "@/modules/journal/queries";
-import { LIBELLES_TRAITS, ORDRE_TRAITS } from "@/modules/questionnaire/libelles";
-import { ordinal, syntheseComparaison } from "@/modules/questionnaire/rapport";
+import { syntheseComparaison } from "@/modules/questionnaire/rapport";
 import { exigerContexte } from "@/server/authz";
 
 export const metadata: Metadata = { title: "Comparer — Prometheus People" };
@@ -29,7 +27,6 @@ export default async function PageComparer({ params }: { params: Promise<{ id: s
 
   const { profils, typePoste } = comparaison;
   if (!apercu) await Promise.all(profils.map((p) => noterLecture(ctx, "consultation", p.id)));
-  const lettre = (i: number) => String.fromCharCode(65 + i);
 
   return (
     <>
@@ -44,46 +41,10 @@ export default async function PageComparer({ params }: { params: Promise<{ id: s
           </>
         }
       />
-      <div className="flex max-w-5xl flex-col gap-5">
+      <div className="flex max-w-[1400px] flex-col gap-5">
         <p className="text-base font-semibold">{syntheseComparaison(profils)}</p>
 
-        {profils.length > 1 ? (
-          <div className="grid gap-4 lg:grid-cols-2">
-            {ORDRE_TRAITS.map((t) => (
-              <section
-                key={t}
-                aria-labelledby={`trait-${t}`}
-                className="flex flex-col gap-3 rounded-bloc border border-bordure bg-white p-5"
-              >
-                <h2 id={`trait-${t}`} className="flex flex-col">
-                  <span className="text-base font-extrabold">{LIBELLES_TRAITS[t].nom}</span>
-                  <span className="text-[13px] text-gris">{LIBELLES_TRAITS[t].resume}</span>
-                </h2>
-                <ul className="flex flex-col gap-1.5">
-                  {profils.map((p, i) => (
-                    <li
-                      key={p.id}
-                      className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)_3rem] items-center gap-3 text-sm"
-                    >
-                      <Link
-                        href={`/candidats/${p.id}`}
-                        className={`truncate ${i === 0 ? "font-extrabold" : ""}`}
-                      >
-                        <span aria-hidden="true">{lettre(i)}. </span>
-                        {p.nom}
-                      </Link>
-                      <BarreRang rang={p.traits[t]} petite />
-                      <span className="chiffres text-right font-bold">
-                        {ordinal(p.traits[t])}
-                        <span className="sr-only"> rang</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-          </div>
-        ) : null}
+        {profils.length > 1 ? <Comparaison profils={profils} /> : null}
         <NoteMethode />
       </div>
     </>

@@ -4,12 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { EnTetePage } from "@/components/cadres";
-import {
-  NoteMethode,
-  ProfilImprime,
-  ProfilInteractif,
-  QualiteReponses,
-} from "@/components/rapport";
+import { NoteMethode, ProfilImprime, QualiteReponses } from "@/components/rapport";
+import { ProfilFiche } from "@/components/anime/profil-fiche";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +14,7 @@ import { rapportFictif } from "@/modules/apercu/donnees";
 import { lireApercu } from "@/modules/apercu/etat";
 import { lireRapport } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
+import { pointsACreuser } from "@/modules/questionnaire/points";
 import { ORDRE_PRESENTATION } from "@/modules/questionnaire/pages";
 import { noterLecture } from "@/modules/journal/queries";
 import { qualiteDesReponses, syntheseProfil } from "@/modules/questionnaire/rapport";
@@ -54,6 +51,7 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
 
   const { resultats } = rapport;
   const qualite = qualiteDesReponses(resultats);
+  const points = pointsACreuser(resultats);
   const temps = duree(rapport.commenceLe, rapport.termineLe);
 
   return (
@@ -86,7 +84,7 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
           </>
         }
       />
-      <div className="flex max-w-5xl flex-col gap-5">
+      <div className="flex max-w-[1240px] flex-col gap-5">
         <Tabs defaultValue="profil" className="print:hidden">
           <TabsList variant="line" className="h-12 w-full justify-start border-b border-bordure">
             <TabsTrigger
@@ -104,11 +102,7 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
           </TabsList>
           <TabsContent value="profil" className="flex flex-col gap-4 pt-4">
             <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
-            <Card className="px-1 md:px-2">
-              <CardContent>
-                <ProfilInteractif resultats={resultats} />
-              </CardContent>
-            </Card>
+            <ProfilFiche resultats={resultats} points={points} />
             <NoteMethode />
           </TabsContent>
           <TabsContent value="qualite" className="pt-4">
@@ -124,6 +118,16 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
         <div className="hidden flex-col gap-5 print:flex">
           <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
           <ProfilImprime resultats={resultats} />
+          {points.length > 0 ? (
+            <>
+              <h2 className="text-lg font-extrabold">À creuser en entretien</h2>
+              <ul className="flex list-disc flex-col gap-1 pl-5">
+                {points.map((p) => (
+                  <li key={p.cle}>{p.phrase}</li>
+                ))}
+              </ul>
+            </>
+          ) : null}
           <h2 className="text-lg font-extrabold">Qualité des réponses</h2>
           <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
           <NoteMethode />
