@@ -77,7 +77,7 @@ export function EnTetePage({
       {retour ? (
         <Link
           href={retour.href}
-          className="-ml-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-controle px-1 text-sm font-bold text-bleu no-underline hover:text-bleu-fonce print:hidden"
+          className="-ml-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-controle px-1 text-sm font-bold text-braise-fonce no-underline hover:text-encre print:hidden"
         >
           <ArrowLeftIcon className="size-4" aria-hidden="true" />
           {retour.libelle}
@@ -133,7 +133,7 @@ function AnneauForfait({
             cy="20"
             r="17"
             fill="none"
-            stroke={part >= 1 ? "var(--color-ambre)" : "var(--color-bleu-clair)"}
+            stroke={part >= 1 ? "var(--color-ambre)" : "var(--color-braise)"}
             strokeWidth="4"
             strokeDasharray={`${part * circonference} ${circonference}`}
           />
@@ -176,14 +176,14 @@ export function CadreApplication({
         <aside className="sticky top-0 hidden h-dvh w-[88px] shrink-0 flex-col items-center gap-2 bg-encre px-0 py-4 text-white md:flex print:hidden">
           <Link
             href="/espace"
-            className="flex size-11 items-center justify-center rounded-bloc focus-visible:outline-bleu-clair"
+            className="flex size-11 items-center justify-center rounded-bloc focus-visible:outline-braise-pale"
           >
             <Flamme taille={30} />
             <span className="sr-only">Prometheus People, tableau de bord</span>
           </Link>
           <BoutonInviter
             size="icon"
-            className="my-2 size-13 rounded-[14px] hover:bg-bleu-clair hover:text-encre focus-visible:ring-bleu-clair [&_svg:not([class*='size-'])]:size-6"
+            className="my-2 size-13 rounded-[14px] hover:bg-braise-fonce focus-visible:ring-braise-pale [&_svg:not([class*='size-'])]:size-6"
           >
             <span className="sr-only">Inviter un candidat</span>
           </BoutonInviter>
@@ -210,7 +210,7 @@ export function CadreApplication({
             <span className="font-extrabold font-stretch-[85%]">Prometheus People</span>
           </Link>
           <span className="ml-auto" />
-          <BoutonInviter size="icon" className="hover:bg-bleu-clair hover:text-encre">
+          <BoutonInviter size="icon" className="hover:bg-braise-fonce">
             <span className="sr-only">Inviter un candidat</span>
           </BoutonInviter>
           <MenuCompte compte={compte} role={role} cote="bottom" />

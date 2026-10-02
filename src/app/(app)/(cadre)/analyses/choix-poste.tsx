@@ -34,7 +34,7 @@ export function ChoixPoste({
         ))}
       </NativeSelect>
       <noscript>
-        <button type="submit" className="text-sm font-bold text-bleu underline">
+        <button type="submit" className="text-sm font-bold text-braise-fonce underline">
           Afficher
         </button>
       </noscript>

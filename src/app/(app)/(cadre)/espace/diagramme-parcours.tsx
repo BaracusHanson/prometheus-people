@@ -1,7 +1,7 @@
 import type { Etape, GenreEtape, Parcours } from "@/modules/tableau/calculs";
 
 // Diagramme en flux du parcours des candidats (maquette TableauV2), dessiné en SVG maison
-// (ADR-0020) : bleu = suite du parcours, gris = en attente, ambre = perte. Les nombres
+// (ADR-0020, ADR-0028) : encre = suite du parcours, gris = en attente, ambre = perte. Les nombres
 // sont écrits sur chaque étape et le tout est décrit en texte (jamais la couleur seule).
 
 const L = 1000; // largeur du repère
@@ -17,8 +17,8 @@ const COULEURS: Record<
 > = {
   suite: {
     noeud: "var(--color-encre)",
-    flux: "var(--color-bleu)",
-    opacite: 0.22,
+    flux: "var(--color-encre)",
+    opacite: 0.14,
     texte: "text-encre",
   },
   attente: {

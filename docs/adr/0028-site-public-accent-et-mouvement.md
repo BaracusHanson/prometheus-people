@@ -1,8 +1,9 @@
-# ADR-0028 — Site public : accent « braise », fond ivoire et animations avec Motion
+# ADR-0028 — Accent « braise », fond ivoire et animations avec Motion
 
 - **Statut** : Accepté
 - **Date** : 2026-10-02
-- **Modifie** : [ADR-0020](0020-interface-et-design.md) (couleurs, animations) pour le site public seulement
+- **Modifie** : [ADR-0020](0020-interface-et-design.md) (couleurs, maquette de référence, animations)
+- _(Modifié le 2026-10-02 : les couleurs s'étendent à tout le produit, après validation de l'accueil par le fondateur.)_
 
 ## Contexte
 
@@ -10,24 +11,25 @@ La direction artistique du site public (fichier de design du fondateur, non vers
 
 ## Décision
 
-**Couleurs, site public uniquement** (pages de `src/app/(site)`, page 404, composants `src/components/vitrine`) :
+**Couleurs, dans tout le produit** (site public, espace recruteur, connexion, pages du candidat) :
 
-| Jeton                   | Rôle                                                                               |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| `braise` #C2410C        | accent signature : bouton principal, état actif, donnée à regarder, point de focus |
-| `braise-fonce`, `-pale` | survol, fond d'un élément mis en avant                                             |
-| `ivoire`, `ivoire-2`    | fond du site, bandeaux                                                             |
-| `ligne`                 | trame et séparateurs sur fond ivoire                                               |
+| Jeton                                 | Rôle                                                                   |
+| ------------------------------------- | ---------------------------------------------------------------------- |
+| `braise` #C2410C                      | actions, liens, élément actif, focus, point sur lequel on attire l'œil |
+| `braise-fonce`, `-pale`               | survol et texte de lien ; élément sélectionné                          |
+| `fond` / `ivoire` #F7F4EE, `ivoire-2` | fond des pages ; bandeaux, zone moyenne, élément neutre sélectionné    |
+| `ligne`, `bordure`, `trait`           | trame, contours et séparateurs, en tons chauds                         |
+| `chart-1` à `chart-5`                 | échelle des graphiques, de l'ivoire à l'encre                          |
 
-Contrastes : braise sur ivoire 4,7:1, blanc sur braise 5,2:1. L'accent ne qualifie jamais un trait : les rangs restent tracés à l'encre, la braise ne désigne que le point sur lequel on attire l'attention. L'espace recruteur, la connexion et le parcours candidat gardent le bleu et les règles de l'ADR-0020.
+Le bleu disparaît. Contrastes : braise sur ivoire 4,7:1, blanc sur braise 5,2:1, lien `braise-fonce` sur ivoire 7:1, contour des champs 3,2:1. Les **données sont tracées à l'encre** ; l'accent ne qualifie jamais un trait et ne mesure jamais une quantité. L'ambre (attention), le vert (terminé, réponses fiables) et le rouge (erreurs) gardent leur rôle de l'ADR-0020 ; le statut « En cours » devient neutre. Un statut est toujours écrit, jamais porté par la couleur seule. Le choix d'une réponse du candidat est à l'encre : une réponse n'est ni bonne ni mauvaise. Ce design remplace la maquette validée citée par l'ADR-0020 ; les captures de référence avant changement sont jointes au ticket du chantier.
 
-**Animations, site public uniquement** : bibliothèque **Motion** (`motion`, ex-Framer Motion), chargée par `LazyMotion` (fonctions d'animation du DOM seulement). Elle ne s'importe que dans `src/components/vitrine` (règle ESLint), et seules les pages qui animent (accueil, tarifs) chargent son fournisseur : le cadre du site (en-tête, pied, page 404) reste sans Motion, car Next le charge aussi hors du site public, jusque sur les pages du candidat (vérifié sur le build). Chaque animation montre une transformation du produit (invitation → réponses → mesures → profil) ; pas d'animation permanente ni décorative. `MotionConfig reducedMotion="user"` : avec « moins d'animations », les éléments arrivent directement dans leur état final. Le serveur rend une page lisible avant toute animation.
+**Animations** — site public : bibliothèque **Motion** (`motion`, ex-Framer Motion), chargée par `LazyMotion` (fonctions d'animation du DOM seulement). Elle ne s'importe que dans `src/components/vitrine` (règle ESLint), et seules les pages qui animent (accueil, tarifs) chargent son fournisseur : le cadre du site (en-tête, pied, page 404) reste sans Motion, car Next le charge aussi hors du site public, jusque sur les pages du candidat (vérifié sur le build). Chaque animation montre une transformation du produit (invitation → réponses → mesures → profil) ; pas d'animation permanente ni décorative. `MotionConfig reducedMotion="user"` : avec « moins d'animations », les éléments arrivent directement dans leur état final. Le serveur rend une page lisible avant toute animation. Espace recruteur : animations sobres d'outil de travail (transitions d'état, chiffres, graphiques qui se dessinent, survols précis), jamais de récit au défilement ni d'attente imposée ; la règle ESLint est élargie quand ces composants arrivent. Pages du candidat : jamais de Motion.
 
 ## Options écartées
 
 - **Tout en CSS** (première version de la refonte) : suffisant pour des apparitions, mais le récit lié au défilement (positions interpolées en continu, indicateurs qui glissent d'un élément à l'autre, transitions de mise en page) devient du code fragile écrit à la main.
 - **GSAP + ScrollTrigger** : plus puissant pour le défilement, mais impératif (hors du modèle React), et la licence des greffons avancés est moins simple.
-- **Accent dans toute l'application** : refonte de dizaines d'écrans validés, et risque de confusion avec le rouge des erreurs dans un outil de travail ; à rediscuter à part.
+- **Garder le bleu dans l'application** (décision initiale de cet ADR) : deux identités pour un même produit ; écarté par le fondateur après validation de l'accueil. Le risque de confusion entre braise, ambre et rouge est traité en écrivant toujours le statut et en traçant les données à l'encre.
 
 ## Conséquences
 

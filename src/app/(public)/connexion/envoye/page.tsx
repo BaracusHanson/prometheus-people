@@ -9,7 +9,7 @@ export const metadata: Metadata = { title: "Vérifiez votre boîte mail — Prom
 export default function PageLienEnvoye() {
   return (
     <EcranCentre>
-      <span className="flex size-12 items-center justify-center rounded-full bg-bleu-pale text-bleu">
+      <span className="flex size-12 items-center justify-center rounded-full bg-braise-pale text-braise-fonce">
         <MailIcon className="size-6" aria-hidden="true" />
       </span>
       <TitreEcran>Vérifiez votre boîte mail</TitreEcran>
@@ -19,7 +19,10 @@ export default function PageLienEnvoye() {
       </p>
       <p className="text-sm leading-relaxed text-gris">
         Rien reçu ? Regardez dans vos courriers indésirables, ou{" "}
-        <Link href="/connexion" className="font-bold text-bleu underline underline-offset-2">
+        <Link
+          href="/connexion"
+          className="font-bold text-braise-fonce underline underline-offset-2"
+        >
           recommencez avec une autre adresse
         </Link>
         .

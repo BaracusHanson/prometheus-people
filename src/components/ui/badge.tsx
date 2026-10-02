@@ -17,7 +17,7 @@ const badgeVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         // Statuts et rôles (ADR-0020) : le texte porte le sens, la couleur le souligne.
         neutre: "bg-trait text-gris-fonce",
-        info: "bg-bleu-pale text-bleu-fonce",
+        info: "bg-ivoire-2 text-encre",
         succes: "bg-vert-pale text-vert",
         attention: "bg-ambre-pale text-ambre-fonce",
         fort: "bg-encre text-white",

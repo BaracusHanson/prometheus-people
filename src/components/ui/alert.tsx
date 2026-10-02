@@ -11,7 +11,7 @@ const alertVariants = cva(
         destructive:
           "bg-card text-destructive *:data-[slot=alert-description]:text-destructive/90 *:[svg]:text-current",
         // Messages (ADR-0020) : jamais la couleur seule, toujours un texte explicite.
-        info: "border-transparent bg-bleu-pale text-bleu-fonce",
+        info: "border-transparent bg-ivoire-2 text-encre",
         succes: "border-transparent bg-vert-pale text-vert",
         attention: "border-transparent bg-ambre-pale text-ambre-texte",
         erreur: "border-transparent bg-rouge-pale text-rouge",

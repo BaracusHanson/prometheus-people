@@ -225,7 +225,7 @@ function Repartition({ repartition: r }: { repartition: RepartitionPoste }) {
               aria-hidden="true"
             >
               <span
-                className="absolute inset-y-0 block bg-bleu-pale/70"
+                className="absolute inset-y-0 block bg-ivoire-2"
                 style={{
                   left: `${ZONE_MOYENNE.debut}%`,
                   width: `${ZONE_MOYENNE.fin - ZONE_MOYENNE.debut}%`,
@@ -235,7 +235,7 @@ function Repartition({ repartition: r }: { repartition: RepartitionPoste }) {
               {t.rangs.map((rang, i) => (
                 <span
                   key={i}
-                  className="absolute block size-2.5 -translate-x-1/2 rounded-full border border-white bg-bleu/75"
+                  className="absolute block size-2.5 -translate-x-1/2 rounded-full border border-white bg-encre/70"
                   style={{ left: `${rang}%`, top: `${4 + ((i * 37) % 5) * 4}px` }}
                 />
               ))}
@@ -253,7 +253,7 @@ function Repartition({ repartition: r }: { repartition: RepartitionPoste }) {
       <p className="text-xs text-gris">
         {TYPES_POSTE[r.poste]}, {r.nombre} candidats. Décrit les candidats que vous avez reçus, pas
         le candidat idéal pour ce poste. Affiché à partir de {MINIMUM_REPARTITION} candidats ; aucun
-        nom n&apos;apparaît. Bande bleue : zone moyenne ; trait foncé : médiane.
+        nom n&apos;apparaît. Bande claire : zone moyenne ; trait foncé : médiane.
       </p>
     </>
   );

@@ -93,7 +93,7 @@ export default async function PageParametres({
               key={s.cle}
               href={`/parametres?section=${s.cle}`}
               aria-current={s.cle === section ? "page" : undefined}
-              className="flex min-h-11 shrink-0 items-center rounded-controle border-b-[3px] border-transparent px-3.5 text-[15px] font-semibold whitespace-nowrap text-encre no-underline transition-colors hover:bg-white md:rounded-l-none md:border-b-0 md:border-l-4 aria-[current=page]:border-bleu aria-[current=page]:bg-bleu-pale aria-[current=page]:font-extrabold aria-[current=page]:text-bleu-fonce"
+              className="flex min-h-11 shrink-0 items-center rounded-controle border-b-[3px] border-transparent px-3.5 text-[15px] font-semibold whitespace-nowrap text-encre no-underline transition-colors hover:bg-white md:rounded-l-none md:border-b-0 md:border-l-4 aria-[current=page]:border-braise aria-[current=page]:bg-white aria-[current=page]:font-extrabold aria-[current=page]:text-encre"
             >
               {s.libelle}
             </Link>
@@ -145,7 +145,7 @@ async function Agence({ ctx }: { ctx: Contexte }) {
           {Object.values(TYPES_POSTE).map((libelle) => (
             <li
               key={libelle}
-              className="rounded-full bg-bleu-pale px-3 py-1.5 text-sm font-semibold text-bleu-fonce"
+              className="rounded-full bg-ivoire-2 px-3 py-1.5 text-sm font-semibold text-encre"
             >
               {libelle}
             </li>
@@ -220,7 +220,7 @@ async function Forfait({ ctx }: { ctx: Contexte }) {
         </TableHeader>
         <TableBody>
           {CLES_FORFAIT.map((f) => (
-            <TableRow key={f} className={f === etat.forfait ? "bg-bleu-pale/50 font-bold" : ""}>
+            <TableRow key={f} className={f === etat.forfait ? "bg-braise-pale/60 font-bold" : ""}>
               <TableCell>
                 <span className="flex items-center gap-2">
                   {FORFAITS[f].libelle}

@@ -56,7 +56,7 @@ function pageCourante(etape: number, sous: number): number {
 const BADGES = {
   brouillon: { libelle: "Pas encore invitée", classe: "bg-ivoire-2 text-gris-fonce" },
   invite: { libelle: "Invitée", classe: "bg-ambre-pale text-ambre-fonce" },
-  en_cours: { libelle: "En cours", classe: "bg-bleu-pale text-bleu-fonce" },
+  en_cours: { libelle: "En cours", classe: "bg-ivoire-2 text-encre" },
   termine: { libelle: "Terminé", classe: "bg-vert-pale text-vert" },
   fiable: { libelle: "Terminé · réponses fiables", classe: "bg-vert-pale text-vert" },
 } as const;
@@ -320,7 +320,7 @@ export function FicheParcours({
             ))}
             <span className="mt-1 flex flex-wrap items-center gap-3">
               <m.span
-                className="rounded-controle bg-bleu px-4 py-2.5 text-[14px] font-bold text-white"
+                className="rounded-controle bg-braise px-4 py-2.5 text-[14px] font-bold text-white"
                 animate={{ scale: envoye ? [1, 0.95, 1] : 1 }}
                 transition={{ duration: 0.25 }}
               >

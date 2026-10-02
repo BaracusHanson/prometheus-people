@@ -95,7 +95,7 @@ export default async function PageInvitation({
         Connecté en tant que {session.user.email}. Ce n&apos;est pas vous ?{" "}
         <button
           type="submit"
-          className="relative cursor-pointer font-bold text-bleu underline underline-offset-2 after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] hover:text-bleu-fonce"
+          className="relative cursor-pointer font-bold text-braise-fonce underline underline-offset-2 after:absolute after:-inset-x-1 after:-inset-y-3 after:content-[''] hover:text-encre"
         >
           Se déconnecter
         </button>

@@ -136,17 +136,13 @@ export function PageQuestions({
         {erreurFin ? (
           <p role="alert" className="text-center text-sm font-bold text-rouge">
             Il manque encore des réponses sur une page précédente.{" "}
-            <Link href={cheminPassation} className="text-bleu underline">
+            <Link href={cheminPassation} className="text-braise-fonce underline">
               Voir où reprendre
             </Link>
           </p>
         ) : null}
         {restantes > 0 ? (
-          <Button
-            size="lg"
-            className="w-full bg-bleu-pale text-bleu-fonce disabled:opacity-100"
-            disabled
-          >
+          <Button size="lg" className="w-full bg-ivoire-2 text-encre disabled:opacity-100" disabled>
             Encore {restantes} phrase{restantes > 1 ? "s" : ""}
           </Button>
         ) : derniere ? (

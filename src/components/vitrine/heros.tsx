@@ -33,7 +33,7 @@ type Statut = (typeof LISTE)[number]["statut"];
 
 const BADGES: Record<Statut, { libelle: string; classe: string }> = {
   invite: { libelle: "Invité", classe: "bg-ambre-pale text-ambre-fonce" },
-  en_cours: { libelle: "En cours", classe: "bg-bleu-pale text-bleu-fonce" },
+  en_cours: { libelle: "En cours", classe: "bg-ivoire-2 text-encre" },
   termine: { libelle: "Terminé", classe: "bg-vert-pale text-vert" },
 };
 
@@ -126,7 +126,7 @@ export function FenetreProduit() {
       <div className="grid min-h-[540px] lg:grid-cols-[minmax(0,1fr)_minmax(0,540px)] xl:grid-cols-[188px_minmax(0,1fr)_minmax(0,540px)]">
         {/* Colonne de navigation de l'application */}
         <div className="flex flex-col gap-1 border-r border-trait bg-fond p-3 max-xl:hidden">
-          <span className="mb-3 flex items-center justify-center gap-2 rounded-controle bg-bleu py-2 text-[13px] font-bold text-white">
+          <span className="mb-3 flex items-center justify-center gap-2 rounded-controle bg-braise py-2 text-[13px] font-bold text-white">
             <PlusIcon className="size-4" /> Inviter
           </span>
           {NAVIGATION.map(({ libelle, Icone, actif }) => (

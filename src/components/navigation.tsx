@@ -63,7 +63,7 @@ export function NavigationPrincipale({
           key={href}
           href={href}
           aria-current={estActif(chemin, href) ? "page" : undefined}
-          className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-bloc px-1 py-2 text-center text-[11px] leading-tight font-semibold text-gris-clair no-underline transition-colors hover:bg-encre-2/60 hover:text-white aria-[current=page]:bg-encre-2 aria-[current=page]:font-extrabold aria-[current=page]:text-white focus-visible:outline-bleu-clair ${colonne ? "w-[76px]" : ""}`}
+          className={`relative flex min-h-14 flex-col items-center justify-center gap-1 rounded-bloc px-1 py-2 text-center text-[11px] leading-tight font-semibold text-gris-clair no-underline transition-colors hover:bg-encre-2/60 hover:text-white aria-[current=page]:bg-encre-2 aria-[current=page]:font-extrabold aria-[current=page]:text-white aria-[current=page]:after:absolute aria-[current=page]:after:inset-x-5 aria-[current=page]:after:bottom-1 aria-[current=page]:after:h-[3px] aria-[current=page]:after:rounded-full aria-[current=page]:after:bg-braise focus-visible:outline-braise-pale ${colonne ? "w-[76px]" : ""}`}
         >
           <Icone className="size-[22px]" strokeWidth={2} aria-hidden="true" />
           {libelle}
@@ -92,7 +92,7 @@ export function MenuCompte({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="flex size-11 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-bleu-clair"
+        className="flex size-11 items-center justify-center rounded-full outline-none focus-visible:ring-3 focus-visible:ring-braise-pale"
         aria-label={`Mon compte : ${compte}`}
       >
         <Avatar className="size-9 after:border-transparent">
