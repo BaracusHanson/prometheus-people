@@ -18,6 +18,7 @@ import { listerJournal, type ActionJournal } from "@/modules/journal/queries";
 import { obtenirAgence } from "@/modules/agences/queries";
 import { CLES_FORFAIT, FORFAITS, phraseRestants } from "@/modules/candidats/forfaits";
 import { lireForfait } from "@/modules/candidats/queries";
+import { TYPES_POSTE } from "@/modules/candidats/schemas";
 import { compterAuDela, lireConservation, lireEmailContact } from "@/modules/parametres/queries";
 import { exigerContexte, type Contexte } from "@/server/authz";
 
@@ -52,8 +53,8 @@ const formatQuand = new Intl.DateTimeFormat("fr-FR", {
   timeZone: "Europe/Paris",
 });
 
-const CARTE = "flex flex-col gap-5 rounded-bloc border border-bordure bg-white p-5 md:p-7";
-const TITRE = "text-xl font-extrabold font-stretch-[85%]";
+const CARTE = "flex flex-col gap-3.5 rounded-bloc border border-bordure bg-white px-5 py-5 md:px-6";
+const TITRE = "text-[19px] font-extrabold font-stretch-[85%]";
 
 // Paramètres de l'agence (maquette « Paramètres », ADR-0023). Réservés aux
 // administrateurs : la page le vérifie, et chaque requête le revérifie.
@@ -77,12 +78,15 @@ export default async function PageParametres({
   const section: Section = SECTIONS.find((s) => s.cle === demande)?.cle ?? "agence";
 
   return (
-    <div className="flex max-w-6xl flex-col gap-6">
-      <EnTetePage titre="Paramètres" />
-      <div className="grid gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
+    <>
+      {/* Sur téléphone, le titre passe au-dessus des onglets de section. */}
+      <div className="mb-4 md:hidden">
+        <EnTetePage titre="Paramètres" />
+      </div>
+      <div className="grid max-w-[1170px] gap-4 md:grid-cols-[240px_minmax(0,900px)] md:gap-6">
         <nav
           aria-label="Sections des paramètres"
-          className="-mx-4 flex gap-1 overflow-x-auto px-4 md:mx-0 md:flex-col md:overflow-visible md:px-0"
+          className="-mx-4 flex gap-1 overflow-x-auto px-4 md:mx-0 md:flex-col md:overflow-visible md:px-0 md:pt-[52px]"
         >
           {SECTIONS.map((s) => (
             <Link
@@ -95,7 +99,10 @@ export default async function PageParametres({
             </Link>
           ))}
         </nav>
-        <div className="min-w-0">
+        <div className="flex min-w-0 flex-col gap-4">
+          <div className="max-md:hidden">
+            <EnTetePage titre="Paramètres" />
+          </div>
           {section === "agence" ? <Agence ctx={ctx} /> : null}
           {section === "conservation" ? <Conservation ctx={ctx} /> : null}
           {section === "forfait" ? <Forfait ctx={ctx} /> : null}
@@ -103,7 +110,7 @@ export default async function PageParametres({
           {section === "apercu" ? <Apercu /> : null}
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -123,14 +130,31 @@ async function Agence({ ctx }: { ctx: Contexte }) {
       <h2 id="titre-agence" className={TITRE}>
         Agence
       </h2>
-      <p>
+      <p className="flex flex-col gap-1">
         <span className="text-sm font-bold">Nom de l&apos;agence</span>
-        <br />
-        {agence?.nom}
-        <span className="block text-sm text-gris">
+        <span className="text-[15px]">{agence?.nom}</span>
+        <span className="text-[13px] text-gris">
           Apparaît dans les emails et sur les pages des candidats.
         </span>
       </p>
+      <div className="flex flex-col gap-1.5">
+        <span className="text-sm font-bold" id="postes-proposes">
+          Types de poste proposés
+        </span>
+        <ul aria-labelledby="postes-proposes" className="flex flex-wrap gap-1.5">
+          {Object.values(TYPES_POSTE).map((libelle) => (
+            <li
+              key={libelle}
+              className="rounded-full bg-bleu-pale px-3 py-1.5 text-sm font-semibold text-bleu-fonce"
+            >
+              {libelle}
+            </li>
+          ))}
+        </ul>
+        <span className="text-[13px] text-gris">
+          Liste fixe en v1, définie par Prometheus People.
+        </span>
+      </div>
       <FormulaireContact actuel={email} />
     </section>
   );
@@ -226,14 +250,12 @@ async function Journal({ ctx }: { ctx: Contexte }) {
 
   return (
     <section className={CARTE} aria-labelledby="titre-journal">
-      <div className="flex flex-col gap-1">
-        <h2 id="titre-journal" className={TITRE}>
-          Journal d&apos;audit
-        </h2>
-        <p className="text-sm text-gris">
-          Qui a consulté, imprimé ou supprimé quel candidat. Les 200 dernières actions.
-        </p>
-      </div>
+      <h2 id="titre-journal" className={TITRE}>
+        Journal d&apos;audit{" "}
+        <span className="text-[13px] font-semibold text-gris font-stretch-100%">
+          qui a consulté, imprimé ou supprimé quel candidat (200 dernières actions)
+        </span>
+      </h2>
       {lignes.length === 0 ? (
         <p className="text-gris">Aucune action enregistrée pour l&apos;instant.</p>
       ) : (

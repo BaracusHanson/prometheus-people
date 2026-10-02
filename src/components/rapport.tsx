@@ -31,7 +31,8 @@ import {
 function Rang({ rang }: { rang: number }) {
   return (
     <span className="chiffres text-right font-extrabold">
-      {ordinal(rang)}
+      <span className="text-xl font-stretch-75%">{rang}</span>
+      <span className="text-xs">{ordinal(rang).slice(String(rang).length)}</span>
       <span className="sr-only"> rang, {LIBELLES_NIVEAUX[niveau(rang)].toLowerCase()}</span>
     </span>
   );
@@ -49,10 +50,10 @@ const RETRAIT_FLECHE = "pr-7";
 function EnTeteEchelle({ fleche }: { fleche: boolean }) {
   return (
     <div
-      className={`${GRILLE} ${fleche ? RETRAIT_FLECHE : ""} items-end pb-2 text-xs leading-tight font-bold text-gris`}
+      className={`${GRILLE} ${fleche ? RETRAIT_FLECHE : ""} items-end border-b-2 border-encre pb-2 text-xs leading-tight font-semibold text-gris`}
       aria-hidden="true"
     >
-      <span className="max-sm:hidden">Trait</span>
+      <span className="max-sm:hidden">{fleche ? "Trait (cliquez pour le détail)" : "Trait"}</span>
       <span className="grid grid-cols-[30fr_40fr_30fr] gap-1">
         <span>{LIBELLES_NIVEAUX.bas}</span>
         <span className="text-center">{LIBELLES_NIVEAUX.moyen}</span>
@@ -120,7 +121,7 @@ export function ProfilInteractif({ resultats }: { resultats: Resultats }) {
   return (
     <div>
       <EnTeteEchelle fleche />
-      <Accordion type="single" collapsible className="border-t border-trait">
+      <Accordion type="single" collapsible>
         {ORDRE_TRAITS.map((t) => (
           <AccordionItem key={t} value={t} className="border-trait">
             <AccordionTrigger className="min-h-11 items-center gap-3 hover:no-underline">
