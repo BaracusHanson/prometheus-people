@@ -240,6 +240,12 @@ export function Progression({ faites, total }: { faites: number; total: number }
 }
 
 // C4 : reprise après une pause.
+const FORMAT_JOUR = new Intl.DateTimeFormat("fr-FR", {
+  day: "numeric",
+  month: "long",
+  timeZone: "Europe/Paris",
+});
+
 export function Reprise({
   nom,
   page,
@@ -247,6 +253,7 @@ export function Reprise({
   faites,
   total,
   suite,
+  valableJusquau,
 }: {
   nom: string;
   page: number;
@@ -254,6 +261,7 @@ export function Reprise({
   faites: number;
   total: number;
   suite: string;
+  valableJusquau: Date | null;
 }) {
   const minutes = Math.max(1, Math.ceil(((total - faites) * 9) / 60));
   const toutFait = faites === total;
@@ -282,6 +290,12 @@ export function Reprise({
       <Button asChild size="lg" className="w-full">
         <Link href={suite}>{toutFait ? "Terminer le questionnaire" : "Reprendre"}</Link>
       </Button>
+      {valableJusquau ? (
+        <p className="text-center text-[15px] text-gris">
+          Votre lien reste valable jusqu&apos;au{" "}
+          <strong className="text-encre">{FORMAT_JOUR.format(valableJusquau)}</strong>.
+        </p>
+      ) : null}
     </>
   );
 }

@@ -76,7 +76,7 @@ function LigneTrait({ trait, rang }: { trait: Trait; rang: number }) {
         </span>
         <span className="text-[13px] font-normal text-gris">{LIBELLES_TRAITS[trait].resume}</span>
       </span>
-      <BarreRang rang={rang} />
+      <BarreRang rang={rang} cerclee />
       <Rang rang={rang} />
     </span>
   );
