@@ -1,63 +1,81 @@
 import { describe, expect, it } from "vitest";
 
-import { POINTS_MAX, SEUIL_ECART, pointsACreuser } from "./points";
-import type { Resultats } from "./resultats";
-import { FACETTES_MESUREES, TRAITS, traitDe, type FacetteMesuree, type Trait } from "./structure";
-
-// Résultats fictifs : tout au 50e rang, puis quelques rangs choisis.
-function resultats(
-  traits: Partial<Record<Trait, number>> = {},
-  facettes: Partial<Record<FacetteMesuree, number>> = {},
-): Resultats {
-  return {
-    version: 1,
-    traits: Object.fromEntries(
-      TRAITS.map((t) => [t, { score: 0, rang: traits[t] ?? 50 }]),
-    ) as Resultats["traits"],
-    facettes: Object.fromEntries(
-      FACETTES_MESUREES.map((f) => [
-        f,
-        { score: 0, rang: facettes[f] ?? traits[traitDe(f)] ?? 50 },
-      ]),
-    ) as Resultats["facettes"],
-    vigilances: [],
-    plusLongueSerie: 3,
-  };
-}
+import { resultatsDepuisEcarts } from "./ecarts";
+import { pointsACreuser } from "./points";
+import { FACETTES_MESUREES, traitDe } from "./structure";
 
 describe("points à creuser", () => {
-  it("ne signale rien quand aucune facette ne s'écarte nettement de son trait", () => {
-    expect(pointsACreuser(resultats({ C: 78 }, { C2: 78 - (SEUIL_ECART - 1) }))).toEqual([]);
+  it("dit qu'il n'y a rien à creuser sur un profil sans écart", () => {
+    expect(pointsACreuser(resultatsDepuisEcarts())).toEqual({
+      lisible: true,
+      prudence: false,
+      points: [],
+    });
   });
 
-  it("signale une facette nettement plus basse que son trait, avec ses sources", () => {
-    const [point, ...autres] = pointsACreuser(resultats({ C: 78 }, { C2: 22 }));
-    expect(autres).toEqual([]);
-    expect(point).toMatchObject({ cle: "C2", trait: "C", sens: "bas", ecart: 56 });
+  it("met en mots une sous-dimension à l'écart, avec ses sources", () => {
+    const r = resultatsDepuisEcarts({ C2: -1.8 });
+    const [point] = pointsACreuser(r).points;
+    expect(point).toEqual({
+      cle: "facette:C2",
+      phrase:
+        "« Ordre » se situe nettement plus bas que les autres sous-dimensions de Conscienciosité.",
+      signalees: ["C2"],
+      sources: [
+        {
+          cible: "trait:C",
+          trait: "C",
+          libelle: "Conscienciosité",
+          rang: r.traits.C.rang,
+          phrases: 24,
+        },
+        { cible: "facette:C2", trait: "C", libelle: "Ordre", rang: r.facettes.C2.rang, phrases: 4 },
+      ],
+    });
+  });
+
+  it("compte 20 phrases pour l'Ouverture (5 sous-dimensions) et élide « d' »", () => {
+    const ouverture = { O2: -0.2, O3: -0.2, O4: -0.2, O5: -0.2, O1: 1.55 };
+    const [point] = pointsACreuser(resultatsDepuisEcarts(ouverture)).points;
     expect(point!.phrase).toBe(
-      "Conscienciosité : « Ordre » (22e rang) est nettement plus bas que le reste du trait (78e rang).",
+      "« Imagination » se situe nettement plus haut que les autres sous-dimensions d'Ouverture.",
     );
-    expect(point!.sources).toEqual([
-      { libelle: "Conscienciosité", rang: 78, phrases: 24 },
-      { libelle: "Ordre", rang: 22, phrases: 4 },
+    expect(point!.sources[0]!.phrases).toBe(20);
+  });
+
+  it("met en mots un trait moyen contrasté, en nommant ses deux sous-dimensions", () => {
+    const [point] = pointsACreuser(resultatsDepuisEcarts({ E3: 1.5, E2: -1.6 })).points;
+    expect(point!.phrase).toBe(
+      "Le rang moyen d'Extraversion réunit des sous-dimensions opposées : « Affirmation de soi » nettement plus haut que « Goût des groupes ».",
+    );
+    expect(point!.signalees).toEqual(["E3", "E2"]);
+    expect(point!.sources.map((s) => s.cible)).toEqual(["trait:E", "facette:E3", "facette:E2"]);
+  });
+
+  it("met en mots un trait très marqué, sans marquer de sous-dimension", () => {
+    const tout = Object.fromEntries(
+      FACETTES_MESUREES.filter((f) => traitDe(f) === "C").map((f) => [f, -2]),
+    );
+    const [point] = pointsACreuser(resultatsDepuisEcarts(tout)).points;
+    expect(point).toMatchObject({
+      cle: "extreme:C",
+      phrase: "Conscienciosité très basse par rapport à l'échantillon de référence.",
+      signalees: [],
+    });
+  });
+
+  it("ne décrit jamais une personne : aucune phrase en « est »", () => {
+    const { points } = pointsACreuser(
+      resultatsDepuisEcarts({ C2: -2, O1: 1.3, O4: -1.3, N3: 1.8 }),
+    );
+    expect(points).toHaveLength(3);
+    for (const p of points) expect(p.phrase).not.toMatch(/\best\b/);
+  });
+
+  it("ne donne aucun point quand les réponses sont illisibles", () => {
+    const r = resultatsDepuisEcarts({ C2: -2 }, [
+      { type: "controle-attention-echoue", echecs: 2, total: 3 },
     ]);
-  });
-
-  it("dit « plus haut » dans l'autre sens, et compte 20 phrases pour l'ouverture (5 facettes)", () => {
-    const [point] = pointsACreuser(resultats({ O: 20 }, { O1: 70 }));
-    expect(point).toMatchObject({ cle: "O1", sens: "haut", ecart: 50 });
-    expect(point!.sources[0].phrases).toBe(20);
-  });
-
-  it("retient un écart égal au seuil", () => {
-    const [point] = pointsACreuser(resultats({ E: 50 }, { E1: 50 + SEUIL_ECART }));
-    expect(point).toMatchObject({ cle: "E1", ecart: SEUIL_ECART });
-  });
-
-  it("garde les écarts les plus nets, au plus trois", () => {
-    const points = pointsACreuser(resultats({}, { E1: 85, N1: 5, A1: 95, C1: 90, C2: 10 }));
-    expect(points).toHaveLength(POINTS_MAX);
-    expect(points.map((p) => p.ecart)).toEqual([45, 45, 40]);
-    expect(points.map((p) => p.cle)).not.toContain("E1");
+    expect(pointsACreuser(r)).toEqual({ lisible: false, prudence: false, points: [] });
   });
 });

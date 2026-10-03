@@ -12,7 +12,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { LIBELLES_FACETTES, LIBELLES_TRAITS, ORDRE_TRAITS } from "@/modules/questionnaire/libelles";
-import { SEUIL_ECART, type PointACreuser } from "@/modules/questionnaire/points";
+import {
+  RANG_TRES_BAS,
+  RANG_TRES_HAUT,
+  SEUIL_CONTRASTE,
+  SEUIL_ECART,
+} from "@/modules/questionnaire/nuances";
+import type { PointsDuProfil } from "@/modules/questionnaire/points";
 import type { Resultats } from "@/modules/questionnaire/resultats";
 import {
   FACETTES_MESUREES,
@@ -30,6 +36,8 @@ import { FournisseurAnime } from "./mouvement";
 // points de rang glissent à l'ouverture (CSS) et les bulles de lecture utilisent Motion.
 
 type Cle = `trait:${Trait}` | `facette:${string}`;
+
+const virgule = (n: number) => String(n).replace(".", ",");
 
 // Bulle de lecture : le rang dit en mots, au survol de la ligne.
 function Lecture({ rang, visible }: { rang: number; visible: boolean }) {
@@ -75,11 +83,12 @@ function Piste({
 
 export function ProfilFiche({
   resultats,
-  points,
+  lecture,
 }: {
   resultats: Resultats;
-  points: readonly PointACreuser[];
+  lecture: PointsDuProfil;
 }) {
+  const { lisible, prudence, points } = lecture;
   const [ouvert, setOuvert] = useState<string>("");
   const [survol, setSurvol] = useState<Cle | null>(null);
 
@@ -128,7 +137,7 @@ export function ProfilFiche({
                     <ul className={`flex flex-col gap-1 pb-3 ${RETRAIT_FLECHE}`}>
                       {FACETTES_MESUREES.filter((f) => traitDe(f) === t).map((f, j) => {
                         const cle: Cle = `facette:${f}`;
-                        const signalee = points.some((p) => p.cle === f);
+                        const signalee = points.some((p) => p.signalees.includes(f));
                         return (
                           <li
                             key={f}
@@ -172,10 +181,20 @@ export function ProfilFiche({
           <h2 id="titre-points" className="text-[19px] font-extrabold font-stretch-[85%]">
             À creuser en entretien
           </h2>
-          {points.length === 0 ? (
+          {prudence ? (
+            <p className="text-[15px] leading-relaxed font-semibold text-ambre-texte">
+              À lire avec prudence : voir la qualité des réponses.
+            </p>
+          ) : null}
+          {!lisible ? (
             <p className="text-[15px] leading-relaxed text-gris-fonce">
-              Aucune sous-dimension ne s&apos;écarte nettement de son trait : les traits se lisent
-              tels quels.
+              Deux contrôles d&apos;attention ou plus ont été manqués : les écarts entre
+              sous-dimensions ne sont pas interprétés. Les traits se lisent avec prudence.
+            </p>
+          ) : points.length === 0 ? (
+            <p className="text-[15px] leading-relaxed text-gris-fonce">
+              Aucune sous-dimension ne se détache et aucun trait n&apos;est très marqué : les traits
+              se lisent tels quels.
             </p>
           ) : (
             <ol className="flex flex-col gap-4">
@@ -189,17 +208,17 @@ export function ProfilFiche({
                     aria-label="Mesures à l'origine de ce point"
                     className="flex flex-wrap gap-1.5"
                   >
-                    {p.sources.map((s, k) => {
-                      const cle: Cle = k === 0 ? `trait:${p.trait}` : `facette:${p.cle}`;
+                    {p.sources.map((s) => {
+                      const cle: Cle = s.cible;
                       return (
                         <li key={s.libelle}>
                           <button
                             type="button"
-                            onPointerEnter={() => montrer(p.trait, cle)}
+                            onPointerEnter={() => montrer(s.trait, cle)}
                             onPointerLeave={() => setSurvol(null)}
-                            onFocus={() => montrer(p.trait, cle)}
+                            onFocus={() => montrer(s.trait, cle)}
                             onBlur={() => setSurvol(null)}
-                            onClick={() => montrer(p.trait, cle)}
+                            onClick={() => montrer(s.trait, cle)}
                             className={`min-h-9 cursor-pointer rounded-full border px-3 text-[12px] font-bold transition-colors ${
                               survol === cle
                                 ? "border-braise bg-braise text-white"
@@ -217,9 +236,11 @@ export function ProfilFiche({
             </ol>
           )}
           <p className="border-t border-trait pt-3 text-xs leading-relaxed text-gris">
-            Une sous-dimension est signalée quand elle s&apos;écarte d&apos;au moins {SEUIL_ECART}{" "}
-            rangs de son trait. C&apos;est un sujet de conversation, pas un défaut : la question,
-            c&apos;est vous qui la posez.
+            Un point est signalé quand une sous-dimension s&apos;écarte d&apos;au moins{" "}
+            {virgule(SEUIL_ECART)} écart-type des autres sous-dimensions de son trait, quand un
+            trait moyen réunit deux sous-dimensions opposées (±{virgule(SEUIL_CONTRASTE)}), ou quand
+            un trait est au {RANG_TRES_BAS}e rang ou moins, au {RANG_TRES_HAUT}e ou plus. C&apos;est
+            un sujet de conversation, pas un défaut : la question, c&apos;est vous qui la posez.
           </p>
         </aside>
       </div>

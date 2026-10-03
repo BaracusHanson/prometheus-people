@@ -8,6 +8,7 @@ import type {
 import type { TypePoste } from "@/modules/candidats/schemas";
 import type { LigneAnalyse } from "@/modules/analyses/calculs";
 import type { LigneJournal } from "@/modules/journal/queries";
+import { resultatsDepuisEcarts } from "@/modules/questionnaire/ecarts";
 import { CONTROLES } from "@/modules/questionnaire/pages";
 import { SEUIL_SERIE_IDENTIQUE, type Vigilance } from "@/modules/questionnaire/qualite";
 import type { Resultats } from "@/modules/questionnaire/resultats";
@@ -160,49 +161,42 @@ function generateur(graine: number): () => number {
   };
 }
 
-function borne(rang: number): number {
-  return Math.min(99, Math.max(1, Math.round(rang)));
+// Écart à la norme en cloche autour de 0 (somme de trois tirages uniformes, écart-type 1).
+function ecartCloche(alea: () => number): number {
+  return (alea() + alea() + alea() - 1.5) * 2;
 }
 
-// Rang en cloche autour de 50 (somme de trois tirages uniformes).
-function rangCloche(alea: () => number): number {
-  return borne(((alea() + alea() + alea()) / 3) * 100);
-}
-
-function score(rang: number): number {
-  return Math.round((1 + (rang / 100) * 4) * 100) / 100;
-}
-
+// Résultats calculés comme de vrais résultats (modules/questionnaire/ecarts.ts) : un niveau
+// par trait, des sous-dimensions proches de ce niveau, puis, chez une partie des candidats,
+// un écart injecté pour que l'aperçu montre les points à creuser (questionnaire/nuances.ts).
 function resultatsFictifs(alea: () => number, vigilance: Vigilance | null): Resultats {
-  const traits = Object.fromEntries(
-    TRAITS.map((t) => {
-      const rang = rangCloche(alea);
-      return [t, { score: score(rang), rang }];
-    }),
-  ) as Record<Trait, { score: number; rang: number }>;
-  const facettes = Object.fromEntries(
-    FACETTES_MESUREES.map((f) => {
-      const rang = borne(traits[traitDe(f)].rang + (alea() - 0.5) * 40);
-      return [f, { score: score(rang), rang }];
-    }),
-  ) as Record<FacetteMesuree, { score: number; rang: number }>;
-  // Un candidat sur deux environ a une sous-dimension nettement à l'écart de son trait,
-  // pour que l'aperçu montre les points à creuser (modules/questionnaire/points.ts).
-  if (alea() < 0.5) {
+  const ecarts: Partial<Record<FacetteMesuree, number>> = {};
+  for (const t of TRAITS) {
+    const niveau = ecartCloche(alea) * 0.55;
+    for (const f of FACETTES_MESUREES.filter((g) => traitDe(g) === t)) {
+      ecarts[f] = niveau + (alea() - 0.5) * 1.2;
+    }
+  }
+  const tirage = alea();
+  if (tirage < 0.45) {
+    // Une sous-dimension à l'écart des autres, du côté où l'échelle laisse de la place.
     const f = FACETTES_MESUREES[Math.floor(alea() * FACETTES_MESUREES.length)]!;
-    const rangTrait = traits[traitDe(f)].rang;
-    const rang = borne(rangTrait >= 50 ? rangTrait - 45 : rangTrait + 45);
-    facettes[f] = { score: score(rang), rang };
+    const autres = FACETTES_MESUREES.filter((g) => g !== f && traitDe(g) === traitDe(f));
+    const moyenne = autres.reduce((somme, g) => somme + (ecarts[g] ?? 0), 0) / autres.length;
+    ecarts[f] = moyenne >= 0 ? moyenne - 1.9 : moyenne + 1.9;
+  } else if (tirage < 0.65) {
+    // Un trait moyen qui réunit deux sous-dimensions opposées.
+    const t = TRAITS[Math.floor(alea() * TRAITS.length)]!;
+    const siennes = FACETTES_MESUREES.filter((g) => traitDe(g) === t);
+    for (const f of siennes) ecarts[f] = (alea() - 0.5) * 0.6;
+    const i = Math.floor(alea() * siennes.length);
+    const j = (i + 1 + Math.floor(alea() * (siennes.length - 1))) % siennes.length;
+    ecarts[siennes[i]!] = 1.3;
+    ecarts[siennes[j]!] = -1.3;
   }
   const serie =
     vigilance?.type === "serie-identique" ? vigilance.longueur : 2 + Math.floor(alea() * 4);
-  return {
-    version: 1,
-    facettes,
-    traits,
-    vigilances: vigilance ? [vigilance] : [],
-    plusLongueSerie: serie,
-  };
+  return resultatsDepuisEcarts(ecarts, vigilance ? [vigilance] : [], serie);
 }
 
 export function idFictif(i: number): string {
