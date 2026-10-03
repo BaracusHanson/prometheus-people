@@ -151,7 +151,20 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
               <h2 className="text-lg font-extrabold">À explorer en entretien</h2>
               <ul className="flex list-disc flex-col gap-1 pl-5">
                 {points.map((p) => (
-                  <li key={p.cle}>{p.phrase}</li>
+                  <li key={p.cle}>
+                    {p.phrase}
+                    {p.texte ? (
+                      <>
+                        <br />
+                        Deux lectures possibles : {p.texte.lectures[0]} ; ou{" "}
+                        {p.texte.lectures[1].charAt(0).toLowerCase() + p.texte.lectures[1].slice(1)}
+                        .
+                        <br />À demander : «&nbsp;{p.texte.question}&nbsp;»
+                        {/* Place pour les notes manuscrites pendant l'entretien. */}
+                        <span className="block h-20" aria-hidden="true" />
+                      </>
+                    ) : null}
+                  </li>
                 ))}
               </ul>
             </>

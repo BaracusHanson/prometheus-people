@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { resultatsDepuisEcarts } from "./ecarts";
 import { aRetenir, pointsACreuser } from "./points";
+import { TEXTES_VALIDES } from "./sujets";
 import { FACETTES_MESUREES, traitDe } from "./structure";
 
 describe("points à creuser", () => {
@@ -23,6 +24,7 @@ describe("points à creuser", () => {
         { libelle: "Ordre", rang: r.facettes.C2.rang, signale: true },
         { libelle: "autres sous-dimensions de Conscienciosité", rang: 50, signale: false },
       ],
+      texte: TEXTES_VALIDES["facette:C2:bas"],
       phrase:
         "« Ordre » se situe nettement plus bas que les autres sous-dimensions de Conscienciosité.",
       signalees: ["C2"],

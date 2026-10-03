@@ -2,6 +2,7 @@ import { LIBELLES_FACETTES, LIBELLES_TRAITS, ORDRE_TRAITS } from "./libelles";
 import { zone, type Zone } from "./marges";
 import { facettesDe, lireProfil, rangDesAutres, type Nuance } from "./nuances";
 import type { Resultats } from "./resultats";
+import { texteDuSujet, type TexteSujet } from "./sujets";
 import { QUESTIONS_PAR_FACETTE, traitDe, type FacetteMesuree, type Trait } from "./structure";
 
 // Points à creuser en entretien : la mise en mots des nuances du profil (nuances.ts).
@@ -38,6 +39,8 @@ export interface PointACreuser {
   type: Nuance["type"];
   phrase: string;
   ecart: [PointEcart, PointEcart] | null;
+  // Lectures possibles et exemple à demander, seulement si le psychologue les a validés.
+  texte: TexteSujet | null;
   // Sous-dimensions nommées par le point, marquées « à creuser » dans le profil.
   signalees: FacetteMesuree[];
   sources: SourcePoint[];
@@ -74,7 +77,7 @@ function sourceFacette(resultats: Resultats, facette: FacetteMesuree): SourcePoi
   };
 }
 
-function enMots(resultats: Resultats, n: Nuance): PointACreuser {
+function enMots(resultats: Resultats, n: Nuance): Omit<PointACreuser, "texte"> {
   const trait = LIBELLES_TRAITS[n.trait].nom;
   switch (n.type) {
     case "contraste":
@@ -135,7 +138,11 @@ function enMots(resultats: Resultats, n: Nuance): PointACreuser {
 
 export function pointsACreuser(resultats: Resultats): PointsDuProfil {
   const { lisible, prudence, nuances } = lireProfil(resultats);
-  return { lisible, prudence, points: nuances.map((n) => enMots(resultats, n)) };
+  return {
+    lisible,
+    prudence,
+    points: nuances.map((n) => ({ ...enMots(resultats, n), texte: texteDuSujet(n) })),
+  };
 }
 
 // Les noms des cinq traits sont féminins : « Agréabilité haute ».
