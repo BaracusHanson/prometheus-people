@@ -1,67 +1,94 @@
 import { LIBELLES_FACETTES, LIBELLES_TRAITS } from "./libelles";
-import { ordinal } from "./ordinal";
+import { facettesDe, lireProfil, type Nuance } from "./nuances";
 import type { Resultats } from "./resultats";
-import {
-  FACETTES_MESUREES,
-  QUESTIONS_PAR_FACETTE,
-  traitDe,
-  type FacetteMesuree,
-  type Trait,
-} from "./structure";
+import { QUESTIONS_PAR_FACETTE, traitDe, type FacetteMesuree, type Trait } from "./structure";
 
-// Points à creuser en entretien : une sous-dimension (facette) qui s'écarte nettement du
-// trait auquel elle appartient. Règle fixe et lisible, pas d'IA (ADR-0010), pas de
-// jugement : un écart n'est ni bon ni mauvais, il dit où l'entretien apprendra le plus.
-// Seuil et formulation à relire par un psychologue du travail, comme les autres libellés.
+// Points à creuser en entretien : la mise en mots des nuances du profil (nuances.ts).
+// Chaque phrase décrit une position par rapport à d'autres mesures, jamais un caractère ;
+// chaque point cite les mesures qui le fondent. Formulations à relire par un psychologue
+// du travail, comme les autres libellés.
 
-// Écart minimal, en rangs, entre une facette et son trait (sur une échelle de 1 à 99).
-export const SEUIL_ECART = 35;
-// Au-delà, le recruteur ne lit plus : on garde les écarts les plus nets.
-export const POINTS_MAX = 3;
+export type CibleSource = `trait:${Trait}` | `facette:${FacetteMesuree}`;
 
 export interface SourcePoint {
+  cible: CibleSource;
+  trait: Trait;
   libelle: string;
   rang: number;
   phrases: number;
 }
 
 export interface PointACreuser {
-  cle: FacetteMesuree;
-  trait: Trait;
-  sens: "bas" | "haut";
-  ecart: number;
+  cle: string;
   phrase: string;
-  sources: [trait: SourcePoint, facette: SourcePoint];
+  // Sous-dimensions nommées par le point, marquées « à creuser » dans le profil.
+  signalees: FacetteMesuree[];
+  sources: SourcePoint[];
 }
 
-function phrasesDuTrait(trait: Trait): number {
-  return FACETTES_MESUREES.filter((f) => traitDe(f) === trait).length * QUESTIONS_PAR_FACETTE;
+export interface PointsDuProfil {
+  lisible: boolean;
+  prudence: boolean;
+  points: PointACreuser[];
 }
 
-export function pointsACreuser(resultats: Resultats): PointACreuser[] {
-  return FACETTES_MESUREES.map((f) => {
-    const trait = traitDe(f);
-    const rangTrait = resultats.traits[trait].rang;
-    const rangFacette = resultats.facettes[f].rang;
-    return { f, trait, rangTrait, rangFacette, ecart: Math.abs(rangFacette - rangTrait) };
-  })
-    .filter((e) => e.ecart >= SEUIL_ECART)
-    .sort((a, b) => b.ecart - a.ecart)
-    .slice(0, POINTS_MAX)
-    .map(({ f, trait, rangTrait, rangFacette, ecart }) => {
-      const sens = rangFacette < rangTrait ? "bas" : "haut";
-      const nomTrait = LIBELLES_TRAITS[trait].nom;
-      const nomFacette = LIBELLES_FACETTES[f];
+// « d'Extraversion », « de Conscienciosité ».
+function de(nom: string): string {
+  return /^[aeiouyàâéèêîô]/i.test(nom) ? `d'${nom}` : `de ${nom}`;
+}
+
+function sourceTrait(resultats: Resultats, trait: Trait): SourcePoint {
+  return {
+    cible: `trait:${trait}`,
+    trait,
+    libelle: LIBELLES_TRAITS[trait].nom,
+    rang: resultats.traits[trait].rang,
+    phrases: facettesDe(trait).length * QUESTIONS_PAR_FACETTE,
+  };
+}
+
+function sourceFacette(resultats: Resultats, facette: FacetteMesuree): SourcePoint {
+  return {
+    cible: `facette:${facette}`,
+    trait: traitDe(facette),
+    libelle: LIBELLES_FACETTES[facette],
+    rang: resultats.facettes[facette].rang,
+    phrases: QUESTIONS_PAR_FACETTE,
+  };
+}
+
+function enMots(resultats: Resultats, n: Nuance): PointACreuser {
+  const trait = LIBELLES_TRAITS[n.trait].nom;
+  switch (n.type) {
+    case "contraste":
       return {
-        cle: f,
-        trait,
-        sens,
-        ecart,
-        phrase: `${nomTrait} : « ${nomFacette} » (${ordinal(rangFacette)} rang) est nettement plus ${sens} que le reste du trait (${ordinal(rangTrait)} rang).`,
+        cle: `contraste:${n.trait}`,
+        phrase: `Le rang moyen ${de(trait)} réunit des sous-dimensions opposées : « ${LIBELLES_FACETTES[n.haute]} » nettement plus haut que « ${LIBELLES_FACETTES[n.basse]} ».`,
+        signalees: [n.haute, n.basse],
         sources: [
-          { libelle: nomTrait, rang: rangTrait, phrases: phrasesDuTrait(trait) },
-          { libelle: nomFacette, rang: rangFacette, phrases: QUESTIONS_PAR_FACETTE },
+          sourceTrait(resultats, n.trait),
+          sourceFacette(resultats, n.haute),
+          sourceFacette(resultats, n.basse),
         ],
       };
-    });
+    case "facette":
+      return {
+        cle: `facette:${n.facette}`,
+        phrase: `« ${LIBELLES_FACETTES[n.facette]} » se situe nettement plus ${n.sens} que les autres sous-dimensions ${de(trait)}.`,
+        signalees: [n.facette],
+        sources: [sourceTrait(resultats, n.trait), sourceFacette(resultats, n.facette)],
+      };
+    case "extreme":
+      return {
+        cle: `extreme:${n.trait}`,
+        phrase: `${trait} très ${n.sens === "haut" ? "haute" : "basse"} par rapport à l'échantillon de référence.`,
+        signalees: [],
+        sources: [sourceTrait(resultats, n.trait)],
+      };
+  }
+}
+
+export function pointsACreuser(resultats: Resultats): PointsDuProfil {
+  const { lisible, prudence, nuances } = lireProfil(resultats);
+  return { lisible, prudence, points: nuances.map((n) => enMots(resultats, n)) };
 }

@@ -51,7 +51,8 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
 
   const { resultats } = rapport;
   const qualite = qualiteDesReponses(resultats);
-  const points = pointsACreuser(resultats);
+  const lecture = pointsACreuser(resultats);
+  const { points } = lecture;
   const temps = duree(rapport.commenceLe, rapport.termineLe);
 
   return (
@@ -102,7 +103,7 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
           </TabsList>
           <TabsContent value="profil" className="flex flex-col gap-4 pt-4">
             <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
-            <ProfilFiche resultats={resultats} points={points} />
+            <ProfilFiche resultats={resultats} lecture={lecture} />
             <NoteMethode />
           </TabsContent>
           <TabsContent value="qualite" className="pt-4">
