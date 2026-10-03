@@ -1,6 +1,6 @@
 import "server-only";
 
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 
 import { getDb } from "@/server/db/client";
 import { member, organization, user } from "@/server/db/schema";
@@ -17,6 +17,7 @@ export interface Agence {
 }
 
 export interface Membre {
+  id: string;
   email: string;
   nom: string;
   role: Role | null;
@@ -35,6 +36,7 @@ export async function obtenirAgence(ctx: Contexte): Promise<Agence | null> {
 export async function listerMembres(ctx: Contexte): Promise<Membre[]> {
   const lignes = await getDb()
     .select({
+      id: member.id,
       email: user.email,
       nom: user.name,
       role: member.role,
@@ -46,4 +48,23 @@ export async function listerMembres(ctx: Contexte): Promise<Membre[]> {
     .orderBy(asc(member.createdAt));
 
   return lignes.map((ligne) => ({ ...ligne, role: roleApplicatif(ligne.role) }));
+}
+
+export interface CibleMembre {
+  id: string;
+  userId: string;
+  email: string;
+  role: Role | null;
+}
+
+// Membre visé par une action de gestion d'équipe, seulement s'il appartient à l'agence du
+// contexte : un identifiant d'une autre agence donne null (CLAUDE.md, règle 5).
+export async function membreDeLAgence(ctx: Contexte, id: string): Promise<CibleMembre | null> {
+  const [ligne] = await getDb()
+    .select({ id: member.id, userId: member.userId, email: user.email, role: member.role })
+    .from(member)
+    .innerJoin(user, eq(user.id, member.userId))
+    .where(and(eq(member.id, id), eq(member.organizationId, ctx.orgId)))
+    .limit(1);
+  return ligne ? { ...ligne, role: roleApplicatif(ligne.role) } : null;
 }

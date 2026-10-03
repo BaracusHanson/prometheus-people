@@ -20,3 +20,12 @@ export function creerSlug(nom: string, suffixe: string): string {
     .slice(0, 40);
   return `${base || "agence"}-${suffixe}`;
 }
+
+// Identifiant de membre généré par Better Auth (chaîne aléatoire opaque) : format vérifié
+// avant toute utilisation.
+export const idMembreSchema = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
+
+export const changementRoleSchema = z.object({
+  id: idMembreSchema,
+  role: z.enum(["admin", "recruteur"], { error: "Rôle invalide." }),
+});
