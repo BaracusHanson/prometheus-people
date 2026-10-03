@@ -4,7 +4,8 @@ import { AnimatePresence, m } from "motion/react";
 import { useState } from "react";
 
 import { BarreRang } from "@/components/barre-rang";
-import { EnTeteEchelle, GRILLE, Rang, RETRAIT_FLECHE } from "@/components/rapport-base";
+import { EcartDessine } from "@/components/ecart-dessine";
+import { EnTeteEchelle, GRILLE_ZONE, RETRAIT_FLECHE } from "@/components/rapport-base";
 import {
   Accordion,
   AccordionContent,
@@ -18,7 +19,15 @@ import {
   SEUIL_CONTRASTE,
   SEUIL_ECART,
 } from "@/modules/questionnaire/nuances";
-import type { PointsDuProfil } from "@/modules/questionnaire/points";
+import {
+  LIBELLES_ZONES,
+  margeSousDimension,
+  margeTrait,
+  zone,
+  type Marge,
+} from "@/modules/questionnaire/marges";
+import { ordinal } from "@/modules/questionnaire/ordinal";
+import { ETIQUETTES, type PointsDuProfil } from "@/modules/questionnaire/points";
 import type { Resultats } from "@/modules/questionnaire/resultats";
 import {
   FACETTES_MESUREES,
@@ -39,8 +48,9 @@ type Cle = `trait:${Trait}` | `facette:${string}`;
 
 const virgule = (n: number) => String(n).replace(".", ",");
 
-// Bulle de lecture : le rang dit en mots, au survol de la ligne.
-function Lecture({ rang, visible }: { rang: number; visible: boolean }) {
+// Bulle de lecture : le rang exact et sa marge, au survol ou au focus de la ligne. La
+// fiche montre des zones ; le chiffre reste disponible pour qui le demande.
+function Lecture({ rang, marge, visible }: { rang: number; marge: Marge; visible: boolean }) {
   return (
     <AnimatePresence>
       {visible ? (
@@ -53,7 +63,7 @@ function Lecture({ rang, visible }: { rang: number; visible: boolean }) {
           exit={{ opacity: 0, y: 4 }}
           transition={{ duration: 0.16 }}
         >
-          Au-dessus de {rang} % de l&apos;échantillon de référence
+          {ordinal(rang)} rang · marge à 90 % : {ordinal(marge.bas)} au {ordinal(marge.haut)}
         </m.span>
       ) : null}
     </AnimatePresence>
@@ -62,12 +72,14 @@ function Lecture({ rang, visible }: { rang: number; visible: boolean }) {
 
 function Piste({
   rang,
+  marge,
   cle,
   survol,
   petite,
   retard,
 }: {
   rang: number;
+  marge: Marge;
   cle: Cle;
   survol: Cle | null;
   petite?: boolean;
@@ -75,8 +87,31 @@ function Piste({
 }) {
   return (
     <span className="relative block">
-      <BarreRang rang={rang} cerclee={!petite} petite={petite} anime={retard} />
-      <Lecture rang={rang} visible={survol === cle} />
+      <BarreRang rang={rang} cerclee={!petite} petite={petite} anime={retard} marge={marge} />
+      <Lecture rang={rang} marge={marge} visible={survol === cle} />
+    </span>
+  );
+}
+
+// Zone écrite en toutes lettres à droite de la piste ; le rang et sa marge pour les
+// lecteurs d'écran, qui n'ont pas la bulle.
+function ZoneRang({
+  rang,
+  marge,
+  petite = false,
+}: {
+  rang: number;
+  marge: Marge;
+  petite?: boolean;
+}) {
+  return (
+    <span
+      className={`text-right leading-tight ${petite ? "text-[13px] text-gris-fonce" : "text-sm font-extrabold text-encre"}`}
+    >
+      {LIBELLES_ZONES[zone(rang)]}
+      <span className="sr-only">
+        , {ordinal(rang)} rang, marge à 90 % du {ordinal(marge.bas)} au {ordinal(marge.haut)}
+      </span>
     </span>
   );
 }
@@ -88,7 +123,7 @@ export function ProfilFiche({
   resultats: Resultats;
   lecture: PointsDuProfil;
 }) {
-  const { lisible, prudence, points } = lecture;
+  const { lisible, points } = lecture;
   const [ouvert, setOuvert] = useState<string>("");
   const [survol, setSurvol] = useState<Cle | null>(null);
 
@@ -99,23 +134,26 @@ export function ProfilFiche({
 
   return (
     <FournisseurAnime>
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="rounded-bloc border border-bordure bg-white px-4 py-4 md:px-6">
-          <EnTeteEchelle fleche />
+          <EnTeteEchelle fleche derniere="Zone" grille={GRILLE_ZONE} />
           <Accordion type="single" collapsible value={ouvert} onValueChange={setOuvert}>
             {ORDRE_TRAITS.map((t, i) => {
               const cleTrait: Cle = `trait:${t}`;
               const rang = resultats.traits[t].rang;
+              const marge = margeTrait(resultats, t);
               return (
                 <AccordionItem key={t} value={t} className="border-trait">
                   <AccordionTrigger
                     onPointerEnter={() => setSurvol(cleTrait)}
                     onPointerLeave={() => setSurvol(null)}
+                    onFocus={() => setSurvol(cleTrait)}
+                    onBlur={() => setSurvol(null)}
                     className={`min-h-11 items-center gap-3 rounded-controle transition-colors hover:no-underline ${
                       survol === cleTrait ? "bg-braise-pale/60" : ""
                     }`}
                   >
-                    <span className={`${GRILLE} w-full py-1 text-left`}>
+                    <span className={`${GRILLE_ZONE} w-full py-1 text-left`}>
                       <span className="flex flex-col">
                         <span className="text-base font-extrabold text-encre">
                           {LIBELLES_TRAITS[t].nom}
@@ -129,8 +167,14 @@ export function ProfilFiche({
                           {LIBELLES_TRAITS[t].resume}
                         </span>
                       </span>
-                      <Piste rang={rang} cle={cleTrait} survol={survol} retard={i * 70} />
-                      <Rang rang={rang} />
+                      <Piste
+                        rang={rang}
+                        marge={marge}
+                        cle={cleTrait}
+                        survol={survol}
+                        retard={i * 70}
+                      />
+                      <ZoneRang rang={rang} marge={marge} />
                     </span>
                   </AccordionTrigger>
                   <AccordionContent>
@@ -138,12 +182,14 @@ export function ProfilFiche({
                       {FACETTES_MESUREES.filter((f) => traitDe(f) === t).map((f, j) => {
                         const cle: Cle = `facette:${f}`;
                         const signalee = points.some((p) => p.signalees.includes(f));
+                        const rangF = resultats.facettes[f].rang;
+                        const margeF = margeSousDimension(resultats, f);
                         return (
                           <li
                             key={f}
                             onPointerEnter={() => setSurvol(cle)}
                             onPointerLeave={() => setSurvol(null)}
-                            className={`${GRILLE} rounded-controle py-1 text-sm transition-colors ${
+                            className={`${GRILLE_ZONE} rounded-controle py-1 text-sm transition-colors ${
                               survol === cle ? "bg-braise-pale/70" : ""
                             }`}
                           >
@@ -156,13 +202,14 @@ export function ProfilFiche({
                               ) : null}
                             </span>
                             <Piste
-                              rang={resultats.facettes[f].rang}
+                              rang={rangF}
+                              marge={margeF}
                               cle={cle}
                               survol={survol}
                               petite
                               retard={j * 50}
                             />
-                            <Rang rang={resultats.facettes[f].rang} />
+                            <ZoneRang rang={rangF} marge={margeF} petite />
                           </li>
                         );
                       })}
@@ -179,13 +226,8 @@ export function ProfilFiche({
           className="flex flex-col gap-4 rounded-bloc border border-bordure border-l-[4px] border-l-braise bg-white px-5 py-4 max-xl:order-first"
         >
           <h2 id="titre-points" className="text-[19px] font-extrabold font-stretch-[85%]">
-            À creuser en entretien
+            À explorer en entretien
           </h2>
-          {prudence ? (
-            <p className="text-[15px] leading-relaxed font-semibold text-ambre-texte">
-              À lire avec prudence : voir la qualité des réponses.
-            </p>
-          ) : null}
           {!lisible ? (
             <p className="text-[15px] leading-relaxed text-gris-fonce">
               Deux contrôles d&apos;attention ou plus ont été manqués : les écarts entre
@@ -197,13 +239,15 @@ export function ProfilFiche({
               se lisent tels quels.
             </p>
           ) : (
-            <ol className="flex flex-col gap-4">
+            <ol className="flex flex-col gap-3">
               {points.map((p) => (
                 <li
                   key={p.cle}
-                  className="flex flex-col gap-2 border-t border-trait pt-3 first:border-0 first:pt-0"
+                  className="flex flex-col gap-3 rounded-bloc border border-bordure bg-fond px-4 py-3"
                 >
-                  <p className="text-[15px] leading-snug font-semibold">{p.phrase}</p>
+                  <p className="text-[12px] font-bold text-braise-fonce">{ETIQUETTES[p.type]}</p>
+                  <p className="-mt-2 text-[15px] leading-snug font-semibold">{p.phrase}</p>
+                  {p.ecart ? <EcartDessine points={p.ecart} /> : null}
                   <ul
                     aria-label="Mesures à l'origine de ce point"
                     className="flex flex-wrap gap-1.5"
@@ -219,13 +263,14 @@ export function ProfilFiche({
                             onFocus={() => montrer(s.trait, cle)}
                             onBlur={() => setSurvol(null)}
                             onClick={() => montrer(s.trait, cle)}
+                            aria-pressed={survol === cle}
                             className={`min-h-9 cursor-pointer rounded-full border px-3 text-[12px] font-bold transition-colors ${
                               survol === cle
                                 ? "border-braise bg-braise text-white"
                                 : "border-bordure bg-fond text-encre hover:border-braise"
                             }`}
                           >
-                            {s.libelle} · {s.rang}e rang · {s.phrases} phrases
+                            {s.libelle} · {s.phrases} phrases
                           </button>
                         </li>
                       );
