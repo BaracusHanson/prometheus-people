@@ -169,7 +169,11 @@ function ecartCloche(alea: () => number): number {
 // Résultats calculés comme de vrais résultats (modules/questionnaire/ecarts.ts) : un niveau
 // par trait, des sous-dimensions proches de ce niveau, puis, chez une partie des candidats,
 // un écart injecté pour que l'aperçu montre les points à creuser (questionnaire/nuances.ts).
-function resultatsFictifs(alea: () => number, vigilance: Vigilance | null): Resultats {
+function resultatsFictifs(
+  alea: () => number,
+  vigilance: Vigilance | null,
+  demonstration = false,
+): Resultats {
   const ecarts: Partial<Record<FacetteMesuree, number>> = {};
   for (const t of TRAITS) {
     const niveau = ecartCloche(alea) * 0.55;
@@ -196,6 +200,14 @@ function resultatsFictifs(alea: () => number, vigilance: Vigilance | null): Resu
   }
   const serie =
     vigilance?.type === "serie-identique" ? vigilance.longueur : 2 + Math.floor(alea() * 4);
+  if (demonstration) {
+    // Profil de démonstration : un sujet dont les textes d'entretien sont validés
+    // (questionnaire/sujets.ts), pour que l'aperçu les montre. Posé après les tirages :
+    // les autres candidats fictifs ne changent pas.
+    for (const f of FACETTES_MESUREES.filter((g) => traitDe(g) === "E")) ecarts[f] = 0.1;
+    ecarts.E3 = 1.3;
+    ecarts.E2 = -1.3;
+  }
   return resultatsDepuisEcarts(ecarts, vigilance ? [vigilance] : [], serie);
 }
 
@@ -212,6 +224,7 @@ export function candidatsFictifs(maintenant = new Date()): CandidatFictif[] {
   const alea = generateur(20261001);
   const t0 = maintenant.getTime();
 
+  let demonstration = true;
   return Array.from({ length: NOMBRE }, (_, i) => {
     const prenom = PRENOMS[i % PRENOMS.length]!;
     const nom = NOMS[(i * 7) % NOMS.length]!;
@@ -255,6 +268,10 @@ export function candidatsFictifs(maintenant = new Date()): CandidatFictif[] {
       vigilance = { type: "controle-attention-echoue", echecs: 1, total: CONTROLES.length };
     }
 
+    // Le premier profil terminé sert de démonstration (voir resultatsFictifs).
+    const demo = Boolean(termine) && demonstration;
+    if (termine) demonstration = false;
+
     return {
       id: idFictif(i),
       nom: `${prenom} ${nom}`,
@@ -268,7 +285,7 @@ export function candidatsFictifs(maintenant = new Date()): CandidatFictif[] {
       termineLe,
       informationLueLe,
       commenceLe,
-      resultats: termine ? resultatsFictifs(alea, vigilance) : null,
+      resultats: termine ? resultatsFictifs(alea, vigilance, demo) : null,
     };
   }).sort((a, b) => b.inviteLe.getTime() - a.inviteLe.getTime());
 }

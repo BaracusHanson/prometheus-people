@@ -28,6 +28,7 @@ import {
 } from "@/modules/questionnaire/marges";
 import { ordinal } from "@/modules/questionnaire/ordinal";
 import { ETIQUETTES, type PointsDuProfil } from "@/modules/questionnaire/points";
+import { TEXTE_ILLISIBLE, type TexteSujet } from "@/modules/questionnaire/sujets";
 import type { Resultats } from "@/modules/questionnaire/resultats";
 import {
   FACETTES_MESUREES,
@@ -113,6 +114,24 @@ function ZoneRang({
         , {ordinal(rang)} rang, marge à 90 % du {ordinal(marge.bas)} au {ordinal(marge.haut)}
       </span>
     </span>
+  );
+}
+
+// Lectures possibles et exemple à demander d'un sujet : textes validés par le psychologue
+// du travail (questionnaire/sujets.ts). La seconde lecture commence par « ou » : le
+// recruteur garde les deux en tête jusqu'à l'entretien.
+function TexteEntretien({ texte }: { texte: TexteSujet }) {
+  const [premiere, seconde] = texte.lectures;
+  return (
+    <div className="flex flex-col gap-2 text-[14px] leading-snug">
+      <p className="text-[12px] font-bold text-gris">Deux lectures possibles</p>
+      <ul className="flex list-disc flex-col gap-1 pl-5">
+        <li>{premiere}</li>
+        <li>ou {seconde.charAt(0).toLowerCase() + seconde.slice(1)}</li>
+      </ul>
+      <p className="pt-1 text-[12px] font-bold text-gris">À demander</p>
+      <p className="font-semibold text-encre">«&nbsp;{texte.question}&nbsp;»</p>
+    </div>
   );
 }
 
@@ -233,6 +252,9 @@ export function ProfilFiche({
               Deux contrôles d&apos;attention ou plus ont été manqués : les écarts entre
               sous-dimensions ne sont pas interprétés. Les traits se lisent avec prudence.
             </p>
+          ) : null}
+          {!lisible ? (
+            <TexteEntretien texte={TEXTE_ILLISIBLE} />
           ) : points.length === 0 ? (
             <p className="text-[15px] leading-relaxed text-gris-fonce">
               Aucune sous-dimension ne se détache et aucun trait n&apos;est très marqué : les traits
@@ -240,7 +262,7 @@ export function ProfilFiche({
             </p>
           ) : (
             <ol className="flex flex-col gap-3">
-              {points.map((p) => (
+              {points.map((p, i) => (
                 <li
                   key={p.cle}
                   className="flex flex-col gap-3 rounded-bloc border border-bordure bg-fond px-4 py-3"
@@ -248,6 +270,23 @@ export function ProfilFiche({
                   <p className="text-[12px] font-bold text-braise-fonce">{ETIQUETTES[p.type]}</p>
                   <p className="-mt-2 text-[15px] leading-snug font-semibold">{p.phrase}</p>
                   {p.ecart ? <EcartDessine points={p.ecart} /> : null}
+                  {p.texte ? (
+                    <Accordion
+                      type="single"
+                      collapsible
+                      defaultValue={i === 0 ? "texte" : undefined}
+                      className="-mb-1"
+                    >
+                      <AccordionItem value="texte" className="border-t border-trait">
+                        <AccordionTrigger className="min-h-11 py-2 text-[13px] font-bold text-braise-fonce hover:no-underline">
+                          Lectures et exemple à demander
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-3">
+                          <TexteEntretien texte={p.texte} />
+                        </AccordionContent>
+                      </AccordionItem>
+                    </Accordion>
+                  ) : null}
                   <ul
                     aria-label="Mesures à l'origine de ce point"
                     className="flex flex-wrap gap-1.5"
