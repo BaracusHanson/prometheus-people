@@ -43,9 +43,10 @@ export function emailLienMagique(a: string, url: string, dureeMinutes: number): 
   return { a, objet: "Votre lien de connexion à Prometheus People", texte, html };
 }
 
+// Rôle écrit comme sur la page Équipe : rien n'est accordé au masculin ou au féminin.
 const ROLES_INVITATION: Record<string, string> = {
-  admin: "en tant qu'administrateur",
-  member: "en tant que recruteur",
+  admin: "avec le rôle Administrateur",
+  member: "avec le rôle Recruteur",
 };
 
 export function emailInvitation(
@@ -58,7 +59,7 @@ export function emailInvitation(
   const texte = [
     "Bonjour,",
     "",
-    `Vous êtes invité à rejoindre l'agence « ${agence} » sur Prometheus People, ${role}.`,
+    `L'agence « ${agence} » vous invite à la rejoindre sur Prometheus People, ${role}.`,
     "Pour accepter, ouvrez ce lien puis connectez-vous avec cette adresse email :",
     url,
     "",
@@ -70,7 +71,7 @@ export function emailInvitation(
 <html lang="fr">
   <body style="font-family: system-ui, sans-serif; color: #1b2230; line-height: 1.5;">
     <p>Bonjour,</p>
-    <p>Vous êtes invité à rejoindre l'agence « ${echapperHtml(agence)} » sur Prometheus People, ${role}.</p>
+    <p>L'agence « ${echapperHtml(agence)} » vous invite à la rejoindre sur Prometheus People, ${role}.</p>
     <p>Pour accepter, ouvrez ce lien puis connectez-vous avec cette adresse email :</p>
     <p><a href="${echapperHtml(url)}" style="display: inline-block; padding: 12px 20px; background: #c2410c; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 700;">Voir l'invitation</a></p>
     <p style="font-size: 14px; color: #505a6b;">Cette invitation est valable ${dureeJours} jours.<br>

@@ -21,8 +21,8 @@ export default function PageIntrouvable() {
         </span>
         <h1 className={TYPO.h2}>Cette page n&apos;existe pas.</h1>
         <p className={`max-w-[620px] ${TYPO.corpsL}`}>
-          Le lien est peut-être incomplet. Si vous êtes candidat et que votre lien d&apos;invitation
-          ne fonctionne pas, contactez l&apos;agence qui vous l&apos;a envoyé.
+          Le lien est peut-être incomplet. Si vous êtes candidat ou candidate et que votre lien
+          d&apos;invitation ne fonctionne pas, contactez l&apos;agence qui vous l&apos;a envoyé.
         </p>
         <div className="flex flex-col gap-3 max-sm:w-full sm:flex-row">
           <Button asChild size="lg" className={BOUTON_ACCENT}>
