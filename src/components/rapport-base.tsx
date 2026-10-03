@@ -19,15 +19,27 @@ export function Rang({ rang }: { rang: number }) {
 export const GRILLE =
   "grid grid-cols-[minmax(0,1fr)_3.5rem] items-center gap-x-3 gap-y-1 *:first:col-span-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_3.5rem] sm:gap-x-4 sm:*:first:col-span-1";
 
+// Variante de la fiche : la dernière colonne écrit la zone (« très haut ») au lieu du rang.
+export const GRILLE_ZONE =
+  "grid grid-cols-[minmax(0,1fr)_4.5rem] items-center gap-x-3 gap-y-1 *:first:col-span-2 sm:grid-cols-[minmax(0,15rem)_minmax(0,1fr)_4.5rem] sm:gap-x-4 sm:*:first:col-span-1";
+
 // À l'écran, la flèche de dépliage occupe 28 px à droite de chaque trait : les lignes
 // sans flèche (en-tête, sous-dimensions) gardent ce retrait pour rester alignées.
 export const RETRAIT_FLECHE = "pr-7";
 
 // Les trois libellés occupent exactement les zones de la barre : 30 %, 40 %, 30 %.
-export function EnTeteEchelle({ fleche }: { fleche: boolean }) {
+export function EnTeteEchelle({
+  fleche,
+  derniere = "Rang",
+  grille = GRILLE,
+}: {
+  fleche: boolean;
+  derniere?: string;
+  grille?: string;
+}) {
   return (
     <div
-      className={`${GRILLE} ${fleche ? RETRAIT_FLECHE : ""} items-end border-b-2 border-encre pb-2 text-xs leading-tight font-semibold text-gris`}
+      className={`${grille} ${fleche ? RETRAIT_FLECHE : ""} items-end border-b-2 border-encre pb-2 text-xs leading-tight font-semibold text-gris`}
       aria-hidden="true"
     >
       <span className="max-sm:hidden">{fleche ? "Trait (cliquez pour le détail)" : "Trait"}</span>
@@ -36,7 +48,7 @@ export function EnTeteEchelle({ fleche }: { fleche: boolean }) {
         <span className="text-center">{LIBELLES_NIVEAUX.moyen}</span>
         <span className="text-right">{LIBELLES_NIVEAUX.haut}</span>
       </span>
-      <span className="text-right">Rang</span>
+      <span className="text-right">{derniere}</span>
     </div>
   );
 }

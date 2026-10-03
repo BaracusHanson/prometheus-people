@@ -1,5 +1,5 @@
 import { ZONE_MOYENNE } from "./libelles";
-import { NORMES_FACETTES, type Norme } from "./normes";
+import { NORMES_FACETTES, rang, type Norme } from "./normes";
 import type { Resultats } from "./resultats";
 import { FACETTES_MESUREES, TRAITS, traitDe, type FacetteMesuree, type Trait } from "./structure";
 
@@ -69,19 +69,29 @@ function arrondi(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+// Rang qu'aurait la moyenne des autres sous-dimensions du trait : le point de comparaison
+// d'une sous-dimension qui se détache, dessiné à côté d'elle sur la fiche.
+export function rangDesAutres(resultats: Resultats, facette: FacetteMesuree): number {
+  const autres = facettesDe(traitDe(facette)).filter((g) => g !== facette);
+  const moyenne =
+    autres.reduce((s, g) => s + ecartReduit(resultats.facettes[g].score, NORMES_FACETTES[g]), 0) /
+    autres.length;
+  return rang(moyenne, { moyenne: 0, ecartType: 1 });
+}
+
 function nuancesDuTrait(resultats: Resultats, trait: Trait): Nuance[] {
   const facettes = facettesDe(trait);
   const z = new Map(
     facettes.map((f) => [f, ecartReduit(resultats.facettes[f].score, NORMES_FACETTES[f])]),
   );
   const zDe = (f: FacetteMesuree) => z.get(f) ?? 0;
-  const { rang } = resultats.traits[trait];
+  const rangTrait = resultats.traits[trait].rang;
   const nuances: Nuance[] = [];
 
   const triees = [...facettes].sort((a, b) => zDe(b) - zDe(a));
   const haute = triees[0]!;
   const basse = triees.at(-1)!;
-  const moyen = rang >= ZONE_MOYENNE.debut && rang <= ZONE_MOYENNE.fin;
+  const moyen = rangTrait >= ZONE_MOYENNE.debut && rangTrait <= ZONE_MOYENNE.fin;
 
   if (
     moyen &&
@@ -120,8 +130,8 @@ function nuancesDuTrait(resultats: Resultats, trait: Trait): Nuance[] {
     }
   }
 
-  if (rang <= RANG_TRES_BAS) nuances.push({ type: "extreme", trait, sens: "bas" });
-  if (rang >= RANG_TRES_HAUT) nuances.push({ type: "extreme", trait, sens: "haut" });
+  if (rangTrait <= RANG_TRES_BAS) nuances.push({ type: "extreme", trait, sens: "bas" });
+  if (rangTrait >= RANG_TRES_HAUT) nuances.push({ type: "extreme", trait, sens: "haut" });
   return nuances;
 }
 

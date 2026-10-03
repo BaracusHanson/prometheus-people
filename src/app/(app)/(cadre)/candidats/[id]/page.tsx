@@ -1,4 +1,4 @@
-import { Columns2Icon } from "lucide-react";
+import { Columns2Icon, TriangleAlertIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -6,15 +6,20 @@ import { notFound } from "next/navigation";
 import { EnTetePage } from "@/components/cadres";
 import { NoteMethode, ProfilImprime, QualiteReponses } from "@/components/rapport";
 import { ProfilFiche } from "@/components/anime/profil-fiche";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { rapportFictif } from "@/modules/apercu/donnees";
 import { lireApercu } from "@/modules/apercu/etat";
 import { lireRapport } from "@/modules/candidats/queries";
 import { TYPES_POSTE } from "@/modules/candidats/schemas";
-import { pointsACreuser } from "@/modules/questionnaire/points";
+import { aRetenir, pointsACreuser } from "@/modules/questionnaire/points";
 import { ORDRE_PRESENTATION } from "@/modules/questionnaire/pages";
 import { noterLecture } from "@/modules/journal/queries";
 import { qualiteDesReponses, syntheseProfil } from "@/modules/questionnaire/rapport";
@@ -53,6 +58,7 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
   const qualite = qualiteDesReponses(resultats);
   const lecture = pointsACreuser(resultats);
   const { points } = lecture;
+  const retenir = aRetenir(resultats, lecture);
   const temps = duree(rapport.commenceLe, rapport.termineLe);
 
   return (
@@ -86,42 +92,63 @@ export default async function PageRapport({ params }: { params: Promise<{ id: st
         }
       />
       <div className="flex max-w-[1240px] flex-col gap-5">
-        <Tabs defaultValue="profil" className="print:hidden">
-          <TabsList variant="line" className="h-12 w-full justify-start border-b border-bordure">
-            <TabsTrigger
-              value="profil"
-              className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
-            >
-              Profil
-            </TabsTrigger>
-            <TabsTrigger
-              value="qualite"
-              className="flex-none px-5 text-[17px] font-semibold data-[state=active]:font-extrabold"
-            >
-              Qualité des réponses
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="profil" className="flex flex-col gap-4 pt-4">
-            <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
-            <ProfilFiche resultats={resultats} lecture={lecture} />
-            <NoteMethode />
-          </TabsContent>
-          <TabsContent value="qualite" className="pt-4">
-            <Card className="px-1 md:px-2">
-              <CardContent>
-                <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <div className="flex flex-col gap-5 print:hidden">
+          {!qualite.fiable ? (
+            <Alert variant="attention">
+              <TriangleAlertIcon aria-hidden="true" />
+              <AlertTitle>Points de vigilance sur les réponses</AlertTitle>
+              <AlertDescription>
+                {qualite.synthese}
+                {!lecture.lisible
+                  ? " Les écarts entre sous-dimensions ne sont donc pas interprétés."
+                  : ""}
+              </AlertDescription>
+            </Alert>
+          ) : null}
+
+          <section aria-labelledby="titre-retenir" className="flex flex-col gap-1">
+            <h2 id="titre-retenir" className="text-[13px] font-bold text-braise-fonce">
+              À retenir
+            </h2>
+            <p className="max-w-[72ch] text-lg leading-snug font-semibold text-encre">{retenir}</p>
+          </section>
+
+          <ProfilFiche resultats={resultats} lecture={lecture} />
+
+          <Accordion
+            type="single"
+            collapsible
+            className="rounded-bloc border border-bordure bg-white px-4 md:px-6"
+          >
+            <AccordionItem value="lire" className="border-0">
+              <AccordionTrigger className="min-h-11 text-base font-extrabold hover:no-underline">
+                Comment lire ce profil
+              </AccordionTrigger>
+              <AccordionContent className="flex flex-col gap-5 pb-5">
+                <p className="text-sm leading-relaxed text-gris-fonce">
+                  Chaque point est entouré d&apos;un trait gris : la marge d&apos;erreur à 90 %. Une
+                  sous-dimension ne repose que sur 4 phrases, sa marge est donc large ; la zone
+                  écrite à droite compte plus que la position exacte du point. Le rang exact
+                  s&apos;affiche au survol ou au clavier.
+                </p>
+                <NoteMethode />
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-sm font-extrabold">Qualité des réponses</h3>
+                  <QualiteReponses qualite={qualite} total={ORDRE_PRESENTATION.length} />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
 
         {/* Version imprimée : tout le profil déplié, puis la qualité des réponses. */}
         <div className="hidden flex-col gap-5 print:flex">
-          <p className="text-base font-semibold">{syntheseProfil(resultats)}</p>
+          <p className="text-base font-semibold">{retenir}</p>
+          <p className="text-sm">{syntheseProfil(resultats)}</p>
           <ProfilImprime resultats={resultats} />
           {points.length > 0 ? (
             <>
-              <h2 className="text-lg font-extrabold">À creuser en entretien</h2>
+              <h2 className="text-lg font-extrabold">À explorer en entretien</h2>
               <ul className="flex list-disc flex-col gap-1 pl-5">
                 {points.map((p) => (
                   <li key={p.cle}>{p.phrase}</li>

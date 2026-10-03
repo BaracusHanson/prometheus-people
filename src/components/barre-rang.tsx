@@ -11,6 +11,7 @@ export function BarreRang({
   cerclee = false,
   anime,
   accent = false,
+  marge,
 }: {
   rang: number;
   petite?: boolean;
@@ -21,6 +22,8 @@ export function BarreRang({
   anime?: number;
   // Point de référence (le candidat A d'une comparaison) : braise au lieu d'encre.
   accent?: boolean;
+  // Marge d'erreur à 90 % (questionnaire/marges.ts) : un trait plus épais autour du point.
+  marge?: { bas: number; haut: number };
 }) {
   const taille = petite
     ? "size-3 -ml-1.5"
@@ -40,6 +43,12 @@ export function BarreRang({
         }}
       />
       <span className="absolute inset-x-0 top-1/2 block h-0.5 -translate-y-1/2 bg-bordure" />
+      {marge ? (
+        <span
+          className={`absolute top-1/2 block -translate-y-1/2 rounded-full bg-encre/25 ${petite ? "h-1" : "h-1.5"}`}
+          style={{ left: `${marge.bas}%`, width: `${marge.haut - marge.bas}%` }}
+        />
+      ) : null}
       <span
         className={`absolute block rounded-full ${accent ? "bg-braise" : "bg-encre"} ${cerclee && !petite ? "" : "top-0"} ${taille} ${anime !== undefined ? "anime-rang" : ""}`}
         style={{
