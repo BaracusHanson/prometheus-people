@@ -26,8 +26,8 @@ export default async function PageConnexion({
     <EcranCentre
       note={
         <>
-          Vous êtes candidat ? Vous n&apos;avez pas besoin de compte : ouvrez le lien personnel reçu
-          par email.
+          Vous êtes candidat ou candidate ? Vous n&apos;avez pas besoin de compte : ouvrez le lien
+          personnel reçu par email.
         </>
       }
     >

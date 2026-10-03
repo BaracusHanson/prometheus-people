@@ -63,13 +63,18 @@ describe("emailInvitation", () => {
     expect(email.a).toBe("recruteur@exemple.fr");
     expect(email.texte).toContain(invitation.url);
     expect(email.texte).toContain("« Intérim Exemple »");
-    expect(email.texte).toMatch(/en tant que recruteur/);
+    expect(email.texte).toMatch(/avec le rôle Recruteur/);
     expect(email.texte).toMatch(/7 jours/);
   });
 
-  it("affiche « administrateur » pour une invitation admin", () => {
+  it("n'accorde rien au masculin : la personne invitée peut être une femme", () => {
+    const email = emailInvitation("a@b.fr", invitation);
+    expect(`${email.texte} ${email.html}`).not.toMatch(/invité|en tant que/);
+  });
+
+  it("affiche le rôle Administrateur pour une invitation admin", () => {
     expect(emailInvitation("a@b.fr", { ...invitation, role: "admin" }).texte).toMatch(
-      /en tant qu'administrateur\./,
+      /avec le rôle Administrateur\./,
     );
   });
 

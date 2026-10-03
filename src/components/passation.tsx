@@ -272,7 +272,7 @@ export function Reprise({
       <div className="flex flex-col gap-2">
         <TitreCandidat>Bon retour, {nom}</TitreCandidat>
         <p className="text-base leading-relaxed">
-          Vos réponses ont été gardées. Vous reprenez exactement là où vous vous étiez arrêté.
+          Vos réponses ont été gardées. Vous reprenez exactement là où vous en étiez.
         </p>
       </div>
       <div className="flex flex-col gap-3 rounded-bloc border border-bordure bg-white p-[18px]">

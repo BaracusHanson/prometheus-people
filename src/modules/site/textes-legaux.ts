@@ -113,7 +113,7 @@ const CONFIDENTIALITE: TexteLegal = {
         ),
         {
           type: "p",
-          gras: "Vous êtes candidat ?",
+          gras: "Vous êtes candidat ou candidate ?",
           texte:
             "L'agence qui vous a invité est responsable de vos données ; ses coordonnées s'affichent avant le questionnaire. Prometheus People héberge vos réponses pour elle et ne les utilise pour rien d'autre. Le détail figure dans",
           lien: { href: "/sous-traitance", libelle: "l'accord de sous-traitance" },
