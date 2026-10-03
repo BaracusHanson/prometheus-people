@@ -24,6 +24,8 @@ import { listerInvitationsEnAttente } from "@/modules/invitations/queries";
 import { lireSession } from "@/server/auth/session";
 import { exigerContexte } from "@/server/authz";
 
+import { ActionsMembre } from "./actions-membre";
+import { BoutonRenvoyer } from "./bouton-renvoyer";
 import { FormulaireMembre } from "./formulaire-membre";
 
 export const metadata: Metadata = { title: "Équipe — Prometheus People" };
@@ -52,8 +54,9 @@ function expiration(expireLe: Date, maintenant: Date): { texte: string; proche: 
   return { texte: `${date}, encore ${jours} jour${jours > 1 ? "s" : ""}`, proche: false };
 }
 
-// Équipe de l'agence. Tout membre voit l'équipe ; seuls les administrateurs invitent et
-// annulent (l'action le revérifie, ADR-0017).
+// Équipe de l'agence. Tout membre voit l'équipe ; seuls les administrateurs invitent,
+// renvoient ou annulent une invitation, changent un rôle et retirent un membre (chaque
+// action le revérifie, ADR-0017). Personne ne gère sa propre ligne.
 export default async function PageEquipe() {
   const ctx = await exigerContexte();
   const estAdmin = ctx.role === "admin";
@@ -89,7 +92,7 @@ export default async function PageEquipe() {
                     <TableHead className="hidden sm:table-cell">Membre depuis</TableHead>
                     <TableHead className="hidden md:table-cell">Candidats invités</TableHead>
                     <TableHead>
-                      <span className="sr-only">Remarque</span>
+                      <span className="sr-only">{estAdmin ? "Gérer" : "Remarque"}</span>
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -98,7 +101,7 @@ export default async function PageEquipe() {
                     // Better Auth remplit parfois le nom avec l'adresse : on ne la répète pas.
                     const nom = m.nom && m.nom !== m.email ? m.nom : null;
                     return (
-                      <TableRow key={m.email} className="h-[60px]">
+                      <TableRow key={m.id} className="h-[60px]">
                         <TableCell className="max-w-0 min-w-44 pl-0 sm:min-w-56">
                           <span className="flex items-center gap-3">
                             <Avatar className="size-9" aria-hidden="true">
@@ -129,7 +132,11 @@ export default async function PageEquipe() {
                           {invites.get(m.email) ?? 0}
                         </TableCell>
                         <TableCell className="text-right text-[13px] text-gris">
-                          {m.email === moi ? "C'est vous" : null}
+                          {m.email === moi ? (
+                            "C'est vous"
+                          ) : estAdmin ? (
+                            <ActionsMembre id={m.id} libelle={nom ?? m.email} role={m.role} />
+                          ) : null}
                         </TableCell>
                       </TableRow>
                     );
@@ -180,6 +187,7 @@ export default async function PageEquipe() {
                               ) : null}
                             </span>
                           </span>
+                          <BoutonRenvoyer id={invitation.id} email={invitation.email} />
                           <form action={annulerInvitation}>
                             <input type="hidden" name="id" value={invitation.id} />
                             <Button

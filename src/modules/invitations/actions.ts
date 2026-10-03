@@ -10,7 +10,7 @@ import { CODE_DEJA_MEMBRE } from "@/server/auth/options";
 import { lireSession } from "@/server/auth/session";
 import { contexteCourant, ErreurAutorisation, exigerAdmin } from "@/server/authz";
 
-import { estInvitationEnAttenteDeLAgence } from "./queries";
+import { estInvitationEnAttenteDeLAgence, invitationEnAttenteDeLAgence } from "./queries";
 import {
   cheminInvitation,
   idInvitationSchema,
@@ -94,6 +94,38 @@ export async function annulerInvitation(formulaire: FormData): Promise<void> {
     headers: await headers(),
   });
   revalidatePath("/equipe");
+}
+
+// Renvoie l'email d'une invitation en attente : même lien, validité repartie pour 7 jours
+// (option `resend` de Better Auth).
+export async function renvoyerInvitation(
+  _etat: EtatInvitation,
+  formulaire: FormData,
+): Promise<EtatInvitation> {
+  const ctx = await contexteCourant();
+  if (!ctx) redirect("/connexion");
+  if (ctx.role !== "admin") return { erreur: "Réservé aux administrateurs de l'agence." };
+
+  const id = idInvitationSchema.safeParse(formulaire.get("id"));
+  const invitation = id.success ? await invitationEnAttenteDeLAgence(ctx, id.data) : null;
+  if (!invitation) return { erreur: "Cette invitation n'est plus en attente." };
+
+  try {
+    await getAuth().api.createInvitation({
+      body: {
+        email: invitation.email,
+        role: invitation.role as (typeof ROLE_BETTER_AUTH)[keyof typeof ROLE_BETTER_AUTH],
+        organizationId: ctx.orgId,
+        resend: true,
+      },
+      headers: await headers(),
+    });
+  } catch {
+    return { erreur: "Impossible de renvoyer l'invitation pour le moment. Réessayez." };
+  }
+
+  revalidatePath("/equipe");
+  return { succes: `Invitation renvoyée à ${invitation.email}.` };
 }
 
 export async function accepterInvitation(formulaire: FormData): Promise<void> {

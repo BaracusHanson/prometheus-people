@@ -49,3 +49,22 @@ export async function estInvitationEnAttenteDeLAgence(ctx: Contexte, id: string)
     .limit(1);
   return ligne !== undefined;
 }
+
+export interface InvitationARenvoyer {
+  email: string;
+  // Rôle tel que Better Auth l'a enregistré (« admin » ou « member »).
+  role: string;
+}
+
+// Invitation en attente de l'agence du contexte, avec ce qu'il faut pour la renvoyer.
+export async function invitationEnAttenteDeLAgence(
+  ctx: Contexte,
+  id: string,
+): Promise<InvitationARenvoyer | null> {
+  const [ligne] = await getDb()
+    .select({ email: invitation.email, role: invitation.role })
+    .from(invitation)
+    .where(and(eq(invitation.id, id), enAttenteDansLAgence(ctx)))
+    .limit(1);
+  return ligne && ligne.role ? { email: ligne.email, role: ligne.role } : null;
+}
